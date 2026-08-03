@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montessori School, A-Camp, Kurnool | Montessori Schools</title>
+<meta name="description" content="Montessori School, A-Camp, Kurnool — a branch of the Montessori Schools, Kurnool. Academics, school life, campus, transport and admissions.">
+<link rel="icon" type="image/png" href="assets/monte-logo.png">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#ffffff;color:#26201d;font-family:"Nunito",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4{font-family:"Quicksand",system-ui,sans-serif}
+  ::selection{background:#a51915;color:#ffd9c4}
+  img{display:block;max-width:100%}
+  @keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes ddIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes loaderPop{0%{transform:scale(.82);opacity:0}55%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
+  @keyframes loaderBar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+  @keyframes wordFloat{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.32em}}
+</style>
+<script src="cursor.js"></script>
+</helmet>
+
+<div style="max-width:100%;overflow:hidden">
+
+<!-- LOADING SCREEN -->
+<div ref="{{ loaderRef }}" style="position:fixed;inset:0;z-index:9998;background:#a51915;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease">
+  <span style="display:block;background:#fff;border:4px solid #e8541b;border-radius:12px;padding:8px;line-height:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:loaderPop .9s cubic-bezier(.2,.8,.2,1) both">
+    <img src="assets/monte-logo.png" alt="Montessori" style="height:96px;width:auto;display:block">
+  </span>
+  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:#fff;text-transform:uppercase;animation:wordFloat .9s ease .25s both">Montessori</div>
+  <div style="width:180px;height:4px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden">
+    <div style="height:100%;background:#e8541b;transform-origin:left;animation:loaderBar 1.15s cubic-bezier(.4,0,.2,1) .1s both"></div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div style="background:#fff;border-bottom:1px solid #f3e6e2">
+  <div style="max-width:1280px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <a href="#top" style="display:flex;align-items:center;gap:18px">
+      <span style="display:block;line-height:0">
+        <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
+      </span>
+      <span style="display:flex;flex-direction:column;line-height:1.15">
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori School, A-Camp</span>
+        <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
+      </span>
+    </a>
+    <div style="text-align:right">
+      <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
+      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
+    </div>
+  </div>
+</div>
+
+<!-- YELLOW NAV WITH DROPDOWNS -->
+<header ref="{{ navRef }}" style="{{ navHeaderStyle }}">
+  <nav style="{{ navBarStyle }}">
+    <div style="{{ menuRowStyle }}">
+      <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
+        <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
+          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+          <sc-if value="{{ m.showDropdown }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
+              <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
+                <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#26201d" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </nav>
+</header>
+
+<!-- FLOATING CURRENT-PAGE PILL (appears after scrolling past the nav) -->
+<sc-if value="{{ showPill }}" hint-placeholder-val="{{ false }}">
+  <div onMouseEnter="{{ pillEnter }}" onMouseLeave="{{ pillLeave }}" style="{{ pillWrapStyle }}">
+    <div style="{{ pillCardStyle }}">
+      <a href="{{ pillHref }}" style="{{ pillHeadStyle }}">
+        <span>{{ currentTab }}</span>
+        <span style="{{ pillHintStyle }}">{{ pillHint }}</span>
+      </a>
+      <div style="{{ pillItemsWrapStyle }}">
+        <sc-for list="{{ pillItems }}" as="it" hint-placeholder-count="4">
+          <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#a51915" style-hover="background:rgba(165,25,21,.12)">{{ it.label }}</a>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<!-- HERO -->
+<section id="top" style="display:grid;grid-template-columns:1fr 1fr;min-height:560px">
+  <div style="padding:70px 28px 70px max(28px,calc((100vw - 1280px)/2 + 28px));display:flex;flex-direction:column;justify-content:center">
+    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
+    <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:52px;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori School, A-Camp</h1>
+    <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">Montessori A-Camp is a co-educational &amp; semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.</p>
+    <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.</p>
+    <div style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
+      <a href="#admissions" style="background:#a51915;color:#fff;padding:14px 28px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#7f120f">Send enquiry →</a>
+      <a href="#about" style="background:#e8541b;color:#fff;padding:14px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#c2410f">Discover the school</a>
+    </div>
+  </div>
+  <div style="position:relative;background:#f6e7e2;min-height:420px">
+    <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
+      <p style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”</p>
+    </div>
+    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Montessori School, A-Camp" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+  </div>
+</section>
+
+<!-- ABOUT / EXCEL + VISION -->
+<section id="about" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+  <div style="text-align:center;max-width:760px;margin:0 auto">
+    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">About Us</div>
+    <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;color:#a51915;margin:12px 0 0">Explore, Experience &amp; Excel at Montessori</h2>
+    <p style="font-size:17px;line-height:1.7;color:#4a423c;margin:20px 0 0">Through the pursuance of excellence in education, Montessori — with the traditional values of empathy, respect and discipline — renders a liberal education where the mind flowers without fear. A vision that accentuates human excellence and moulds the younger generation for a meaningful and productive life in a globalized society.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:44px">
+    <div style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:34px">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#c2410f">Our Vision</div>
+      <p style="font-size:17px;line-height:1.65;color:#3d3531;margin:12px 0 0">To create citizens of tomorrow steeped in the traditional values of empathy, discipline and respect — where no fears prevail; a vision that leads to change.</p>
+    </div>
+    <div style="background:#a51915;border-radius:16px;padding:34px;color:#fff">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">Core Values</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;align-items:center">
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">Empathy</span>
+        <span style="opacity:.4">•</span>
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#fff">Respect</span>
+        <span style="opacity:.4">•</span>
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">Discipline</span>
+      </div>
+      <p style="font-size:15px;line-height:1.6;color:#f4ddd2;margin:18px 0 0">The three pillars behind every classroom, playground and interaction at Montessori.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ACADEMICS -->
+<section id="academics" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
+  <div style="max-width:1280px;margin:0 auto;padding:74px 28px">
+    <div style="text-align:center;max-width:620px;margin:0 auto 40px">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Teaching &amp; Learning</div>
+      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Our Academics</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <sc-for list="{{ academics }}" as="a" hint-placeholder-count="6">
+        <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;border-top:4px solid #e8541b">
+          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#c2410f;letter-spacing:.05em">{{ a.tag }}</div>
+          <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin:8px 0 0">{{ a.title }}</h4>
+          <p style="font-size:14.5px;line-height:1.6;color:#6b615b;margin:9px 0 0">{{ a.desc }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- SCHOOL LIFE -->
+<section id="life" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+  <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center">
+    <div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">School Life &amp; Activities</div>
+      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;color:#a51915;margin:12px 0 0">A day, built around the child.</h2>
+      <p style="font-size:16.5px;line-height:1.65;color:#4a423c;margin:16px 0 0;max-width:490px">From timings and the house system to clubs, physical education and co-curricular activities, life at Montessori balances rigorous academics with the joy of growing up.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px">
+        <sc-for list="{{ life }}" as="l" hint-placeholder-count="4">
+          <div style="border-left:3px solid #e8541b;padding:2px 0 2px 14px">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:#a51915">{{ l.title }}</div>
+            <div style="font-size:13.5px;color:#6b615b;line-height:1.5;margin-top:3px">{{ l.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:#a51915;border-radius:18px;padding:36px;color:#fff">
+      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">The Four Houses</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#e8541b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Valour</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#2f9e6b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Wisdom</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#3f7fd0"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Harmony</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#e0533a"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Integrity</span></div>
+      </div>
+      <p style="font-size:14.5px;line-height:1.6;color:#f4ddd2;margin:22px 0 0">Every student belongs to a house — earning points through academics, sport and service, building lifelong belonging and healthy competition.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STUDENT SHOWCASE / VIDEO -->
+<section style="background:#a51915;color:#fff">
+  <div style="max-width:1280px;margin:0 auto;padding:72px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center">
+    <div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Students Showcase</div>
+      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">Creativity at the Grand Art Exhibition</h2>
+      <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
+    </div>
+    <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
+      <video ref="{{ videoRef }}" controls playsinline muted style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover"></video>
+    </div>
+  </div>
+</section>
+
+<!-- CAMPUS & FACILITIES -->
+<section id="campus" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+  <div style="text-align:center;max-width:620px;margin:0 auto 40px">
+    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Campus &amp; Facilities</div>
+    <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">For complete growth, all at one place</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+    <sc-for list="{{ facilities }}" as="f" hint-placeholder-count="6">
+      <a href="{{ f.href }}" data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .32s ease,box-shadow .3s ease,border-color .2s ease,background .25s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;display:block" style-hover="border-color:#ffd9c4;transform:translateY(-8px);box-shadow:0 20px 40px rgba(165,25,21,.16);background:#fffdf5">
+        <div style="width:56px;height:56px;border-radius:13px;background:#fdeadf;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <img src="{{ f.icon }}" alt="{{ f.title }}" style="width:32px;height:32px;object-fit:contain">
+        </div>
+        <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:21px;color:#a51915;margin:16px 0 0;display:flex;align-items:center;gap:8px">{{ f.title }}<span style="color:#c2410f;font-size:16px">→</span></h4>
+        <p style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ f.desc }}</p>
+      </a>
+    </sc-for>
+  </div>
+  <div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:9px">
+    <sc-for list="{{ facilityChips }}" as="c" hint-placeholder-count="10">
+      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#a51915;background:#fbf3f2;border:1px solid #f0e0dc;padding:8px 14px;border-radius:999px">{{ c }}</span>
+    </sc-for>
+  </div>
+</section>
+
+<!-- TRANSPORT -->
+<section id="transport" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
+  <div style="max-width:1280px;margin:0 auto;padding:64px 28px;display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center">
+    <div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Transport</div>
+      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:36px;line-height:1.12;color:#a51915;margin:12px 0 0">Safe rides, every route.</h2>
+    </div>
+    <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:0">A GPS-enabled bus fleet covers routes across Kurnool and the surrounding areas, with trained attendants on every bus. Pick-up and drop timings are shared with parents at the start of each term, and detailed bus routes are available from the school office.</p>
+  </div>
+</section>
+
+<!-- NEWS ROOM -->
+<section id="news" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
+    <div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">News Room</div>
+      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Latest &amp; upcoming</h2>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+    <sc-for list="{{ news }}" as="n" hint-placeholder-count="3">
+      <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;overflow:hidden">
+        <div style="height:120px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px)"></div>
+        <div style="padding:22px 22px 24px">
+          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#c2410f">{{ n.tag }}</div>
+          <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:8px 0 0;line-height:1.25">{{ n.title }}</h4>
+          <p style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ n.desc }}</p>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
+  <div style="max-width:1280px;margin:0 auto;padding:74px 28px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
+      <div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Gallery</div>
+        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Life in pictures</h2>
+      </div>
+      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">more photos coming soon</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
+      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
+      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
+      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
+      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
+      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px);border:1px solid #f0e0dc"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ADMISSIONS -->
+<section id="admissions" style="background:#a51915;color:#fff;scroll-margin-top:110px">
+  <div style="max-width:1280px;margin:0 auto;padding:78px 28px">
+    <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start">
+      <div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Admissions 2026–27</div>
+        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;margin:12px 0 0">The admission procedure</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:26px">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="flex:none;width:36px;height:36px;border-radius:50%;background:#e8541b;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px">{{ s.n }}</span>
+              <div>
+                <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px">{{ s.title }}</div>
+                <div style="font-size:14px;color:#f4ddd2;line-height:1.5;margin-top:2px">{{ s.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">
+          <a href="#admissions" style="background:#e8541b;color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="background:#c2410f">Download brochure</a>
+          <a href="#admissions" style="border:1px solid rgba(255,255,255,.4);color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="border-color:#fff">School fee</a>
+        </div>
+      </div>
+      <div style="background:#fff;color:#26201d;border-radius:16px;padding:30px">
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin-bottom:16px">Send an enquiry</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="Parent / student name" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="Phone number" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <select value="{{ form.track }}" onChange="{{ onTrack }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+            <option>Pre-Primary Program</option>
+            <option>Primary School</option>
+            <option>Secondary School</option>
+            <option>Not sure yet</option>
+          </select>
+          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="Message (optional)" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
+          <button onClick="{{ submit }}" style="width:100%;padding:14px;border:none;border-radius:9px;background:#a51915;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#7f120f">{{ submitLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:#7f120f;color:#f4ddd2">
+  <div style="max-width:1280px;margin:0 auto;padding:60px 28px 30px">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px">
+      <div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
+          <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori A-Camp</span>
+        </div>
+        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">A-Camp, Kurnool, Andhra Pradesh, India — full address to be added.</p>
+        <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4">+91 XXXXX XXXXX</a> · <a href="#admissions" style="color:#ffd9c4">+91 XXXXX XXXXX</a></p>
+        <p style="font-size:14px;margin:6px 0 0"><a href="mailto:info@msceducation.net" style="color:#ffd9c4">info@msceducation.net</a></p>
+      </div>
+      <div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">School</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+          <a href="#about" style-hover="color:#fff">About Us</a>
+          <a href="#academics" style-hover="color:#fff">Academics</a>
+          <a href="#life" style-hover="color:#fff">School Life</a>
+          <a href="#campus" style-hover="color:#fff">Campus</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">Quick links</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+          <a href="#gallery" style-hover="color:#fff">Gallery</a>
+          <a href="#news" style-hover="color:#fff">News Room</a>
+          <a href="#admissions" style-hover="color:#fff">Admission</a>
+          <a href="acamp-subpage.html#house" style-hover="color:#fff">School Life</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">Group</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+          <a href="index.html" style-hover="color:#fff">Montessori Schools</a>
+          <a href="montessori-vidyanagar.html" style-hover="color:#fff">Montessori Vidyanagar</a>
+                  </div>
+      </div>
+    </div>
+    <div style="margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:#cf9c8f">
+      <span>© 2026 Montessori School, A-Camp · Montessori School Committee. All rights reserved.</span>
+      <span style="font-family:'Quicksand',sans-serif;font-weight:600;letter-spacing:.04em">Empathy · Respect · Discipline</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { openMenu: -1, navFixed: false, pillExpanded: false, currentTab: "Home", form: { name: "", phone: "", track: "Pre-Primary Program", msg: "" }, submitted: false };
+
+  componentDidMount() {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          const sibs = Array.from(el.parentElement ? el.parentElement.querySelectorAll(":scope > [data-reveal]") : [el]);
+          el.style.transitionDelay = (Math.max(0, sibs.indexOf(el)) * 70) + "ms";
+          el.style.opacity = "1"; el.style.transform = "translateY(0)";
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    this._io = io;
+
+    const v = this._videoEl;
+    if (v) {
+      const KEY = "msc_acamp_video_pos";
+      const saved = parseFloat(localStorage.getItem(KEY) || "0");
+      if (saved > 0 && isFinite(saved)) { try { v.currentTime = saved; } catch (e) {} }
+      this._vSave = () => { if (v.currentTime > 0) localStorage.setItem(KEY, String(v.currentTime)); };
+      v.addEventListener("timeupdate", this._vSave);
+    }
+
+    // loading screen fade-out
+    const loader = this._loaderEl;
+    if (loader) {
+      this._t1 = setTimeout(() => { loader.style.opacity = "0"; }, 1250);
+      this._t2 = setTimeout(() => { loader.style.display = "none"; }, 1900);
+    }
+
+    // custom cursor handled globally by cursor.js
+
+    // static → collapse-to-pill on scroll-past → expand on hover
+    const header = this._navEl;
+    if (header) {
+      this._headerOffset = header.offsetTop;          // top-bar height, before it ever fixes
+      this._navH = header.offsetHeight || 52;
+      const SPY = [["top","Home"],["about","About"],["academics","Academics"],["life","School Life"],["campus","Campus & Facilities"],["transport","Transport"],["gallery","Gallery"],["news","News Room"],["admissions","Admission"]];
+      const apply = () => {
+        const y = window.scrollY;
+        const fixed = y > (this._headerOffset - 4);
+        let cur = "Home";
+        for (const [id, label] of SPY) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= 140) cur = label; }
+        if (fixed !== this.state.navFixed || cur !== this.state.currentTab) this.setState({ navFixed: fixed, currentTab: cur });
+      };
+      this._navScroll = () => window.requestAnimationFrame(apply);
+      window.addEventListener("scroll", this._navScroll, { passive: true });
+      apply();
+    }
+  }
+  componentWillUnmount() {
+    if (this._io) this._io.disconnect();
+    if (this._videoEl && this._vSave) this._videoEl.removeEventListener("timeupdate", this._vSave);
+    clearTimeout(this._t1); clearTimeout(this._t2);
+    if (this._onMove) window.removeEventListener("mousemove", this._onMove);
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._cdot) this._cdot.remove();
+    if (this._cring) this._cring.remove();
+    if (this._navScroll) window.removeEventListener("scroll", this._navScroll);
+  }
+
+  renderVals() {
+    const set = (k) => (e) => this.setState({ form: { ...this.state.form, [k]: e.target.value } });
+    const open = this.state.openMenu;
+    const SUB = "acamp-subpage.html#";
+    const rawMenus = [
+      { label: "Home", href: "#top", items: [] },
+      { label: "About", href: "#about", items: [
+        { label: "Core Values", href: SUB + "core-values" }, { label: "Founder's Message", href: SUB + "founders-message" },
+        { label: "From Principal's Desk", href: SUB + "principals-desk" }, { label: "Team Montessori", href: SUB + "team-monte" },
+        { label: "Affiliations", href: SUB + "affiliations" }, { label: "Documents", href: SUB + "documents" } ] },
+      { label: "School Life", href: SUB + "house", items: [] },
+      { label: "Academics", href: "#academics", items: [
+        { label: "Pre-Primary Program", href: SUB + "pre-primary" },
+        { label: "Primary School", href: SUB + "primary" }, { label: "Secondary School", href: SUB + "secondary" },
+        { label: "Assessment Policy", href: SUB + "assessment" } ] },
+      { label: "Activities", href: "#life", items: [
+        { label: "School Calendar", href: SUB + "calendar" }, { label: "Co-Curricular Activity", href: SUB + "co-curricular" },
+        { label: "Physical Education", href: SUB + "physical-education" }, { label: "Clubs & Societies", href: SUB + "clubs" }, { label: "Events", href: SUB + "events" } ] },
+      { label: "Campus & Facilities", href: "#campus", items: [
+        { label: "The Campus", href: SUB + "the-campus" }, { label: "Classrooms", href: SUB + "ac-classrooms" },
+        { label: "Labs", href: SUB + "science-labs" }, { label: "Library", href: SUB + "library" },
+        { label: "Swimming Pool", href: SUB + "swimming-pool" }, { label: "Sports", href: SUB + "sports-arena" },
+        { label: "Music", href: SUB + "music" }, { label: "Infirmary", href: SUB + "infirmary" } ] },
+      { label: "Transport", href: SUB + "transport", items: [] },
+      { label: "Gallery", href: "#gallery", items: [
+        { label: "Photo Gallery", href: SUB + "photo-gallery" }, { label: "Videos", href: SUB + "videos" } ] },
+      { label: "News Room", href: "#news", items: [
+        { label: "Events", href: SUB + "events-news" }, { label: "Latest News", href: SUB + "latest-news" },
+        { label: "Awards & Achievements", href: SUB + "awards" }, { label: "Circulars & Downloads", href: SUB + "circulars" } ] },
+      { label: "Admission", href: "#admissions", items: [
+        { label: "Admission Procedure", href: SUB + "procedure" }, { label: "Admission Form", href: SUB + "form" },
+        { label: "Brochure", href: SUB + "brochure" }, { label: "School Fee", href: SUB + "fee" } ] },
+    ];
+    const menus = rawMenus.map((m, i) => ({
+      label: m.label, href: m.href, items: m.items,
+      hasItems: m.items.length > 0,
+      isOpen: open === i,
+      showDropdown: open === i && m.items.length > 0,
+      color: i === 0 ? "#fff" : "#a51915",
+      bg: i === 0 ? "#a51915" : "transparent",
+      open: () => this.setState({ openMenu: i }),
+    }));
+
+    // header is always a static sticky gold bar
+    const navHeaderStyle = { position: "sticky", top: 0, zIndex: 60, background: "#ffd9c4", boxShadow: "0 2px 10px rgba(165,25,21,.12)" };
+    const navBarStyle = { position: "relative", maxWidth: "1280px", margin: "0 auto", padding: "0 12px", display: "flex", alignItems: "stretch", flexWrap: "wrap", overflow: "visible" };
+    const menuRowStyle = { display: "flex", alignItems: "stretch", flexWrap: "wrap" };
+
+    // floating current-page pill (only when the "Floating" nav style is on AND we've scrolled past the bar)
+    const pillEnabled = (this.props.navStyle || "Floating") === "Floating";
+    const showPill = pillEnabled && this.state.navFixed;
+    const curMenu = rawMenus.find((m) => m.label === this.state.currentTab) || rawMenus[0];
+    const pillItems = curMenu.items || [];
+    const hasItems = pillItems.length > 0;
+    const pillExpanded = this.state.pillExpanded && hasItems;
+    const pillHint = hasItems ? (pillExpanded ? "select a page" : "hover for more options") : (this.state.currentTab === "Home" ? "" : "click for more details");
+    const pillHref = curMenu.href;
+
+    const pillWrapStyle = { position: "fixed", top: "16px", left: 0, right: 0, zIndex: 65, display: "flex", justifyContent: "center", pointerEvents: "none" };
+    const pillCardStyle = {
+      pointerEvents: "auto", display: "flex", flexDirection: "column",
+      background: "rgba(255,217,196,.96)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+      padding: "6px", borderRadius: "23px",
+      boxShadow: "0 14px 34px rgba(165,25,21,.28)",
+    };
+    const pillHeadStyle = {
+      display: "flex", alignItems: "center", justifyContent: "center", gap: "11px",
+      padding: "8px 18px", borderRadius: "999px", cursor: "pointer", whiteSpace: "nowrap",
+      fontFamily: "'Quicksand',sans-serif", fontWeight: 700, fontSize: "15px", color: "#a51915",
+    };
+    const pillHintStyle = {
+      display: pillHint ? "inline-block" : "none", width: "150px", whiteSpace: "nowrap",
+      fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: "12px",
+      color: "rgba(165,25,21,.6)", borderLeft: "1px solid rgba(165,25,21,.28)", paddingLeft: "12px",
+    };
+    const pillItemsWrapStyle = {
+      overflow: "hidden",
+      maxHeight: pillExpanded ? (pillItems.length * 44 + 8) + "px" : "0px",
+      opacity: pillExpanded ? 1 : 0,
+      transition: "max-height .3s ease, opacity .25s ease",
+    };
+
+    return {
+      navRef: (el) => { this._navEl = el; },
+      videoRef: (el) => { this._videoEl = el; },
+      loaderRef: (el) => { this._loaderEl = el; },
+      navHeaderStyle, navBarStyle, menuRowStyle, currentTab: this.state.currentTab,
+      showPill, pillItems, pillHint, pillHref,
+      pillWrapStyle, pillCardStyle, pillHeadStyle, pillHintStyle, pillItemsWrapStyle,
+      pillEnter: () => { if (hasItems) this.setState({ pillExpanded: true }); },
+      pillLeave: () => this.setState({ pillExpanded: false }),
+      menus,
+      closeMenu: () => this.setState({ openMenu: -1 }),
+      academics: [
+        { tag: "01", title: "Pedagogy", desc: "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
+        { tag: "02", title: "Pre-Primary Program", desc: "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
+        { tag: "03", title: "Primary School", desc: "Foundational years building strong literacy, numeracy and enquiry habits through guided, hands-on learning." },
+        { tag: "04", title: "Secondary School", desc: "A structured programme focused on holistic development through academics, activities and character." },
+        { tag: "05", title: "Lower & Primary", desc: "Foundational programs building strong literacy, numeracy and enquiry habits under the Cambridge pathway." },
+        { tag: "06", title: "Assessment Policy", desc: "A well-defined framework of continuous formative and summative assessment that promotes academic growth." },
+      ],
+      life: [
+        { title: "School Timings", desc: "Structured day with breaks, activity periods and supervised study." },
+        { title: "Rules & Regulations", desc: "Clear, kind expectations that build discipline and respect." },
+        { title: "Clubs & Societies", desc: "From robotics to debate, drama and eco clubs." },
+        { title: "Physical Education", desc: "Daily sport, athletics and access to the sports arena." },
+      ],
+      facilities: [
+        { href: "acamp-subpage.html#ac-classrooms", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Classrooms", desc: "Centrally air-conditioned rooms with smart audio-visual teaching aids." },
+        { href: "acamp-subpage.html#science-labs", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Labs", desc: "Science, robotics, maths and computing labs for hands-on discovery." },
+        { href: "acamp-subpage.html#library", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Library", desc: "A well-stocked home for reading, reference and independent research." },
+        { href: "acamp-subpage.html#sports-arena", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Sports", desc: "Expansive grounds and courts for athletics and team sports." },
+        { href: "acamp-subpage.html#swimming-pool", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Swimming Pool", desc: "Safe, supervised aquatics as part of a rounded PE program." },
+        { href: "acamp-subpage.html#music", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Music", desc: "Vocal and instrumental music with regular performances." },
+      ],
+      facilityChips: ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
+      news: [
+        { tag: "Event", title: "Grand Art Exhibition", desc: "Students showcase a term of creativity across painting, sculpture and design." },
+        { tag: "Achievement", title: "Inter-school Olympiad wins", desc: "Our scholars bring home honours in maths and science olympiads." },
+        { tag: "Circular", title: "Term calendar released", desc: "Key dates, holidays and assessment schedules for the new session." },
+      ],
+      steps: [
+        { n: "1", title: "Enquiry & campus visit", desc: "Send an enquiry or drop by — meet our team and tour the campus." },
+        { n: "2", title: "Application form", desc: "Complete the admission form for your child's grade and pathway." },
+        { n: "3", title: "Interaction / assessment", desc: "A friendly interaction to understand your child's learning needs." },
+        { n: "4", title: "Confirmation", desc: "Complete enrolment and fee formalities to secure the seat." },
+      ],
+      form: this.state.form,
+      onName: set("name"), onPhone: set("phone"), onTrack: set("track"), onMsg: set("msg"),
+      submitLabel: this.state.submitted ? "✓ Enquiry received" : "Send enquiry",
+      submit: () => this.setState({ submitted: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

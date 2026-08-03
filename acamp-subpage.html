@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montessori School, A-Camp — Details</title>
+<meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
+<link rel="icon" type="image/png" href="assets/monte-logo.png">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#ffffff;color:#26201d;font-family:"Nunito",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,h4{font-family:"Quicksand",system-ui,sans-serif}
+  ::selection{background:#a51915;color:#ffd9c4}
+  img{display:block;max-width:100%}
+  @keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes ddIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<script src="cursor.js"></script>
+</helmet>
+
+<div style="max-width:100%;overflow:hidden">
+
+<!-- TOP BAR -->
+<div style="background:#fff;border-bottom:1px solid #f3e6e2">
+  <div style="max-width:1280px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <a href="montessori-acamp.html#top" style="display:flex;align-items:center;gap:18px">
+      <span style="display:block;line-height:0">
+        <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
+      </span>
+      <span style="display:flex;flex-direction:column;line-height:1.15">
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori School, A-Camp</span>
+        <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
+      </span>
+    </a>
+    <div style="text-align:right">
+      <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
+      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
+    </div>
+  </div>
+</div>
+
+<!-- YELLOW NAV WITH DROPDOWNS -->
+<header style="position:sticky;top:0;z-index:60;background:#ffd9c4;box-shadow:0 2px 10px rgba(165,25,21,.12)">
+  <nav style="max-width:1280px;margin:0 auto;padding:0 12px;display:flex;align-items:stretch;flex-wrap:wrap">
+    <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
+      <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
+        <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:#a51915" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+        <sc-if value="{{ m.isOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
+            <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
+              <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:{{ it.color }}" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </nav>
+</header>
+
+<!-- PAGE HERO / BREADCRUMB -->
+<section style="background:#a51915;color:#fff">
+  <div style="max-width:1280px;margin:0 auto;padding:46px 28px 50px">
+    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13.5px;color:#ffd9c4;display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+      <a href="montessori-acamp.html#top" style="opacity:.85" style-hover="opacity:1">Home</a>
+      <span style="opacity:.5">/</span>
+      <span style="color:#f4ddd2">{{ current.parent }}</span>
+      <span style="opacity:.5">/</span>
+      <span style="color:#fff">{{ current.title }}</span>
+    </div>
+    <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:44px;line-height:1.1;margin:16px 0 0">{{ current.title }}</h1>
+    <p style="font-size:17px;line-height:1.65;color:#f4ddd2;margin:14px 0 0;max-width:680px">{{ current.intro }}</p>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<section style="max-width:1280px;margin:0 auto;padding:56px 28px 70px">
+  <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
+    <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
+      <div key="{{ b.key }}">
+        <sc-if value="{{ b.isHeading }}" hint-placeholder-val="{{ false }}">
+          <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#a51915;margin:34px 0 0">{{ b.text }}</h2>
+        </sc-if>
+        <sc-if value="{{ b.isPara }}" hint-placeholder-val="{{ true }}">
+          <p style="font-size:17px;line-height:1.72;color:#4a423c;margin:16px 0 0">{{ b.text }}</p>
+        </sc-if>
+        <sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px;margin:18px 0 0">
+            <sc-for list="{{ b.items }}" as="li" hint-placeholder-count="4">
+              <div style="display:flex;gap:13px;align-items:flex-start;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:12px;padding:16px 18px">
+                <span style="flex:none;width:9px;height:9px;border-radius:50%;background:#e8541b;margin-top:7px"></span>
+                <div style="font-size:15.5px;line-height:1.55;color:#3d3531"><strong style="color:#a51915">{{ li.h }}</strong>{{ li.sep }}{{ li.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isGallery }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 0">
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+          </div>
+          <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+        </sc-if>
+        <sc-if value="{{ b.isNote }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fdeadf;border:1px solid #f6c8ae;border-radius:14px;padding:22px 24px;margin:22px 0 0">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:#a51915">{{ b.text }}</div>
+            <div style="font-size:14.5px;color:#6b615b;margin-top:6px">{{ b.sub }}</div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <!-- CTA -->
+    <div style="margin-top:44px;display:flex;gap:12px;flex-wrap:wrap">
+      <a href="montessori-acamp.html#admissions" style="background:#a51915;color:#fff;padding:13px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#7f120f">Enquire about admission →</a>
+      <a href="{{ current.parentHref }}" style="background:#e8541b;color:#fff;padding:13px 24px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#c2410f">Back to {{ current.parent }}</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="background:#7f120f;color:#f4ddd2">
+  <div style="max-width:1280px;margin:0 auto;padding:52px 28px 30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;align-items:center">
+    <a href="montessori-acamp.html#top" style="display:flex;align-items:center;gap:14px">
+      <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:52px;width:auto;display:block"></span>
+      <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori A-Camp</span>
+    </a>
+    <div style="display:flex;gap:22px;font-size:14px;flex-wrap:wrap">
+      <a href="montessori-acamp.html#top" style-hover="color:#fff">Home</a>
+      <a href="montessori-acamp.html#admissions" style-hover="color:#fff">Admission</a>
+      <a href="index.html" style-hover="color:#fff">Montessori Schools</a>
+    </div>
+    <span style="font-size:12.5px;color:#cf9c8f;font-family:'Quicksand',sans-serif">A-Camp, Kurnool</span>
+  </div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { openMenu: -1, route: "" };
+
+  componentDidMount() {
+    this._apply = () => {
+      const r = (location.hash || "").replace(/^#/, "");
+      this.setState({ route: r });
+      try { window.scrollTo(0, 0); } catch (e) {}
+    };
+    this._apply();
+    window.addEventListener("hashchange", this._apply);
+  }
+  componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
+
+  renderVals() {
+    const MI = "montessori-acamp.html";
+    // ---- nav menu structure (minor items => this file's hashes) ----
+    const rawMenus = [
+      { label: "Home", href: MI + "#top", items: [] },
+      { label: "About", href: MI + "#about", items: [
+        ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
+        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
+      { label: "School Life", href: "#house", items: [] },
+      { label: "Academics", href: MI + "#academics", items: [
+        ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
+        ["Secondary School", "secondary"], ["Assessment Policy", "assessment"] ] },
+      { label: "Activities", href: MI + "#life", items: [
+        ["School Calendar", "calendar"], ["Co-Curricular Activity", "co-curricular"], ["Physical Education", "physical-education"],
+        ["Clubs & Societies", "clubs"], ["Events", "events"] ] },
+      { label: "Campus & Facilities", href: MI + "#campus", items: [
+        ["The Campus", "the-campus"], ["Classrooms", "ac-classrooms"], ["Labs", "science-labs"], ["Library", "library"],
+        ["Swimming Pool", "swimming-pool"], ["Sports", "sports-arena"], ["Music", "music"], ["Infirmary", "infirmary"] ] },
+      { label: "Transport", href: "#transport", items: [] },
+      { label: "Gallery", href: MI + "#gallery", items: [
+        ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
+      { label: "News Room", href: MI + "#news", items: [
+        ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
+      { label: "Admission", href: MI + "#admissions", items: [
+        ["Admission Procedure", "procedure"], ["Admission Form", "form"], ["Brochure", "brochure"], ["School Fee", "fee"] ] },
+    ];
+    const open = this.state.openMenu;
+    const route = this.state.route;
+    const menus = rawMenus.map((m, i) => ({
+      label: m.label, href: m.href, hasItems: m.items.length > 0, isOpen: open === i,
+      open: () => this.setState({ openMenu: i }),
+      items: m.items.map(([label, key]) => ({ label, href: "#" + key, color: key === route ? "#a51915" : "#26201d" })),
+    }));
+
+    // ---- content map ----
+    const P = (parent, parentKey, title, intro, blocks) => ({ parent, parentHref: MI + parentKey, title, intro, blocks });
+    const pages = {
+      "core-values": P("About", "#about", "Core Values", "Empathy, respect and discipline — the three pillars behind every classroom, playground and interaction at Montessori.", [
+        { p: "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families." },
+        { list: [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] },
+      ]),
+      "founders-message": P("About", "#about", "Founder's Message", "A word from the founding vision of the Montessori Schools.", [
+        { p: "Our journey began with twelve children and a simple conviction — that every child, given the right environment, will help themselves to learn. Five decades on, that belief still guides everything we do at Montessori." },
+        { p: "We invite you to visit our campus, meet our teachers, and see how a value-based, child-centred education prepares your child not just for examinations, but for a meaningful and productive life." },
+        { note: "Full message & founder's portrait", sub: "Send us the founder's photograph and message text and we'll place them here." },
+      ]),
+      "principals-desk": P("About", "#about", "From the Principal's Desk", "Leadership notes on learning, character and community at Montessori.", [
+        { p: "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
+        { note: "Principal's message & photo", sub: "Share the principal's note and portrait to complete this page." },
+      ]),
+      "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
+        { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
+        { gallery: true },
+      ]),
+      "affiliations": P("About", "#about", "Affiliations", "Recognitions and affiliations that underpin a Montessori education.", [
+        { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
+        { note: "Affiliation details", sub: "Affiliation details will be added here." },
+      ]),
+      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
+        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
+        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
+      ]),
+      "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
+        { p: "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship." },
+        { list: [["Valour", "courage and leadership."], ["Wisdom", "curiosity and scholarship."], ["Harmony", "teamwork and care."], ["Integrity", "honesty and responsibility."]] },
+      ]),
+      "pre-primary": P("Academics", "#academics", "Pre-Primary Program", "A play-based foundation for our youngest learners.", [
+        { p: "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life." },
+        { gallery: true },
+      ]),
+      "primary": P("Academics", "#academics", "Primary School", "A strong, well-rounded foundation for the primary years.", [
+        { p: "The primary school years emphasise strong fundamentals in language and numeracy alongside curiosity-led exploration, preparing students for the years of schooling ahead." },
+        { list: [["Foundational Skills", "reading, writing and numeracy built through steady practice."], ["Enquiry", "hands-on activities that encourage questions and exploration."], ["Character", "values, habits and independence nurtured alongside academics."]] },
+      ]),
+      "secondary": P("Academics", "#academics", "Secondary School", "A structured, comprehensive curriculum for the secondary years.", [
+        { p: "The secondary school years build on a strong foundation, focusing on holistic development through rigorous academics, co-curricular activities and continuous assessment." },
+      ]),
+      "assessment": P("Academics", "#academics", "Assessment Policy & Schedule", "Continuous, fair evaluation that promotes growth.", [
+        { p: "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing." },
+        { note: "Assessment schedule", sub: "Share the term-wise assessment calendar to publish exact dates." },
+      ]),
+      "calendar": P("Activities", "#life", "School Calendar", "Key dates, terms and events across the academic year.", [
+        { p: "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead." },
+        { note: "Downloadable calendar", sub: "Provide the current-session calendar and we'll add it here." },
+      ]),
+      "co-curricular": P("Activities", "#life", "Co-Curricular Activity", "Learning that extends beyond the syllabus.", [
+        { p: "From public speaking and quizzing to art, music and community service, co-curricular activities build confidence, teamwork and well-rounded character." },
+      ]),
+      "physical-education": P("Activities", "#life", "Physical Education", "Daily sport, movement and well-being.", [
+        { p: "Physical education is a daily part of school life, with athletics, team sports and access to the sports arena and swimming pool." },
+        { gallery: true },
+      ]),
+      "clubs": P("Activities", "#life", "Clubs & Societies", "Spaces for every interest to flourish.", [
+        { list: [["Robotics & Coding", "build, program and compete."], ["Debate & Literary", "argue, write and present."], ["Arts & Music", "create, perform and exhibit."], ["Eco Club", "sustainability and campus stewardship."]] },
+      ]),
+      "events": P("Activities", "#life", "Events", "Celebrations, competitions and milestones through the year.", [
+        { p: "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together." },
+        { gallery: true },
+      ]),
+      "the-campus": P("Campus & Facilities", "#campus", "The Campus", "A verdant, purpose-built campus on the outskirts of Kurnool.", [
+        { p: "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
+        { gallery: true },
+      ]),
+      "ac-classrooms": P("Campus & Facilities", "#campus", "Classrooms", "Comfortable, focused learning environments.", [
+        { p: "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids." },
+      ]),
+      "science-labs": P("Campus & Facilities", "#campus", "Labs", "Where theory meets hands-on discovery — science, robotics, maths and computing under one roof.", [
+        { p: "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them." },
+        { list: [["Science Laboratories", "physics, chemistry and biology labs for hands-on practicals."], ["Robotics Lab", "computational thinking, electronics and problem-solving through building and programming real projects."], ["Math Lab", "manipulatives, models and activities that turn abstract concepts into intuitive understanding."], ["Computer Lab", "modern machines building digital literacy, coding foundations and responsible technology use."]] },
+        { gallery: true },
+      ]),
+      "library": P("Campus & Facilities", "#campus", "Library", "A quiet home for reading, research and discovery.", [
+        { p: "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces." },
+        { gallery: true },
+      ]),
+      "swimming-pool": P("Campus & Facilities", "#campus", "Swimming Pool", "Safe, supervised aquatics for every learner.", [
+        { p: "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program." },
+      ]),
+      "sports-arena": P("Campus & Facilities", "#campus", "Sports", "Grounds and courts for every game.", [
+        { p: "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit." },
+        { gallery: true },
+      ]),
+      "music": P("Campus & Facilities", "#campus", "Music", "Voice, rhythm and performance.", [
+        { p: "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet." },
+      ]),
+      "infirmary": P("Campus & Facilities", "#campus", "Infirmary", "Care and well-being on campus.", [
+        { p: "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for." },
+      ]),
+      "transport": P("Transport", "#top", "Transport", "Safe, GPS-enabled buses covering Kurnool and the surrounding areas.", [
+        { p: "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term." },
+        { p: "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
+        { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
+      ]),
+      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: true }]),
+      "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
+        { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
+        { note: "Video embeds", sub: "Share YouTube links or files and we'll embed them here." },
+      ]),
+      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [{ gallery: true }]),
+      "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
+        { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
+        { note: "News feed", sub: "Share announcements and we'll build out the news list." },
+      ]),
+      "awards": P("News Room", "#news", "Awards & Achievements", "Celebrating our students and staff.", [
+        { p: "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
+        { gallery: true },
+      ]),
+      "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
+        { note: "Circulars", sub: "Upload circulars and forms and we'll add download links." },
+      ]),
+      "procedure": P("Admission", "#admissions", "Admission Procedure", "Four simple steps to join Montessori.", [
+        { list: [["Enquiry & campus visit", "meet our team and tour the campus."], ["Application form", "complete the form for your child's grade and pathway."], ["Interaction / assessment", "a friendly interaction to understand learning needs."], ["Confirmation", "complete enrolment and fee formalities to secure the seat."]] },
+      ]),
+      "form": P("Admission", "#admissions", "Admission Form", "Start your application.", [
+        { p: "Complete the enquiry form on our admissions section and our team will share the full application form for your chosen grade and pathway." },
+        { note: "Online form", sub: "We can connect this to your Google Form or admissions system." },
+      ]),
+      "brochure": P("Admission", "#admissions", "Brochure", "Everything about Montessori, in one place.", [
+        { p: "Our brochure covers the curriculum, campus, facilities, fees and admissions at a glance." },
+        { note: "Brochure download", sub: "Upload the brochure PDF and we'll add a download button." },
+      ]),
+      "fee": P("Admission", "#admissions", "School Fee", "Transparent fee information.", [
+        { p: "Fee structures vary by grade and pathway (Pre-Primary, Primary and Secondary)." },
+        { note: "Fee schedule", sub: "Share the fee structure and we'll present it clearly here." },
+      ]),
+    };
+
+    const fallback = P("Montessori", "#top", "Montessori School, A-Camp", "Choose a section from the menu above to explore.", [
+      { p: "Select any item from the dropdown navigation to open its dedicated page." },
+    ]);
+    const current = pages[route] || fallback;
+
+    // normalize blocks to flagged form
+    let k = 0;
+    const blocks = [];
+    current.blocks.forEach((b) => {
+      if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p });
+      else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h });
+      else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
+      else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true });
+      else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
+    });
+
+    return {
+      menus,
+      closeMenu: () => this.setState({ openMenu: -1 }),
+      current: { parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro },
+      blocks,
+    };
+  }
+}
+</script>
+</body>
+</html>
