@@ -28,6 +28,62 @@
   @keyframes loaderPop{0%{transform:scale(.82);opacity:0}55%{transform:scale(1.04);opacity:1}100%{transform:scale(1);opacity:1}}
   @keyframes loaderBar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
   @keyframes wordFloat{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.32em}}
+
+  /* ===== Layout system (desktop-first; breakpoints at the bottom) ===== */
+  .wrap{max-width:1280px;margin:0 auto;padding-left:28px;padding-right:28px}
+  img,svg,video{max-width:100%}
+  h1,h2,h3,h4,p,a,span,div{overflow-wrap:break-word}
+
+  .g{display:grid}
+  .g-hero{grid-template-columns:1fr 1fr;min-height:560px}
+  .g-hero-pad{padding:70px 28px 70px max(28px,calc((100vw - 1280px)/2 + 28px))}
+  .g-2{grid-template-columns:1fr 1fr;gap:22px}
+  .g-2t{grid-template-columns:1fr 1fr;gap:16px}
+  .g-3{grid-template-columns:repeat(3,1fr);gap:20px}
+  .g-4{grid-template-columns:repeat(4,1fr);gap:12px}
+  .g-split{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}
+  .g-split2{grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}
+  .g-split3{grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center}
+  .g-splitS{grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
+  .g-foot{grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+
+  .h-hero{font-size:52px}
+  .h-1{font-size:40px}
+
+  /* ===== Tablet ===== */
+  @media (max-width:1024px){
+    .wrap{padding-left:22px;padding-right:22px}
+    .g-hero{grid-template-columns:1fr;min-height:0}
+    .g-hero-pad{padding:56px 22px}
+    .g-3{grid-template-columns:repeat(2,1fr)}
+    .g-split,.g-split2,.g-split3,.g-splitS{grid-template-columns:1fr;gap:36px}
+    .g-4{grid-template-columns:repeat(2,1fr)}
+    .g-foot{grid-template-columns:1fr 1fr;gap:32px}
+    .h-hero{font-size:40px}
+    .h-1{font-size:32px}
+  }
+
+  /* ===== Phone ===== */
+  @media (max-width:720px){
+    .wrap{padding-left:18px;padding-right:18px}
+    .g-hero-pad{padding:44px 18px}
+    .g-2,.g-3,.g-2t{grid-template-columns:1fr}
+    .g-foot{grid-template-columns:1fr;gap:26px}
+    .nav-row{flex-wrap:wrap;gap:12px}
+    /* stack the logo and phone block instead of squeezing them side by side */
+    .top-bar{flex-direction:column;align-items:flex-start!important;gap:14px}
+    .top-bar .phone-block{text-align:left!important}
+    .hero-btns{flex-wrap:wrap}
+    .hero-btns>a{flex:1 1 100%;text-align:center}
+    .h-hero{font-size:32px}
+    .h-1{font-size:27px}
+    .h-hero br,.h-1 br{content:"";display:inline}
+    .h-hero br::after,.h-1 br::after{content:" "}
+  }
+
+  @media (max-width:520px){
+    .g-4{grid-template-columns:1fr}
+  }
 </style>
 <script src="cursor.js"></script>
 </helmet>
@@ -47,7 +103,7 @@
 
 <!-- TOP BAR -->
 <div style="background:#fff;border-bottom:1px solid #f3e6e2">
-  <div style="max-width:1280px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+  <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="#top" style="display:flex;align-items:center;gap:18px">
       <span style="display:block;line-height:0">
         <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
@@ -57,7 +113,7 @@
         <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
       </span>
     </a>
-    <div style="text-align:right">
+    <div class="phone-block" style="text-align:right">
       <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
       <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
     </div>
@@ -102,13 +158,13 @@
 </sc-if>
 
 <!-- HERO -->
-<section id="top" style="display:grid;grid-template-columns:1fr 1fr;min-height:560px">
-  <div style="padding:70px 28px 70px max(28px,calc((100vw - 1280px)/2 + 28px));display:flex;flex-direction:column;justify-content:center">
+<section id="top" class="g g-hero">
+  <div class="g-hero-pad" style="display:flex;flex-direction:column;justify-content:center">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
-    <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:52px;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori School, A-Camp</h1>
+    <h1 class="h-hero" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori School, A-Camp</h1>
     <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">Montessori A-Camp is a co-educational &amp; semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.</p>
     <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.</p>
-    <div style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
+    <div class="hero-btns" style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
       <a href="#admissions" style="background:#a51915;color:#fff;padding:14px 28px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#7f120f">Send enquiry →</a>
       <a href="#about" style="background:#e8541b;color:#fff;padding:14px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#c2410f">Discover the school</a>
     </div>
@@ -122,13 +178,13 @@
 </section>
 
 <!-- ABOUT / EXCEL + VISION -->
-<section id="about" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+<section id="about" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:760px;margin:0 auto">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">About Us</div>
-    <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;color:#a51915;margin:12px 0 0">Explore, Experience &amp; Excel at Montessori</h2>
+    <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">Explore, Experience &amp; Excel at Montessori</h2>
     <p style="font-size:17px;line-height:1.7;color:#4a423c;margin:20px 0 0">Through the pursuance of excellence in education, Montessori — with the traditional values of empathy, respect and discipline — renders a liberal education where the mind flowers without fear. A vision that accentuates human excellence and moulds the younger generation for a meaningful and productive life in a globalized society.</p>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:44px">
+  <div class="g g-2" style="margin-top:44px">
     <div style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:34px">
       <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#c2410f">Our Vision</div>
       <p style="font-size:17px;line-height:1.65;color:#3d3531;margin:12px 0 0">To create citizens of tomorrow steeped in the traditional values of empathy, discipline and respect — where no fears prevail; a vision that leads to change.</p>
@@ -149,12 +205,12 @@
 
 <!-- ACADEMICS -->
 <section id="academics" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
-  <div style="max-width:1280px;margin:0 auto;padding:74px 28px">
+  <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="text-align:center;max-width:620px;margin:0 auto 40px">
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Teaching &amp; Learning</div>
-      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Our Academics</h2>
+      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Our Academics</h2>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+    <div class="g g-3">
       <sc-for list="{{ academics }}" as="a" hint-placeholder-count="6">
         <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;border-top:4px solid #e8541b">
           <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#c2410f;letter-spacing:.05em">{{ a.tag }}</div>
@@ -167,13 +223,13 @@
 </section>
 
 <!-- SCHOOL LIFE -->
-<section id="life" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
-  <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center">
+<section id="life" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
+  <div class="g g-split">
     <div>
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">School Life &amp; Activities</div>
-      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;color:#a51915;margin:12px 0 0">A day, built around the child.</h2>
+      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">A day, built around the child.</h2>
       <p style="font-size:16.5px;line-height:1.65;color:#4a423c;margin:16px 0 0;max-width:490px">From timings and the house system to clubs, physical education and co-curricular activities, life at Montessori balances rigorous academics with the joy of growing up.</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px">
+      <div class="g g-2t" style="margin-top:26px">
         <sc-for list="{{ life }}" as="l" hint-placeholder-count="4">
           <div style="border-left:3px solid #e8541b;padding:2px 0 2px 14px">
             <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:#a51915">{{ l.title }}</div>
@@ -184,7 +240,7 @@
     </div>
     <div style="background:#a51915;border-radius:18px;padding:36px;color:#fff">
       <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">The Four Houses</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+      <div class="g g-2t" style="margin-top:20px">
         <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#e8541b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Valour</span></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#2f9e6b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Wisdom</span></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#3f7fd0"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Harmony</span></div>
@@ -197,7 +253,7 @@
 
 <!-- STUDENT SHOWCASE / VIDEO -->
 <section style="background:#a51915;color:#fff">
-  <div style="max-width:1280px;margin:0 auto;padding:72px 28px;display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center">
+  <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Students Showcase</div>
       <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">Creativity at the Grand Art Exhibition</h2>
@@ -210,12 +266,12 @@
 </section>
 
 <!-- CAMPUS & FACILITIES -->
-<section id="campus" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+<section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:620px;margin:0 auto 40px">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Campus &amp; Facilities</div>
-    <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">For complete growth, all at one place</h2>
+    <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">For complete growth, all at one place</h2>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+  <div class="g g-3">
     <sc-for list="{{ facilities }}" as="f" hint-placeholder-count="6">
       <a href="{{ f.href }}" data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .32s ease,box-shadow .3s ease,border-color .2s ease,background .25s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;display:block" style-hover="border-color:#ffd9c4;transform:translateY(-8px);box-shadow:0 20px 40px rgba(165,25,21,.16);background:#fffdf5">
         <div style="width:56px;height:56px;border-radius:13px;background:#fdeadf;display:flex;align-items:center;justify-content:center;overflow:hidden">
@@ -235,7 +291,7 @@
 
 <!-- TRANSPORT -->
 <section id="transport" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
-  <div style="max-width:1280px;margin:0 auto;padding:64px 28px;display:grid;grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center">
+  <div class="wrap g g-split3" style="padding-top:64px;padding-bottom:64px">
     <div>
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Transport</div>
       <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:36px;line-height:1.12;color:#a51915;margin:12px 0 0">Safe rides, every route.</h2>
@@ -245,14 +301,14 @@
 </section>
 
 <!-- NEWS ROOM -->
-<section id="news" style="max-width:1280px;margin:0 auto;padding:78px 28px;scroll-margin-top:110px">
+<section id="news" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
     <div>
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">News Room</div>
-      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Latest &amp; upcoming</h2>
+      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Latest &amp; upcoming</h2>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+  <div class="g g-3">
     <sc-for list="{{ news }}" as="n" hint-placeholder-count="3">
       <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;overflow:hidden">
         <div style="height:120px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px)"></div>
@@ -268,15 +324,15 @@
 
 <!-- GALLERY -->
 <section id="gallery" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
-  <div style="max-width:1280px;margin:0 auto;padding:74px 28px">
+  <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
       <div>
         <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Gallery</div>
-        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;color:#a51915;margin:12px 0 0">Life in pictures</h2>
+        <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Life in pictures</h2>
       </div>
       <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">more photos coming soon</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+    <div class="g g-4">
       <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
       <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
       <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
@@ -289,11 +345,11 @@
 
 <!-- ADMISSIONS -->
 <section id="admissions" style="background:#a51915;color:#fff;scroll-margin-top:110px">
-  <div style="max-width:1280px;margin:0 auto;padding:78px 28px">
-    <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start">
+  <div class="wrap" style="padding-top:78px;padding-bottom:78px">
+    <div class="g g-splitS">
       <div>
         <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Admissions 2026–27</div>
-        <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:40px;line-height:1.1;margin:12px 0 0">The admission procedure</h2>
+        <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;margin:12px 0 0">The admission procedure</h2>
         <div style="display:flex;flex-direction:column;gap:16px;margin-top:26px">
           <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;gap:16px;align-items:flex-start">
@@ -331,8 +387,8 @@
 
 <!-- FOOTER -->
 <footer style="background:#7f120f;color:#f4ddd2">
-  <div style="max-width:1280px;margin:0 auto;padding:60px 28px 30px">
-    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px">
+  <div class="wrap" style="padding-top:60px;padding-bottom:30px">
+    <div class="g g-foot">
       <div>
         <div style="display:flex;align-items:center;gap:14px">
           <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
@@ -541,7 +597,7 @@ class Component extends DCLogic {
         { tag: "02", title: "Pre-Primary Program", desc: "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
         { tag: "03", title: "Primary School", desc: "Foundational years building strong literacy, numeracy and enquiry habits through guided, hands-on learning." },
         { tag: "04", title: "Secondary School", desc: "A structured programme focused on holistic development through academics, activities and character." },
-        { tag: "05", title: "Lower & Primary", desc: "Foundational programs building strong literacy, numeracy and enquiry habits under the Cambridge pathway." },
+        { tag: "05", title: "Lower & Primary", desc: "Foundational programs building strong literacy, numeracy and enquiry habits." },
         { tag: "06", title: "Assessment Policy", desc: "A well-defined framework of continuous formative and summative assessment that promotes academic growth." },
       ],
       life: [

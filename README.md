@@ -21,6 +21,19 @@ Both branch pages use the same layout/structure and the same red palette:
 `#a51915` primary · `#7f120f` dark · `#e8541b` orange accent · `#ffd9c4` peach ·
 warm greys (`#26201d`, `#4a423c`, `#6b615b`, `#fbf3f2`).
 
+### Layout system
+Each page's `<style>` block holds a small layout system near the bottom, followed
+by its breakpoints. Layout lives in classes; typography and colour stay inline.
+
+- `.wrap` — page gutter (1240px on `index.html`, 1280px on the branch/sub pages)
+- `.g` + a modifier — every grid (`.g-2`, `.g-3`, `.g-4`, `.g-hero`, `.g-split*`, `.g-foot`)
+- `.h-hero` / `.h-1` / `.h-2` — headings that scale down at each breakpoint
+
+Breakpoints: **1024px** (tablet — splits collapse to one column), **720px**
+(phone — grids go single-column, nav/top bar stack), **520px** and **420px**
+(narrow phones). Adding a section? Reuse a `.g-*` class and it is responsive for
+free — avoid new inline `grid-template-columns`, which no media query can override.
+
 ## ⚠️ Placeholders awaiting real data
 The public internet has no reliable information on these schools, so every
 uncertain fact was deliberately left blank rather than guessed. Search for these:
@@ -32,7 +45,9 @@ uncertain fact was deliberately left blank rather than guessed. Search for these
 - **Founding history / timeline** — the "Our Approach" section replaced a fabricated
   timeline; add real history when available
 - **Curriculum & grades** — pages say generic "Primary School" / "Secondary School";
-  replace with the actual boards and grade ranges offered at each branch
+  replace with the actual boards and grade ranges offered at each branch.
+  (A stray "under the Cambridge pathway" survived the first scrub on both branch
+  pages and has since been removed — no board is claimed anywhere now.)
 - **Affiliations** — placeholder note only
 - **Photography** — striped tiles (gallery, news, hero) await real photos
 - **Logos** — `assets/` still holds the logos copied from the source project;
@@ -41,9 +56,11 @@ uncertain fact was deliberately left blank rather than guessed. Search for these
 ## Before go-live
 1. **Forms** are front-end only (button flips to "✓ Enquiry received").
    Point them at a real endpoint (Formspree / Google Form / CRM / email).
-2. **Mobile** — layout is desktop-first (~1240–1280px grids). Test on phones and
-   add breakpoints as a fast follow.
-3. Serve over HTTPS (enable "Enforce HTTPS" in GitHub Pages once the cert issues).
+2. Serve over HTTPS (enable "Enforce HTTPS" in GitHub Pages once the cert issues).
+
+_Mobile breakpoints are in place — see “Layout system” above. Verified at 390px,
+768px and 1440px; no horizontal overflow on any page. Worth a pass on a real
+handset once there is real content (long school names, photos) to test with._
 
 ## DNS (domain currently at Squarespace)
 Keep the domain registered at Squarespace; change only the DNS records:
