@@ -1,4 +1,43 @@
 <!DOCTYPE html>
+<!--
+  MSC LANDING PAGE  (msceducation.net/)
+  =====================================
+  The Montessori School Committee group page. It introduces the committee and
+  hands off to the two branch sites: montessori-acamp.html and
+  montessori-vidyanagar.html.
+
+  HOW EVERY PAGE IN THIS PROJECT IS BUILT
+  =======================================
+  There is no build step and no server. Each page is one self-contained file
+  rendered in the browser by support.js, and always has the same three parts:
+
+    1. <helmet>   Google Fonts, the page stylesheet and cursor.js. Its children
+                  are lifted into <head> when the runtime boots.
+
+    2. <x-dc>     the markup template. Ordinary HTML plus four extras:
+                    {{ expr }}    a hole, filled from renderVals() in part 3
+                    <sc-for>      repeat the children once per array element
+                    <sc-if>       render the children only if value is truthy
+                    style-hover   a genuine :hover rule (inline style cannot
+                                  express one, so the runtime compiles this
+                                  attribute into a real generated CSS class)
+
+    3. <script type="text/x-dc" data-dc-script>
+                  the page logic: a single `class Component extends DCLogic`
+                  whose renderVals() returns the flat object that every
+                  {{ hole }} above is resolved against.
+
+  The {{ }} language is deliberately tiny: property paths, string / number /
+  boolean literals, `!`, and the equality operators. No function calls, no
+  arithmetic. Anything more involved is computed in renderVals() and exposed
+  under a single name.
+
+  hint-placeholder-count / hint-placeholder-val are hints for the authoring
+  tool's streaming preview only. They have no effect on the deployed site.
+
+  Note: support.js is a generated vendor bundle (see its first line) and is not
+  edited by hand.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,15 +45,24 @@
 <title>Montessori Schools, Kurnool | Montessori School Committee</title>
 <meta name="description" content="Montessori School Committee runs two branches in Kurnool, Andhra Pradesh — Montessori School A-Camp and Montessori School Vidyanagar. Admissions open.">
 <link rel="icon" type="image/png" href="assets/group-logo.png">
+<!-- The template runtime. Must load before the page renders: it finds the
+     <x-dc> block below, compiles it, and swaps it for the live markup. -->
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
+<!-- Everything in <helmet> is moved into <head> at boot: fonts first, then
+     the page stylesheet, then the shared custom-cursor script. -->
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
 <style>
+  /* Base reset and page defaults. The palette is the shared MSC red set:
+     #a51915 primary, #7f120f dark, #e8541b orange accent, #ffd9c4 peach,
+     warm greys #26201d / #4a423c / #6b615b / #fbf3f2. This landing page is the
+     only one using the Cormorant Garamond + Hanken Grotesk pairing; the branch
+     pages use Quicksand + Nunito. */
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:#ffffff;color:#26201d;font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -23,34 +71,54 @@
   a.link-accent:hover{color:#26201d}
   ::selection{background:#a51915;color:#fff}
   img{display:block;max-width:100%}
+
+  /* Entrance animations. riseIn / fadeIn are applied inline on hero elements
+     with a stagger delay; the scroll-triggered reveals further down the page
+     use the [data-reveal] mechanism in the logic block instead. */
   @keyframes riseIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  /* floatChip is currently unused: it is left here for the floating hero chip
+     that will return once real campus photography replaces the placeholder. */
   @keyframes floatChip{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 
-  /* ===== Layout system (desktop-first; breakpoints at the bottom) ===== */
+  /* ===== Layout system (desktop-first; breakpoints at the bottom) =====
+     Typography and colour stay inline on each element, but anything that has
+     to CHANGE at a breakpoint lives in a class here. That split matters: a
+     media query cannot override an inline grid-template-columns, so a section
+     that hard-codes its columns inline can never go single-column on a phone.
+     Adding a section? Reuse one of the .g-* classes below and it is responsive
+     for free. */
+
+  /* Page gutter. Every full-width section wraps its contents in .wrap so all
+     content lines up on one 1240px column. (The branch pages use 1280px.) */
   .wrap{max-width:1240px;margin:0 auto;padding-left:32px;padding-right:32px}
   /* nothing should force the page wider than the viewport */
   img,svg,video{max-width:100%}
   h1,h2,h3,h4,p,a,span,div{overflow-wrap:break-word}
 
+  /* Grids. .g turns the element into a grid; the modifier picks the shape.
+     .g-hero / .g-split / .g-cta are two-column asymmetric splits that collapse
+     at 1024px; .g-2/3/4 are the even card grids that collapse at 720px. */
   .g{display:grid}
-  .g-hero{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}
-  .g-split{grid-template-columns:.9fr 1.1fr;gap:60px}
-  .g-cta{grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
-  .g-2{grid-template-columns:repeat(2,1fr);gap:20px}
-  .g-3{grid-template-columns:repeat(3,1fr);gap:18px}
-  .g-4{grid-template-columns:repeat(4,1fr);gap:24px}
-  .g-foot{grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}
+  .g-hero{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}   /* headline + portrait */
+  .g-split{grid-template-columns:.9fr 1.1fr;gap:60px}                        /* "Our Approach" copy + list */
+  .g-cta{grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}       /* admissions copy + form */
+  .g-2{grid-template-columns:repeat(2,1fr);gap:20px}                         /* the two branch cards */
+  .g-3{grid-template-columns:repeat(3,1fr);gap:18px}                         /* facility cards */
+  .g-4{grid-template-columns:repeat(4,1fr);gap:24px}                         /* hero stat strip */
+  .g-foot{grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}                  /* footer columns */
 
   .row{display:flex;align-items:center}
-  .row-btns{gap:14px;margin-top:34px}
+  .row-btns{gap:14px;margin-top:34px}          /* hero button pair; stacks on phones */
   .sec-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:18px;margin-bottom:36px}
 
+  /* Headings scale down at each breakpoint, so their size must be a class
+     rather than an inline font-size. */
   .h-hero{font-size:72px}
   .h-1{font-size:46px}
   .h-2{font-size:44px}
 
-  /* ===== Tablet ===== */
+  /* ===== Tablet: the asymmetric splits collapse to a single column ===== */
   @media (max-width:1024px){
     .wrap{padding-left:24px;padding-right:24px}
     .g-hero,.g-split,.g-cta{grid-template-columns:1fr;gap:40px}
@@ -61,7 +129,7 @@
     .h-2{font-size:36px}
   }
 
-  /* ===== Phone ===== */
+  /* ===== Phone: card grids go single-column, nav and top bar stack ===== */
   @media (max-width:720px){
     .wrap{padding-left:18px;padding-right:18px}
     .g-2,.g-3{grid-template-columns:1fr}
@@ -82,10 +150,12 @@
     .h-hero br::after,.h-1 br::after,.h-2 br::after{content:" "}
   }
 
+  /* ===== Narrow phones: the 4-up stat strip finally gives up its columns ==== */
   @media (max-width:520px){
     .g-4{grid-template-columns:1fr;gap:22px}
   }
 
+  /* ===== Smallest phones: one more step down for the display headings ===== */
   @media (max-width:420px){
     .h-hero{font-size:34px}
     .h-1{font-size:27px}
@@ -95,9 +165,15 @@
 <script src="cursor.js"></script>
 </helmet>
 
+<!-- Outer clip. Hero animations translate elements horizontally before they
+     settle, and without this the transient overflow would give the whole page
+     a horizontal scrollbar on small screens. -->
 <div style="max-width:100%;overflow:hidden">
 
-<!-- ============ TOP UTILITY BAR ============ -->
+<!-- ============ TOP UTILITY BAR ============
+     Thin red strip above the nav: location line on the left, phone number and
+     enquiry link on the right. The phone number is a placeholder awaiting the
+     real number (see README). Both links jump to the admissions form below. -->
 <div style="background:#a51915;color:#f6e3d8;font-size:12.5px;letter-spacing:.02em">
   <div class="wrap util-bar" style="padding-top:9px;padding-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
     <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Two branches · Kurnool, Andhra Pradesh</span>
@@ -108,7 +184,11 @@
   </div>
 </div>
 
-<!-- ============ NAV ============ -->
+<!-- ============ NAV ============
+     Sticky translucent header. ref="{{ navRef }}" hands the real DOM node to
+     the logic block, which adds a drop shadow once the page is scrolled.
+     The nav links are in-page anchors; the two branch sites are reached from
+     the cards further down and from the footer. -->
 <header ref="{{ navRef }}" style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(38,32,29,.1);transition:box-shadow .3s ease">
   <nav class="wrap nav-bar" style="padding-top:13px;padding-bottom:13px;display:flex;align-items:center;justify-content:space-between;gap:24px">
     <a href="index.html" style="display:flex;align-items:center;gap:13px">
@@ -127,7 +207,13 @@
   </nav>
 </header>
 
-<!-- ============ HERO ============ -->
+<!-- ============ HERO ============
+     Headline and portrait side by side (.g-hero), followed by a four-up strip
+     of statistics driven by the `stats` array in renderVals().
+     The portrait <img> is a 1x1 transparent GIF standing in for real
+     photography; the peach box around it is what you actually see today.
+     The stat tiles carry data-reveal, so they fade in when scrolled into view
+     rather than on load like the headline above them. -->
 <section id="top" class="wrap" style="position:relative;padding-top:74px;padding-bottom:56px">
   <div class="g g-hero">
     <div>
@@ -165,7 +251,12 @@
   </div>
 </section>
 
-<!-- ============ OUR APPROACH ============ -->
+<!-- ============ OUR APPROACH ============
+     Statement of the Montessori method, with a vertical rule of points fed by
+     the `timeline` array. Despite the variable name these are themed points
+     (Approach / Culture / Values / Consistency), not dates: this section
+     replaced an earlier fabricated founding timeline and stays deliberately
+     date-free until the real history is supplied. -->
 <section id="legacy" style="background:#faf5f1;border-top:1px solid rgba(38,32,29,.07);border-bottom:1px solid rgba(38,32,29,.07)">
   <div class="wrap g g-split" style="padding-top:80px;padding-bottom:80px">
     <div>
@@ -193,7 +284,11 @@
   </div>
 </section>
 
-<!-- ============ SCHOOLS OVERVIEW ============ -->
+<!-- ============ SCHOOLS OVERVIEW ============
+     The two branch cards, and the main route into the branch sites. Each card
+     is one entry in the `schools` array; sc.page is the destination file and
+     sc.accent / sc.ink / sc.ink2 colour the card, so a third branch would be
+     added by appending to that array rather than by copying markup. -->
 <section id="schools" class="wrap" style="padding-top:86px;padding-bottom:30px">
   <div style="text-align:center;max-width:640px;margin:0 auto 48px">
     <div style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">Two Branches</div>
@@ -219,7 +314,11 @@
   </div>
 </section>
 
-<!-- ============ CAMPUS / FACILITIES ============ -->
+<!-- ============ CAMPUS / FACILITIES ============
+     Six facility cards from the `facilities` array. Each f.icon is currently a
+     1x1 transparent GIF placeholder, so the icon tiles render as empty rounded
+     squares until real icons are supplied. Unlike the branch pages, these
+     cards do not link anywhere: the group site has no detail pages. -->
 <section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px">
   <div class="sec-head">
     <div>
@@ -241,7 +340,13 @@
   </div>
 </section>
 
-<!-- ============ ADMISSIONS CTA ============ -->
+<!-- ============ ADMISSIONS CTA ============
+     Enquiry form. Each field is controlled: value reads from form.* and
+     onInput/onChange writes back through the setters in renderVals(), so the
+     component owns the text rather than the DOM.
+     IMPORTANT: this form is front-end only. Submitting flips the button label
+     to "Enquiry received" and nothing is sent anywhere. Wire `submit` to a
+     real endpoint (Formspree / Google Form / CRM) before go-live. -->
 <section id="admissions" class="wrap" style="padding-top:84px;padding-bottom:84px">
   <div class="g g-cta cta-box" style="background:#faf5f1;border:1px solid rgba(38,32,29,.1);border-radius:20px;padding:54px">
     <div>
@@ -269,7 +374,12 @@
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
+<!-- ============ FOOTER ============
+     Four columns (.g-foot): address and email, the two branch links, in-page
+     links, then social. The address and the social hrefs are placeholders.
+     Every link here uses style-hover to grow an underline, which is why the
+     background-image/background-size pair appears on each one: it is an
+     animatable underline that a plain text-decoration cannot do. -->
 <footer style="background:#7f120f;color:#c9c1ba">
   <div class="wrap" style="padding-top:60px;padding-bottom:30px">
     <div class="g g-foot">
@@ -315,13 +425,39 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+/*
+  PAGE LOGIC
+  ==========
+  One class per page, always named `Component`, always extending DCLogic. The
+  runtime instantiates it, calls the React-style lifecycle hooks below, and
+  re-renders the template whenever setState() runs.
+
+  The contract is renderVals(): whatever object it returns becomes the set of
+  names the {{ }} holes in the template can see. Anything the markup needs —
+  data, styles, event handlers, refs — has to be returned from there.
+
+  This page's logic does four things:
+    1. holds the enquiry form state,
+    2. reveals [data-reveal] elements as they scroll into view,
+    3. shadows the nav once the page is scrolled,
+    4. attaches the pointer effects to [data-btn] and [data-card] elements.
+*/
 class Component extends DCLogic {
+  // The only real state on this page. `form` backs the controlled inputs in
+  // the admissions section; `submitted` just swaps the button label, since
+  // there is no submission endpoint yet.
   state = {
     form: { name: "", phone: "", school: "Montessori School, A-Camp" },
     submitted: false,
   };
 
   componentDidMount() {
+    // ---- Scroll reveal ----
+    // Anything marked [data-reveal] starts transparent and nudged down (set
+    // inline in the template) and is released the first time it enters the
+    // viewport. Siblings are staggered 80ms apart so a row of cards arrives in
+    // sequence rather than all at once, and each element is unobserved after
+    // firing so it never replays on scroll-back.
     const els = document.querySelectorAll("[data-reveal]");
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -339,6 +475,10 @@ class Component extends DCLogic {
     els.forEach((el) => io.observe(el));
     this._io = io;
 
+    // ---- Nav shadow ----
+    // this._navEl was captured by the navRef callback returned from
+    // renderVals(). The header is translucent, so it needs a shadow to lift
+    // off the content once the page scrolls under it.
     const nav = this._navEl;
     if (nav) {
       const onScroll = () => {
@@ -348,6 +488,8 @@ class Component extends DCLogic {
       this._onScroll = onScroll;
     }
 
+    // Expand a #rgb or #rrggbb string into an rgba() string, so the ripple
+    // below can reuse a button's solid data-glow colour at partial opacity.
     const hexToRgba = (hex, a) => {
       const h = hex.replace("#", "");
       const f = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
@@ -356,24 +498,39 @@ class Component extends DCLogic {
     };
 
     // ---- Buttons: color grow-from-cursor + click ripple + press ----
+    // Opt in by putting data-btn on any element in the template. Optional:
+    //   data-glow="#hex"  colour of the fill and ripple (default orange)
+    //   data-ink="#hex"   text colour to switch to while hovered, for buttons
+    //                     whose fill would otherwise swallow their own label
+    // Note [data-btn] is also part of the selector cursor.js watches, so these
+    // elements additionally collapse the pen cursor into a dot.
     document.querySelectorAll("[data-btn]").forEach((btn) => {
       const glowColor = btn.getAttribute("data-glow") || "#e8541b";
       const inkHover = btn.getAttribute("data-ink");
+      // The glow and ripple are absolutely positioned children, so the button
+      // must be a positioning context and must clip them to its own rounding.
       if (getComputedStyle(btn).position === "static") btn.style.position = "relative";
       btn.style.overflow = "hidden";
       const baseColor = btn.style.color;
       btn.style.transition = (btn.style.transition ? btn.style.transition + "," : "") + "transform .16s ease, box-shadow .28s ease, color .3s ease";
 
+      // Rehome the label into a stacking-context span so it stays above the
+      // glow and ripple layers that get inserted behind it.
       const inner = document.createElement("span");
       inner.style.cssText = "position:relative;z-index:2;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;height:100%";
       while (btn.firstChild) inner.appendChild(btn.firstChild);
       btn.appendChild(inner);
 
+      // The glow: a dot parked at the cursor that scales up to flood the
+      // button on enter and shrinks back out on leave.
       const glow = document.createElement("span");
       glow.style.cssText = "position:absolute;top:0;left:0;width:18px;height:18px;border-radius:50%;background:" + glowColor + ";pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(0);transition:transform 1.05s cubic-bezier(.22,1,.36,1),opacity .5s ease;z-index:0";
       btn.insertBefore(glow, inner);
 
+      // How far the 18px dot must scale to cover the whole button, plus margin.
       const scaleFor = () => Math.max(btn.offsetWidth, btn.offsetHeight) / 9 + 1.4;
+      // Keep the glow under the cursor: the fill then appears to grow from
+      // wherever the pointer entered rather than from a fixed point.
       const move = (e) => {
         const r = btn.getBoundingClientRect();
         glow.style.left = (e.clientX - r.left) + "px";
@@ -391,6 +548,8 @@ class Component extends DCLogic {
         glow.style.transform = "translate(-50%,-50%) scale(0)";
         if (inkHover) btn.style.color = baseColor;
       });
+      // Press: shrink slightly, and spawn a one-shot ripple from the click
+      // point that expands and fades. It removes itself after the animation.
       btn.addEventListener("pointerdown", (e) => {
         btn.style.transform = "scale(.96)";
         const r = btn.getBoundingClientRect();
@@ -407,11 +566,16 @@ class Component extends DCLogic {
     });
 
     // ---- Cards: cursor spotlight + lift/shadow + press ----
+    // Opt in with data-card. Optional data-spot overrides the spotlight tint;
+    // supplying it is also taken as "this card sits on a dark background", so
+    // the hover shadow is deepened to stay visible.
     document.querySelectorAll("[data-card]").forEach((card) => {
       const tint = card.getAttribute("data-spot") || "rgba(165,25,21,.1)";
       if (getComputedStyle(card).position === "static") card.style.position = "relative";
       card.style.transition = (card.style.transition ? card.style.transition + "," : "") + "box-shadow .3s ease, transform .35s cubic-bezier(.22,1,.36,1), border-color .3s ease";
 
+      // A full-bleed overlay holding a radial gradient that is re-aimed at the
+      // cursor on every pointermove, giving a soft spotlight that follows it.
       const spot = document.createElement("span");
       spot.style.cssText = "position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .35s ease;z-index:1;border-radius:inherit;background:radial-gradient(220px circle at 50% 0%," + tint + ",transparent 60%)";
       card.appendChild(spot);
@@ -445,35 +609,61 @@ class Component extends DCLogic {
     if (prev.cursorType !== this.props.cursorType) this.applyCursor();
   }
 
+  // Choose the custom cursor style (implemented in cursor.js). cursorType is a
+  // prop the authoring tool can set; on the deployed static site no props are
+  // supplied, so this always resolves to the default pen.
   applyCursor() {
     if (window.MonteCursor) window.MonteCursor.set(this.props.cursorType ?? "Pen (ink)");
   }
 
+  // Release the observer and the scroll listener. Both outlive the component
+  // otherwise, since they were attached to global objects rather than to the
+  // rendered tree. (The per-element pointer listeners added above die with
+  // their elements, so they need no cleanup here.)
   componentWillUnmount() {
     if (this._io) this._io.disconnect();
     if (this._onScroll) window.removeEventListener("scroll", this._onScroll);
   }
 
+  // Everything the template can see. Note it is rebuilt on every render, so
+  // the arrays below are effectively the page's content source: to change the
+  // copy on this page, edit these, not the markup.
   renderVals() {
+    // Field setter factory: set("phone") returns the onInput handler that
+    // writes into form.phone. Used for all three inputs in the enquiry form.
     const set = (k) => (e) => this.setState({ form: { ...this.state.form, [k]: e.target.value } });
     return {
+      // ref callback: the runtime passes the real <header> node here, and the
+      // scroll handler in componentDidMount needs it to set the shadow.
       navRef: (el) => { this._navEl = el; },
+
+      // Hero stat strip. Deliberately non-numeric placeholders: no verified
+      // enrolment or founding figures exist for these schools yet, so nothing
+      // is invented here. Replace with real numbers when they are confirmed.
       stats: [
         { n: "2", label: "Branches in Kurnool" },
         { n: "A-Camp", label: "Branch one" },
         { n: "Vidyanagar", label: "Branch two" },
         { n: "TBD", label: "Details coming soon" },
       ],
+      // "Our Approach" points. `y` is the label on the left of each marker and
+      // `t` the sentence beside it. These replaced a fabricated year-by-year
+      // history; keep them undated until the real founding story is available.
       timeline: [
         { y: "Approach", t: "Child-centred learning — every child works at their own pace in a prepared environment." },
         { y: "Culture", t: "Learning without fear, built on empathy, discipline and respect." },
         { y: "Values", t: "Values-first education that shapes character alongside academics." },
         { y: "Consistency", t: "Two branches, one standard — the same care and method at both campuses." },
       ],
+      // The two branch cards. `page` is the branch site each card opens;
+      // accent/ink/ink2 are the card's fill, badge text and accent colours.
+      // Both descriptions are holding copy pending real branch details.
       schools: [
         { tag: "01", accent: "#a51915", ink: "#fff", ink2: "#a51915", page: "montessori-acamp.html", kicker: "Branch · Kurnool", name: "Montessori School, A-Camp", short: "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", imgLabel: "a-camp campus — photo" },
         { tag: "02", accent: "#a51915", ink: "#fff", ink2: "#a51915", page: "montessori-vidyanagar.html", kicker: "Branch · Kurnool", name: "Montessori School, Vidyanagar", short: "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", imgLabel: "vidyanagar campus — photo" },
       ],
+      // Facility cards. Every `icon` is the same 1x1 transparent GIF standing
+      // in for a real icon, so the icon wells currently render blank.
       facilities: [
         { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Classrooms", desc: "Child-centred classrooms designed for hands-on, self-paced learning." },
         { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Library", desc: "A quiet space for reading and independent exploration." },
@@ -482,11 +672,15 @@ class Component extends DCLogic {
         { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Arts & Music", desc: "Creative outlets that build confidence and self-expression." },
         { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Care & Well-being", desc: "Attentive, supportive care for every child throughout the school day." },
       ],
+      // ---- Enquiry form wiring ----
+      // form.* feeds the input values; the three setters write back on typing.
       form: this.state.form,
       onName: set("name"),
       onPhone: set("phone"),
       onSchool: set("school"),
       submitLabel: this.state.submitted ? "✓ Enquiry received" : "Send enquiry",
+      // Front-end only: this acknowledges the click and discards the input.
+      // Post form.* to a real endpoint here before the site goes live.
       submit: () => this.setState({ submitted: true }),
     };
   }

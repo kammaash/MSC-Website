@@ -1,4 +1,39 @@
 <!DOCTYPE html>
+<!--
+  BRANCH SITE: MONTESSORI SCHOOL, VIDYANAGAR
+  ==========================================
+  The full site for the Vidyanagar branch. Everything a visitor sees lives on
+  this one long scrolling page; the dropdown menus point either at a section of
+  this page (#academics) or at a detail page in vidyanagar-subpage.html
+  (#library).
+
+  TWIN FILE
+  =========
+  montessori-acamp.html is the same page for the other branch, and the two
+  are kept deliberately identical in structure: the only differences are the
+  school name, the hero copy, the localStorage key, and which subpage file and
+  sibling branch they link to. A change to the layout or logic here almost
+  certainly needs the same change there.
+
+  PAGE STRUCTURE
+  ==============
+  As with every page in this project (see index.html for the full explanation
+  of the runtime): <helmet> is lifted into <head>, <x-dc> is the markup
+  template with {{ }} holes, sc-for loops and sc-if conditionals, and the
+  data-dc-script block at the bottom holds the `Component` class whose
+  renderVals() supplies every value the template reads.
+
+  This page's interactive parts, in the order they appear:
+    - a branded loading screen that fades itself out after ~1.9s
+    - a sticky peach nav bar whose menus open on hover
+    - a floating "current page" pill that appears once you scroll past the nav
+      and tracks which section you are looking at
+    - the showcase video, which remembers its playback position
+    - an admissions enquiry form (front-end only, sends nothing)
+
+  Fonts here are Quicksand + Nunito, distinct from the landing page's
+  Cormorant Garamond + Hanken Grotesk, though the red palette is shared.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,15 +41,21 @@
 <title>Montessori School, Vidyanagar, Kurnool | Montessori Schools</title>
 <meta name="description" content="Montessori School, Vidyanagar, Kurnool — a branch of the Montessori Schools, Kurnool. Academics, school life, campus, transport and admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
+<!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
+<!-- Lifted into <head> at boot: fonts, the page stylesheet, the cursor. -->
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Base reset and page defaults. Shared MSC palette: #a51915 primary,
+     #7f120f dark, #e8541b orange accent, #ffd9c4 peach (the nav bar), warm
+     greys #26201d / #4a423c / #6b615b / #fbf3f2. Body copy is Nunito and all
+     headings are Quicksand, set once here rather than inline on each heading. */
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:#ffffff;color:#26201d;font-family:"Nunito",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -22,6 +63,10 @@
   h1,h2,h3,h4{font-family:"Quicksand",system-ui,sans-serif}
   ::selection{background:#a51915;color:#ffd9c4}
   img{display:block;max-width:100%}
+
+  /* Animations. riseIn/fadeIn are applied inline with staggered delays on the
+     hero; ddIn is the nav dropdown opening; the three loader* animations play
+     once on the loading screen and are never reused. */
   @keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   @keyframes ddIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -29,28 +74,43 @@
   @keyframes loaderBar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
   @keyframes wordFloat{from{opacity:0;letter-spacing:.05em}to{opacity:1;letter-spacing:.32em}}
 
-  /* ===== Layout system (desktop-first; breakpoints at the bottom) ===== */
+  /* ===== Layout system (desktop-first; breakpoints at the bottom) =====
+     Typography and colour stay inline on each element, but anything that must
+     CHANGE at a breakpoint lives in a class here. This matters: a media query
+     cannot override an inline grid-template-columns, so a section that
+     hard-codes its columns inline could never collapse on a phone. Adding a
+     section? Reuse a .g-* class below and it is responsive for free. */
+
+  /* Page gutter: one shared 1280px column that every section lines up to. */
   .wrap{max-width:1280px;margin:0 auto;padding-left:28px;padding-right:28px}
   img,svg,video{max-width:100%}
   h1,h2,h3,h4,p,a,span,div{overflow-wrap:break-word}
 
   .g{display:grid}
+  /* The hero is full-bleed rather than inside .wrap, so that the photo half
+     runs to the right edge of the screen. .g-hero-pad then re-creates the
+     gutter on the text half only: max() keeps the copy aligned with the rest
+     of the page on wide screens while never dropping below 28px on narrow
+     ones. That is why the hero does not simply use .wrap. */
   .g-hero{grid-template-columns:1fr 1fr;min-height:560px}
   .g-hero-pad{padding:70px 28px 70px max(28px,calc((100vw - 1280px)/2 + 28px))}
-  .g-2{grid-template-columns:1fr 1fr;gap:22px}
-  .g-2t{grid-template-columns:1fr 1fr;gap:16px}
-  .g-3{grid-template-columns:repeat(3,1fr);gap:20px}
-  .g-4{grid-template-columns:repeat(4,1fr);gap:12px}
-  .g-split{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}
-  .g-split2{grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}
-  .g-split3{grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center}
-  .g-splitS{grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
+  .g-2{grid-template-columns:1fr 1fr;gap:22px}          /* vision + core values */
+  .g-2t{grid-template-columns:1fr 1fr;gap:16px}         /* tighter: school-life and house pairs */
+  .g-3{grid-template-columns:repeat(3,1fr);gap:20px}    /* academics, facilities, news cards */
+  .g-4{grid-template-columns:repeat(4,1fr);gap:12px}    /* gallery mosaic */
+  /* Four asymmetric two-column splits, each tuned to its own content; all of
+     them collapse to a single column at 1024px. */
+  .g-split{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}   /* school life */
+  .g-split2{grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}    /* video showcase */
+  .g-split3{grid-template-columns:.8fr 1.2fr;gap:48px;align-items:center}    /* transport */
+  .g-splitS{grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}   /* admissions: top-aligned, not centred */
   .g-foot{grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
 
+  /* Headings scale down per breakpoint, so their size must be a class. */
   .h-hero{font-size:52px}
   .h-1{font-size:40px}
 
-  /* ===== Tablet ===== */
+  /* ===== Tablet: hero and every split collapse to one column ===== */
   @media (max-width:1024px){
     .wrap{padding-left:22px;padding-right:22px}
     .g-hero{grid-template-columns:1fr;min-height:0}
@@ -63,7 +123,7 @@
     .h-1{font-size:32px}
   }
 
-  /* ===== Phone ===== */
+  /* ===== Phone: card grids go single-column; top bar and nav stack ===== */
   @media (max-width:720px){
     .wrap{padding-left:18px;padding-right:18px}
     .g-hero-pad{padding:44px 18px}
@@ -81,6 +141,7 @@
     .h-hero br::after,.h-1 br::after{content:" "}
   }
 
+  /* ===== Narrow phones: the gallery mosaic finally goes single file ===== */
   @media (max-width:520px){
     .g-4{grid-template-columns:1fr}
   }
@@ -90,7 +151,11 @@
 
 <div style="max-width:100%;overflow:hidden">
 
-<!-- LOADING SCREEN -->
+<!-- LOADING SCREEN
+     Full-screen red splash with the logo, shown while the fonts and runtime
+     settle. It is not tied to any real loading signal: the logic block simply
+     fades it at 1250ms and hides it at 1900ms. Because it is removed on a
+     timer, a slow connection can still reveal an unstyled moment behind it. -->
 <div ref="{{ loaderRef }}" style="position:fixed;inset:0;z-index:9998;background:#a51915;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease">
   <span style="display:block;background:#fff;border:4px solid #e8541b;border-radius:12px;padding:8px;line-height:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:loaderPop .9s cubic-bezier(.2,.8,.2,1) both">
     <img src="assets/monte-logo.png" alt="Montessori" style="height:96px;width:auto;display:block">
@@ -101,7 +166,11 @@
   </div>
 </div>
 
-<!-- TOP BAR -->
+<!-- TOP BAR
+     White band above the nav: logo and school name on the left, phone number
+     on the right (a placeholder awaiting the real number). It scrolls away
+     normally; only the peach nav below it sticks. On phones the two halves
+     stack, via .top-bar in the stylesheet. -->
 <div style="background:#fff;border-bottom:1px solid #f3e6e2">
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="#top" style="display:flex;align-items:center;gap:18px">
@@ -120,7 +189,15 @@
   </div>
 </div>
 
-<!-- YELLOW NAV WITH DROPDOWNS -->
+<!-- YELLOW NAV WITH DROPDOWNS
+     The main navigation, built entirely from the `menus` array in renderVals()
+     rather than hand-written markup: one entry per top-level item, each with
+     its own list of dropdown links. Menus open on hover (onMouseEnter sets
+     openMenu to that index) and there is no click or keyboard affordance, so
+     the dropdowns are effectively desktop-only.
+     The bar sticks to the top of the viewport; ref="{{ navRef }}" hands the
+     element to the logic block, which measures it to decide when to show the
+     floating pill below. -->
 <header ref="{{ navRef }}" style="{{ navHeaderStyle }}">
   <nav style="{{ navBarStyle }}">
     <div style="{{ menuRowStyle }}">
@@ -140,7 +217,13 @@
   </nav>
 </header>
 
-<!-- FLOATING CURRENT-PAGE PILL (appears after scrolling past the nav) -->
+<!-- FLOATING CURRENT-PAGE PILL (appears after scrolling past the nav)
+     A compact replacement for the nav once it has scrolled out of view. It
+     names the section you are currently in (the scrollspy in componentDidMount
+     keeps `currentTab` up to date) and expands on hover to offer that
+     section's dropdown links. All of its styles are computed in renderVals()
+     as pill*Style objects, because they depend on state the stylesheet cannot
+     see: whether it is expanded, and how many items it has to grow to fit. -->
 <sc-if value="{{ showPill }}" hint-placeholder-val="{{ false }}">
   <div onMouseEnter="{{ pillEnter }}" onMouseLeave="{{ pillLeave }}" style="{{ pillWrapStyle }}">
     <div style="{{ pillCardStyle }}">
@@ -157,7 +240,12 @@
   </div>
 </sc-if>
 
-<!-- HERO -->
+<!-- HERO
+     Full-bleed two-column band: introduction on the left, photo on the right
+     with a quotation banner across its top. The <img> is a 1x1 transparent GIF
+     placeholder, so today the right half shows the quote over a flat peach
+     panel. The hero copy is the one substantial piece of branch-specific text
+     on the page and is genuinely different in the A-Camp twin. -->
 <section id="top" class="g g-hero">
   <div class="g-hero-pad" style="display:flex;flex-direction:column;justify-content:center">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
@@ -177,7 +265,12 @@
   </div>
 </section>
 
-<!-- ABOUT / EXCEL + VISION -->
+<!-- ABOUT / EXCEL + VISION
+     Static section (no template data): the "Explore, Experience and Excel"
+     statement, then the vision card and the core-values card side by side.
+     scroll-margin-top:110px appears on this and every other anchored section
+     so that jumping to #about does not park the heading underneath the sticky
+     nav bar. -->
 <section id="about" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:760px;margin:0 auto">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">About Us</div>
@@ -203,7 +296,11 @@
   </div>
 </section>
 
-<!-- ACADEMICS -->
+<!-- ACADEMICS
+     Six cards from the `academics` array. These describe programmes in general
+     terms only: no board, affiliation or grade range is claimed anywhere on
+     this site, because none has been confirmed. Add those to the array copy
+     once the real curriculum details are available. -->
 <section id="academics" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="text-align:center;max-width:620px;margin:0 auto 40px">
@@ -222,7 +319,10 @@
   </div>
 </section>
 
-<!-- SCHOOL LIFE -->
+<!-- SCHOOL LIFE
+     Left: four short points from the `life` array. Right: the four houses,
+     hard-coded here rather than driven by an array because each has its own
+     fixed swatch colour and the set does not change. -->
 <section id="life" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div class="g g-split">
     <div>
@@ -251,7 +351,11 @@
   </div>
 </section>
 
-<!-- STUDENT SHOWCASE / VIDEO -->
+<!-- STUDENT SHOWCASE / VIDEO
+     The <video> has no src yet, so it currently renders as an empty black
+     player. ref="{{ videoRef }}" gives the logic block the element so it can
+     save and restore the playback position across visits. Add the film by
+     giving this element a src (or a <source> child). -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
@@ -265,7 +369,13 @@
   </div>
 </section>
 
-<!-- CAMPUS & FACILITIES -->
+<!-- CAMPUS & FACILITIES
+     Six linked cards from `facilities`, each opening its detail page in
+     vidyanagar-subpage.html, followed by a row of plain text chips from
+     `facilityChips` for the facilities that have no page of their own. The
+     card icons are transparent-GIF placeholders, so the icon wells are blank.
+     Unlike the landing page, hover here is pure CSS via style-hover; this page
+     has no data-btn/data-card JavaScript effects. -->
 <section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:620px;margin:0 auto 40px">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Campus &amp; Facilities</div>
@@ -289,7 +399,9 @@
   </div>
 </section>
 
-<!-- TRANSPORT -->
+<!-- TRANSPORT
+     Short static section. The stop-by-stop routes it refers to live on the
+     subpage at #transport, and have not been supplied yet. -->
 <section id="transport" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap g g-split3" style="padding-top:64px;padding-bottom:64px">
     <div>
@@ -300,7 +412,10 @@
   </div>
 </section>
 
-<!-- NEWS ROOM -->
+<!-- NEWS ROOM
+     Three cards from the `news` array. The illustrative items here are sample
+     copy, not real announcements, and the striped block at the top of each
+     card is a placeholder standing in for a photograph. -->
 <section id="news" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
     <div>
@@ -322,7 +437,11 @@
   </div>
 </section>
 
-<!-- GALLERY -->
+<!-- GALLERY
+     A fixed mosaic: two wide tiles spanning two columns each, with four square
+     tiles between them. Written out by hand rather than looped because the
+     span pattern is part of the design. Every tile is a diagonal-stripe
+     placeholder awaiting real photography. -->
 <section id="gallery" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
@@ -343,7 +462,13 @@
   </div>
 </section>
 
-<!-- ADMISSIONS -->
+<!-- ADMISSIONS
+     Left: the four-step procedure from the `steps` array. Right: the enquiry
+     form, whose fields are controlled by form.* in state.
+     IMPORTANT: the form is front-end only. Pressing the button just flips its
+     label to "Enquiry received"; nothing is transmitted or stored. Wire
+     `submit` to a real endpoint before go-live. The two buttons on the left
+     (brochure, fee) are likewise inert, linking back to this same section. -->
 <section id="admissions" style="background:#a51915;color:#fff;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:78px;padding-bottom:78px">
     <div class="g g-splitS">
@@ -385,7 +510,10 @@
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER
+     Four columns: identity and contact, in-page section links, quick links,
+     then the group column pointing at the landing page and the sibling branch.
+     Address, phone numbers and email are all placeholders. -->
 <footer style="background:#7f120f;color:#f4ddd2">
   <div class="wrap" style="padding-top:60px;padding-bottom:30px">
     <div class="g g-foot">
@@ -434,10 +562,35 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+/*
+  PAGE LOGIC
+  ==========
+  One class named `Component`, extending DCLogic. renderVals() at the bottom
+  returns the flat object every {{ }} hole in the template above reads from,
+  so it holds both this page's content (the academics/facilities/news arrays)
+  and its computed styles and handlers.
+
+  componentDidMount wires up four independent behaviours, in order:
+    1. scroll reveal for [data-reveal] cards
+    2. the showcase video's remembered playback position
+    3. the loading screen's timed fade-out
+    4. the scroll listener driving the nav state and the floating pill
+*/
 class Component extends DCLogic {
+  // openMenu     index of the open nav dropdown, or -1 for none
+  // navFixed     true once scrolled past the nav (shows the floating pill)
+  // pillExpanded true while hovering the pill, which opens its link list
+  // currentTab   label of the section currently in view, from the scrollspy
+  // form         the controlled admissions inputs
+  // submitted    swaps the button label; there is no submission endpoint yet
   state = { openMenu: -1, navFixed: false, pillExpanded: false, currentTab: "Home", form: { name: "", phone: "", track: "Pre-Primary Program", msg: "" }, submitted: false };
 
   componentDidMount() {
+    // ---- 1. Scroll reveal ----
+    // [data-reveal] elements start transparent and shifted down (set inline in
+    // the template) and are released when they first enter the viewport, with
+    // siblings staggered 70ms apart. Each is unobserved after firing so it
+    // never replays.
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
@@ -452,6 +605,10 @@ class Component extends DCLogic {
     document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
     this._io = io;
 
+    // ---- 2. Resume the showcase video where the visitor left off ----
+    // The position is written to localStorage on every timeupdate and restored
+    // on the next visit. The key is per branch, so the two branch pages do not
+    // overwrite each other's position.
     const v = this._videoEl;
     if (v) {
       const KEY = "msc_vidyanagar_video_pos";
@@ -461,7 +618,10 @@ class Component extends DCLogic {
       v.addEventListener("timeupdate", this._vSave);
     }
 
-    // loading screen fade-out
+    // ---- 3. Loading screen fade-out ----
+    // Purely time-based: fade at 1250ms, then remove from the layout at 1900ms
+    // once the opacity transition has finished. It is not waiting on any real
+    // load event.
     const loader = this._loaderEl;
     if (loader) {
       this._t1 = setTimeout(() => { loader.style.opacity = "0"; }, 1250);
@@ -470,24 +630,46 @@ class Component extends DCLogic {
 
     // custom cursor handled globally by cursor.js
 
-    // static → collapse-to-pill on scroll-past → expand on hover
+    // ---- 4. Nav state and scrollspy ----
+    // Drives two things at once: whether the floating pill is showing, and
+    // which section name it displays. static -> collapse-to-pill on
+    // scroll-past -> expand on hover.
     const header = this._navEl;
     if (header) {
+      // The nav is position:sticky, so offsetTop is still its natural position
+      // in the document, i.e. the height of the top bar above it. Once the
+      // page is scrolled past that point the nav is pinned and the pill shows.
       this._headerOffset = header.offsetTop;          // top-bar height, before it ever fixes
-      this._navH = header.offsetHeight || 52;
+      this._navH = header.offsetHeight || 52;         // measured but currently unused
+      // Section id -> the label the pill shows for it, in document order.
       const SPY = [["top","Home"],["about","About"],["academics","Academics"],["life","School Life"],["campus","Campus & Facilities"],["transport","Transport"],["gallery","Gallery"],["news","News Room"],["admissions","Admission"]];
       const apply = () => {
         const y = window.scrollY;
         const fixed = y > (this._headerOffset - 4);
+        // Walk the sections in order and keep the LAST one whose top has
+        // already crossed 140px (just under the nav). Because the list is in
+        // document order, the survivor is the section currently in view.
         let cur = "Home";
         for (const [id, label] of SPY) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= 140) cur = label; }
+        // Only call setState when something actually changed: this runs on
+        // every frame of every scroll, and an unconditional setState would
+        // re-render the whole page continuously.
         if (fixed !== this.state.navFixed || cur !== this.state.currentTab) this.setState({ navFixed: fixed, currentTab: cur });
       };
+      // Coalesce scroll events onto animation frames rather than reacting to
+      // each one; passive:true keeps the listener off the scrolling critical
+      // path since it never calls preventDefault.
       this._navScroll = () => window.requestAnimationFrame(apply);
       window.addEventListener("scroll", this._navScroll, { passive: true });
-      apply();
+      apply();   // set the initial state, e.g. when loading straight onto a #hash
     }
   }
+  // Release everything attached to globals; anything inside the rendered tree
+  // is torn down with it.
+  // Note: _onMove / _raf / _cdot / _cring below are vestigial. They date from
+  // when this page drew its own custom cursor, before that moved out into the
+  // shared cursor.js, and are never assigned now. The guards make them
+  // harmless, but they can be deleted.
   componentWillUnmount() {
     if (this._io) this._io.disconnect();
     if (this._videoEl && this._vSave) this._videoEl.removeEventListener("timeupdate", this._vSave);
@@ -499,10 +681,21 @@ class Component extends DCLogic {
     if (this._navScroll) window.removeEventListener("scroll", this._navScroll);
   }
 
+  // Everything the template can see. Rebuilt on every render, so the arrays
+  // near the bottom are effectively this page's content source: to change the
+  // copy, edit them rather than the markup.
   renderVals() {
+    // Field setter factory: set("phone") returns the handler that writes into
+    // form.phone. Used by all four admissions inputs.
     const set = (k) => (e) => this.setState({ form: { ...this.state.form, [k]: e.target.value } });
     const open = this.state.openMenu;
+    // Every dropdown link points into the branch's detail page, which routes
+    // on the hash. This prefix is one of the few genuine differences between
+    // this file and its A-Camp twin.
     const SUB = "vidyanagar-subpage.html#";
+    // The full navigation tree. A top-level entry with an empty `items` is a
+    // plain link with no dropdown. Note the mix of destinations: `href` may be
+    // a section of this page (#academics) or a subpage route.
     const rawMenus = [
       { label: "Home", href: "#top", items: [] },
       { label: "About", href: "#about", items: [
@@ -532,6 +725,10 @@ class Component extends DCLogic {
         { label: "Admission Procedure", href: SUB + "procedure" }, { label: "Admission Form", href: SUB + "form" },
         { label: "Brochure", href: SUB + "brochure" }, { label: "School Fee", href: SUB + "fee" } ] },
     ];
+    // Flatten the tree into exactly what the template needs. The {{ }} language
+    // cannot compare or compute, so every decision is resolved to a plain
+    // value here: hasItems drives the caret, showDropdown drives the panel,
+    // and color/bg highlight the first item ("Home") as the active tab.
     const menus = rawMenus.map((m, i) => ({
       label: m.label, href: m.href, items: m.items,
       hasItems: m.items.length > 0,
@@ -547,16 +744,31 @@ class Component extends DCLogic {
     const navBarStyle = { position: "relative", maxWidth: "1280px", margin: "0 auto", padding: "0 12px", display: "flex", alignItems: "stretch", flexWrap: "wrap", overflow: "visible" };
     const menuRowStyle = { display: "flex", alignItems: "stretch", flexWrap: "wrap" };
 
-    // floating current-page pill (only when the "Floating" nav style is on AND we've scrolled past the bar)
+    // ---- Floating current-page pill ----
+    // Shown only when the "Floating" nav style is on AND we have scrolled past
+    // the bar. navStyle is a prop the authoring tool can set; the deployed site
+    // passes no props, so it always falls back to "Floating" and the pill is
+    // effectively always enabled.
     const pillEnabled = (this.props.navStyle || "Floating") === "Floating";
     const showPill = pillEnabled && this.state.navFixed;
+    // Match the scrollspy's current section back to its menu entry, so the
+    // pill can offer that section's dropdown links. The labels in SPY above
+    // are written to match these menu labels exactly; the fallback to
+    // rawMenus[0] covers a section whose label has no matching menu.
     const curMenu = rawMenus.find((m) => m.label === this.state.currentTab) || rawMenus[0];
     const pillItems = curMenu.items || [];
     const hasItems = pillItems.length > 0;
+    // Only expand if there is actually something to show.
     const pillExpanded = this.state.pillExpanded && hasItems;
+    // Hint text tells the visitor what the pill will do, which differs by
+    // whether the current section has sub-pages at all.
     const pillHint = hasItems ? (pillExpanded ? "select a page" : "hover for more options") : (this.state.currentTab === "Home" ? "" : "click for more details");
     const pillHref = curMenu.href;
 
+    // Pill styling. These are objects rather than stylesheet rules because
+    // each depends on state the stylesheet cannot see. The wrapper spans the
+    // viewport to centre the pill but is pointerEvents:none so it does not
+    // swallow clicks on the page beneath; the card itself re-enables them.
     const pillWrapStyle = { position: "fixed", top: "16px", left: 0, right: 0, zIndex: 65, display: "flex", justifyContent: "center", pointerEvents: "none" };
     const pillCardStyle = {
       pointerEvents: "auto", display: "flex", flexDirection: "column",
@@ -574,6 +786,9 @@ class Component extends DCLogic {
       fontFamily: "'Nunito',sans-serif", fontWeight: 600, fontSize: "12px",
       color: "rgba(165,25,21,.6)", borderLeft: "1px solid rgba(165,25,21,.28)", paddingLeft: "12px",
     };
+    // The expanding drawer. Height cannot be transitioned from 0 to "auto" in
+    // CSS, so the open height is computed from the item count (44px per row
+    // plus padding) and animated as an explicit maxHeight.
     const pillItemsWrapStyle = {
       overflow: "hidden",
       maxHeight: pillExpanded ? (pillItems.length * 44 + 8) + "px" : "0px",
@@ -582,6 +797,9 @@ class Component extends DCLogic {
     };
 
     return {
+      // ref callbacks: the runtime passes the real DOM node to each of these,
+      // which is how componentDidMount gets hold of the three elements it has
+      // to measure, time or drive imperatively.
       navRef: (el) => { this._navEl = el; },
       videoRef: (el) => { this._videoEl = el; },
       loaderRef: (el) => { this._loaderEl = el; },
@@ -592,6 +810,9 @@ class Component extends DCLogic {
       pillLeave: () => this.setState({ pillExpanded: false }),
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
+      // ---- Page content from here down ----
+      // The six academics cards. Deliberately generic: no examination board,
+      // affiliation or grade range is claimed, as none has been confirmed.
       academics: [
         { tag: "01", title: "Pedagogy", desc: "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
         { tag: "02", title: "Pre-Primary Program", desc: "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
@@ -600,12 +821,16 @@ class Component extends DCLogic {
         { tag: "05", title: "Lower & Primary", desc: "Foundational programs building strong literacy, numeracy and enquiry habits." },
         { tag: "06", title: "Assessment Policy", desc: "A well-defined framework of continuous formative and summative assessment that promotes academic growth." },
       ],
+      // Four short school-life points shown beside the house panel.
       life: [
         { title: "School Timings", desc: "Structured day with breaks, activity periods and supervised study." },
         { title: "Rules & Regulations", desc: "Clear, kind expectations that build discipline and respect." },
         { title: "Clubs & Societies", desc: "From robotics to debate, drama and eco clubs." },
         { title: "Physical Education", desc: "Daily sport, athletics and access to the sports arena." },
       ],
+      // Facility cards. Each href must match a key in the `pages` map in
+      // vidyanagar-subpage.html, or the link lands on that page's generic fallback.
+      // Every icon is a transparent-GIF placeholder.
       facilities: [
         { href: "vidyanagar-subpage.html#ac-classrooms", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Classrooms", desc: "Centrally air-conditioned rooms with smart audio-visual teaching aids." },
         { href: "vidyanagar-subpage.html#science-labs", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Labs", desc: "Science, robotics, maths and computing labs for hands-on discovery." },
@@ -614,21 +839,29 @@ class Component extends DCLogic {
         { href: "vidyanagar-subpage.html#swimming-pool", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Swimming Pool", desc: "Safe, supervised aquatics as part of a rounded PE program." },
         { href: "vidyanagar-subpage.html#music", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Music", desc: "Vocal and instrumental music with regular performances." },
       ],
+      // Plain text chips under the facility cards, for facilities that have no
+      // detail page of their own. Strings only, so they are not links.
       facilityChips: ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
+      // News cards. Illustrative sample copy, not real announcements.
       news: [
         { tag: "Event", title: "Grand Art Exhibition", desc: "Students showcase a term of creativity across painting, sculpture and design." },
         { tag: "Achievement", title: "Inter-school Olympiad wins", desc: "Our scholars bring home honours in maths and science olympiads." },
         { tag: "Circular", title: "Term calendar released", desc: "Key dates, holidays and assessment schedules for the new session." },
       ],
+      // The four numbered admission steps. Kept in sync by hand with the
+      // "procedure" entry in the subpage's content map.
       steps: [
         { n: "1", title: "Enquiry & campus visit", desc: "Send an enquiry or drop by — meet our team and tour the campus." },
         { n: "2", title: "Application form", desc: "Complete the admission form for your child's grade and pathway." },
         { n: "3", title: "Interaction / assessment", desc: "A friendly interaction to understand your child's learning needs." },
         { n: "4", title: "Confirmation", desc: "Complete enrolment and fee formalities to secure the seat." },
       ],
+      // ---- Enquiry form wiring ----
       form: this.state.form,
       onName: set("name"), onPhone: set("phone"), onTrack: set("track"), onMsg: set("msg"),
       submitLabel: this.state.submitted ? "✓ Enquiry received" : "Send enquiry",
+      // Front-end only: acknowledges the click and discards the input. Post
+      // form.* to a real endpoint here before the site goes live.
       submit: () => this.setState({ submitted: true }),
     };
   }

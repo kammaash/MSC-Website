@@ -1,4 +1,39 @@
 <!DOCTYPE html>
+<!--
+  A-CAMP DETAIL PAGES  (one file, many pages)
+  ===========================================
+  Every "inner" page for the A-Camp branch lives in this single file and is
+  selected by the URL hash. acamp-subpage.html#library shows the library page,
+  #transport the transport page, and so on. There are roughly thirty such
+  routes, all defined in the `pages` map in the logic block at the bottom.
+
+  WHY ONE FILE
+  ============
+  The pages are all the same shape: a red banner with a breadcrumb, then a
+  column of text blocks. Rather than thirty near-identical HTML files, the
+  layout is written once here and the differences live purely as data. Adding a
+  page means adding one entry to `pages` and linking to its hash; no new file
+  and no new markup.
+
+  HOW A ROUTE IS RESOLVED
+  =======================
+    1. componentDidMount reads location.hash into state.route, and listens for
+       hashchange so navigating between routes never reloads the page.
+    2. renderVals() looks the route up in `pages`. An unknown or empty hash
+       falls back to a generic "choose a section" page, so a bad link degrades
+       gracefully instead of rendering blank.
+    3. The chosen page's blocks are normalised into flagged objects that the
+       template renders with a chain of sc-if tests (see `blocks` below).
+
+  TWIN FILE
+  =========
+  vidyanagar-subpage.html is the same file for the other branch; only the
+  school name and the page it links back to differ. Content changes usually
+  need to be made in both.
+
+  See index.html for the explanation of the <helmet> / <x-dc> / data-dc-script
+  structure that every page in this project shares.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,15 +41,20 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
+<!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
+<!-- Lifted into <head> at boot: fonts, the page stylesheet, the cursor. -->
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Base reset and defaults, identical to the branch page's: shared MSC red
+     palette, Nunito body copy, Quicksand headings. riseIn is unused on this
+     page; ddIn animates the nav dropdowns opening. */
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:#ffffff;color:#26201d;font-family:"Nunito",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
@@ -25,20 +65,23 @@
   @keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   @keyframes ddIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ===== Layout system (desktop-first; breakpoints at the bottom) ===== */
+  /* ===== Layout system (desktop-first; breakpoints at the bottom) =====
+     Much smaller than the branch page's, because these pages are a single
+     column of text. Only the gutter and the gallery grid need to respond;
+     the content column is capped inline at 820px for readable line length. */
   .wrap{max-width:1280px;margin:0 auto;padding-left:28px;padding-right:28px}
   img,svg,video{max-width:100%}
   h1,h2,h3,h4,p,a,span,div{overflow-wrap:break-word}
 
   .g{display:grid}
-  .g-3{grid-template-columns:repeat(3,1fr);gap:12px}
+  .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
 
-  /* ===== Tablet ===== */
+  /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
     .wrap{padding-left:22px;padding-right:22px}
   }
 
-  /* ===== Phone ===== */
+  /* ===== Phone: gallery goes single-column; top bar and footer stack ===== */
   @media (max-width:720px){
     .wrap{padding-left:18px;padding-right:18px}
     .g-3{grid-template-columns:1fr}
@@ -52,7 +95,9 @@
 
 <div style="max-width:100%;overflow:hidden">
 
-<!-- TOP BAR -->
+<!-- TOP BAR
+     Same white identity band as the branch page, except the logo links back to
+     the branch home rather than to the top of this page. -->
 <div style="background:#fff;border-bottom:1px solid #f3e6e2">
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="montessori-acamp.html#top" style="display:flex;align-items:center;gap:18px">
@@ -71,7 +116,19 @@
   </div>
 </div>
 
-<!-- YELLOW NAV WITH DROPDOWNS -->
+<!-- YELLOW NAV WITH DROPDOWNS
+     The same navigation as the branch page, rebuilt from this file's own
+     `menus` array. Two differences worth knowing:
+       - top-level links point back at the branch page's sections, since those
+         sections do not exist here;
+       - dropdown links are bare "#hash" routes into this same file, and the
+         entry matching the current route is tinted red via it.color, giving
+         the menu a "you are here" state the branch page's copy does not have.
+     KNOWN QUIRK: this nav opens its panel on m.isOpen, whereas the branch page
+     uses m.showDropdown, which also requires the menu to have items. So here,
+     hovering one of the three item-less menus (Home, School Life, Transport)
+     pops an empty white panel. Guarding on m.hasItems as well, or exposing a
+     showDropdown flag as the branch page does, would fix it. -->
 <header style="position:sticky;top:0;z-index:60;background:#ffd9c4;box-shadow:0 2px 10px rgba(165,25,21,.12)">
   <nav class="wrap" style="padding-left:12px;padding-right:12px;display:flex;align-items:stretch;flex-wrap:wrap">
     <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
@@ -89,7 +146,10 @@
   </nav>
 </header>
 
-<!-- PAGE HERO / BREADCRUMB -->
+<!-- PAGE HERO / BREADCRUMB
+     Red banner naming the current route: breadcrumb (Home / parent section /
+     this page), the title, and the introduction. All four values come from
+     `current`, which is the matched entry from the `pages` map. -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap" style="padding-top:46px;padding-bottom:50px">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13.5px;color:#ffd9c4;display:flex;gap:9px;align-items:center;flex-wrap:wrap">
@@ -104,7 +164,21 @@
   </div>
 </section>
 
-<!-- CONTENT -->
+<!-- CONTENT
+     The generic page body: loop over `blocks` and render each according to its
+     type flag. This chain of sc-if tests is what lets one piece of markup
+     serve every route, since the {{ }} language has no switch and cannot call
+     a function to pick a renderer.
+
+     The five block types, all produced by the normaliser in renderVals():
+       isHeading  a sub-heading within the page
+       isPara     a paragraph (the common case)
+       isList     bulleted cards, each a bold term followed by a description
+       isGallery  a 6-tile placeholder grid, with a "photos coming soon" note
+       isNote     a highlighted panel, used to mark exactly what content is
+                  still missing and what the school needs to supply
+     Adding a sixth type means adding a flag in the normaliser and an sc-if
+     here. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
   <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
     <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
@@ -145,7 +219,8 @@
       </div>
     </sc-for>
 
-    <!-- CTA -->
+    <!-- CTA: fixed on every route. The second button returns to whichever
+         section of the branch page this route belongs to (current.parentHref). -->
     <div style="margin-top:44px;display:flex;gap:12px;flex-wrap:wrap">
       <a href="montessori-acamp.html#admissions" style="background:#a51915;color:#fff;padding:13px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#7f120f">Enquire about admission →</a>
       <a href="{{ current.parentHref }}" style="background:#e8541b;color:#fff;padding:13px 24px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#c2410f">Back to {{ current.parent }}</a>
@@ -153,7 +228,9 @@
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER
+     Deliberately lighter than the branch page's four-column footer: a single
+     row, since these are secondary pages. -->
 <footer style="background:#7f120f;color:#f4ddd2">
   <div class="wrap foot-row" style="padding-top:52px;padding-bottom:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;align-items:center">
     <a href="montessori-acamp.html#top" style="display:flex;align-items:center;gap:14px">
@@ -172,23 +249,49 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+/*
+  PAGE LOGIC: the hash router and the entire content library
+  =========================================================
+  Two responsibilities:
+    - keep state.route in step with the URL hash,
+    - turn that route into the values the template renders.
+
+  The bulk of this block is the `pages` map: the actual prose of every detail
+  page on the A-Camp site. Editing content here is the normal way to work on
+  these pages; the markup above almost never needs to change.
+*/
 class Component extends DCLogic {
+  // openMenu: index of the open nav dropdown, -1 for none.
+  // route:    the current hash without its "#", e.g. "library". Empty string
+  //           means no hash, which resolves to the fallback page.
   state = { openMenu: -1, route: "" };
 
   componentDidMount() {
+    // Read the hash into state, and scroll back to the top. That scroll matters:
+    // moving between routes only swaps content, so without it a visitor who was
+    // partway down a long page would land mid-way through the next one. The
+    // try/catch guards environments where scrollTo is unavailable.
     this._apply = () => {
       const r = (location.hash || "").replace(/^#/, "");
       this.setState({ route: r });
       try { window.scrollTo(0, 0); } catch (e) {}
     };
-    this._apply();
+    this._apply();                                      // resolve the hash the page was opened with
+    // hashchange, not click handlers: this catches in-page links, the browser's
+    // back and forward buttons, and hashes typed straight into the address bar.
     window.addEventListener("hashchange", this._apply);
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
   renderVals() {
+    // The branch page this file belongs to. One of the few things that differs
+    // between this file and its Vidyanagar twin.
     const MI = "montessori-acamp.html";
     // ---- nav menu structure (minor items => this file's hashes) ----
+    // Same menu as the branch page, but the dropdown entries are written as
+    // compact [label, routeKey] pairs rather than objects, because every one
+    // of them resolves to a hash in this same file. Each routeKey must match a
+    // key in the `pages` map below.
     const rawMenus = [
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
@@ -214,15 +317,43 @@ class Component extends DCLogic {
     ];
     const open = this.state.openMenu;
     const route = this.state.route;
+    // Expand the pairs into what the template needs. The colour comparison is
+    // done here rather than in the markup because {{ }} cannot compare values:
+    // the entry matching the current route is tinted red as a "you are here".
     const menus = rawMenus.map((m, i) => ({
       label: m.label, href: m.href, hasItems: m.items.length > 0, isOpen: open === i,
       open: () => this.setState({ openMenu: i }),
       items: m.items.map(([label, key]) => ({ label, href: "#" + key, color: key === route ? "#a51915" : "#26201d" })),
     }));
 
-    // ---- content map ----
+    // ---- content map: every detail page on this branch site ----
+    // P() is shorthand for one page, keeping the map below readable:
+    //   parent     the section name shown in the breadcrumb
+    //   parentKey  the section of the branch page to return to
+    //   title      page heading, also the last breadcrumb crumb
+    //   intro      the standfirst under the heading
+    //   blocks     the body, as a list of one-key objects, each of which
+    //              becomes a rendered block:
+    //                { p: "..." }                  paragraph
+    //                { h: "..." }                  sub-heading
+    //                { list: [[term, desc], ...] } bulleted term cards
+    //                { gallery: true }             placeholder photo grid
+    //                { note: "...", sub: "..." }   highlighted panel
+    //
+    // A key here is exactly the hash that reaches it, so "library" is served at
+    // acamp-subpage.html#library and must match the hrefs used by the branch
+    // page's facility cards and dropdown menus.
+    //
+    // On content: many pages are written from the general Montessori material
+    // and end with a `note` block stating precisely which asset is still
+    // needed (a PDF, a photograph, the founder's text). Those notes are
+    // visible on the live site by design, so nothing reads as finished when it
+    // is not, and so the school can see what to send. Nothing here asserts a
+    // board affiliation, a founding date or a statistic, since none has been
+    // confirmed.
     const P = (parent, parentKey, title, intro, blocks) => ({ parent, parentHref: MI + parentKey, title, intro, blocks });
     const pages = {
+      // ===== About =====
       "core-values": P("About", "#about", "Core Values", "Empathy, respect and discipline — the three pillars behind every classroom, playground and interaction at Montessori.", [
         { p: "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families." },
         { list: [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] },
@@ -248,10 +379,12 @@ class Component extends DCLogic {
         { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
         { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
       ]),
+      // ===== School Life =====
       "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
         { p: "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship." },
         { list: [["Valour", "courage and leadership."], ["Wisdom", "curiosity and scholarship."], ["Harmony", "teamwork and care."], ["Integrity", "honesty and responsibility."]] },
       ]),
+      // ===== Academics =====
       "pre-primary": P("Academics", "#academics", "Pre-Primary Program", "A play-based foundation for our youngest learners.", [
         { p: "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life." },
         { gallery: true },
@@ -267,6 +400,7 @@ class Component extends DCLogic {
         { p: "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing." },
         { note: "Assessment schedule", sub: "Share the term-wise assessment calendar to publish exact dates." },
       ]),
+      // ===== Activities =====
       "calendar": P("Activities", "#life", "School Calendar", "Key dates, terms and events across the academic year.", [
         { p: "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead." },
         { note: "Downloadable calendar", sub: "Provide the current-session calendar and we'll add it here." },
@@ -285,6 +419,7 @@ class Component extends DCLogic {
         { p: "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together." },
         { gallery: true },
       ]),
+      // ===== Campus & Facilities (the destinations of the facility cards) =====
       "the-campus": P("Campus & Facilities", "#campus", "The Campus", "A verdant, purpose-built campus on the outskirts of Kurnool.", [
         { p: "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
         { gallery: true },
@@ -314,16 +449,19 @@ class Component extends DCLogic {
       "infirmary": P("Campus & Facilities", "#campus", "Infirmary", "Care and well-being on campus.", [
         { p: "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for." },
       ]),
+      // ===== Transport =====
       "transport": P("Transport", "#top", "Transport", "Safe, GPS-enabled buses covering Kurnool and the surrounding areas.", [
         { p: "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term." },
         { p: "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
         { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
       ]),
+      // ===== Gallery =====
       "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: true }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
         { note: "Video embeds", sub: "Share YouTube links or files and we'll embed them here." },
       ]),
+      // ===== News Room =====
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [{ gallery: true }]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
@@ -336,6 +474,7 @@ class Component extends DCLogic {
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
         { note: "Circulars", sub: "Upload circulars and forms and we'll add download links." },
       ]),
+      // ===== Admission =====
       "procedure": P("Admission", "#admissions", "Admission Procedure", "Four simple steps to join Montessori.", [
         { list: [["Enquiry & campus visit", "meet our team and tour the campus."], ["Application form", "complete the form for your child's grade and pathway."], ["Interaction / assessment", "a friendly interaction to understand learning needs."], ["Confirmation", "complete enrolment and fee formalities to secure the seat."]] },
       ]),
@@ -353,12 +492,24 @@ class Component extends DCLogic {
       ]),
     };
 
+    // Shown for an unknown route and for the bare file with no hash at all, so
+    // a stale or mistyped link lands on something usable instead of a blank
+    // page. Worth remembering when adding a link: a typo fails quietly here
+    // rather than erroring.
     const fallback = P("Montessori", "#top", "Montessori School, A-Camp", "Choose a section from the menu above to explore.", [
       { p: "Select any item from the dropdown navigation to open its dedicated page." },
     ]);
     const current = pages[route] || fallback;
 
-    // normalize blocks to flagged form
+    // ---- Normalise blocks into the flagged form the template renders ----
+    // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
+    // flags ({ isPara: true, text: "..." }), because the template can only test
+    // a value for truthiness, not ask which key an object has. The order of
+    // these branches is the precedence: an object with several keys renders
+    // only its first recognised one.
+    // `key` gives each block a stable identity for the list rendering, and the
+    // list blocks also pre-split each pair into term / separator / description
+    // so the markup does not have to concatenate anything.
     let k = 0;
     const blocks = [];
     current.blocks.forEach((b) => {
@@ -372,6 +523,8 @@ class Component extends DCLogic {
     return {
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
+      // Only the four fields the banner and CTA display; `blocks` is passed
+      // separately in its normalised form, so current.blocks is not exposed.
       current: { parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro },
       blocks,
     };
