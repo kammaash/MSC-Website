@@ -63,11 +63,9 @@ _Mobile breakpoints are in place — see “Layout system” above. Verified at 
 handset once there is real content (long school names, photos) to test with._
 
 ## DNS (domain currently at Squarespace)
-Keep the domain registered at Squarespace; change only the DNS records:
-- Delete Squarespace's default A records and their `www` CNAME.
-- `CNAME`: `www` → `kammaash.github.io`
-- Apex `A` records for `msceducation.net`:
-  `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+Keep the domain registered at Squarespace; point its DNS at GitHub Pages by
+replacing Squarespace's default records with the ones GitHub documents for
+[apex and `www` custom domains](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site).
 
 ## Local preview
 ```sh
