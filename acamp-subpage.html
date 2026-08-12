@@ -50,7 +50,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Nunito:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <style>
   /* Base reset and defaults, identical to the branch page's: shared MSC red
      palette, Nunito body copy, Quicksand headings. riseIn is unused on this
@@ -75,6 +75,18 @@
 
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
+
+  /* ===== Flip cards (real-photo gallery blocks) =====
+     Same mechanism as montessori-acamp.html: .flip is the 3D scene, .flip-in
+     is what rotates, .flip-f/.flip-b are the two faces. Every isGallery
+     block on this page (Events, Awards, Latest News, Photo Gallery, Team,
+     Pre-Primary, Physical Education, …) renders through one shared template
+     further down, so this one ruleset covers all of them. */
+  .flip{perspective:1400px}
+  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d}
+  .flip:hover .flip-in,.flip:focus-within .flip-in{transform:rotateY(180deg)}
+  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:inherit;overflow:hidden}
+  .flip-b{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
 
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
@@ -175,8 +187,9 @@
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
        isGallery  real photos when a page's { gallery: [[src,caption],...] }
-                  entry supplies them; otherwise the original 6-tile
-                  placeholder grid with a "photos coming soon" note
+                  entry supplies them, shown as flip cards (hover/focus to
+                  read the caption on the back); otherwise the original
+                  6-tile placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
@@ -205,9 +218,13 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
-                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                <div tabindex="0" class="flip" style="aspect-ratio:4/3;border-radius:12px">
+                  <div class="flip-in">
+                    <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
+                    <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;justify-content:center;align-items:flex-start">
+                      <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px;color:#fff;line-height:1.35">{{ im.caption }}</span>
+                    </div>
+                  </div>
                 </div>
               </sc-for>
             </div>
@@ -241,8 +258,9 @@
         </sc-if>
         <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
-            <video controls playsinline style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
+            <video controls playsinline preload="metadata" poster="{{ b.video.poster }}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
               <source src="{{ b.video.src }}" type="video/mp4">
+              Your browser doesn't support embedded video. <a href="{{ b.video.src }}" style="color:#fff">Watch/download it directly</a>.
             </video>
           </div>
         </sc-if>
@@ -544,16 +562,22 @@ class Component extends DCLogic {
       ] }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
+        { note: "Why these show a placeholder for now", sub: "The school's WordPress host blocks video requests that don't come from its own domain (\"hotlink protection\") — that's why the .mp4 files won't play from this local page. Each video below now points at a local file under assets/videos/. Download each source file (right-click the link on the school site — or open it in a new tab and use Ctrl+S) and save it with the exact filename listed, and it will start playing here with no further changes." },
         { h: "Founder's Day — Blood Donation Camp" },
-        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/BIG-MAM.mp4" } },
+        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/BIG-MAM.mp4 → save as assets/videos/founders-day.mp4" },
+        { video: { src: "assets/videos/founders-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg" } },
         { h: "Freshers' Day — \"Srikaram\"" },
-        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FRESHERS-DAY.mp4" } },
+        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/FRESHERS-DAY.mp4 → save as assets/videos/freshers-day.mp4" },
+        { video: { src: "assets/videos/freshers-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg" } },
         { h: "Campus Moments" },
-        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/WhatsApp-Video-2026-07-13-at-10.09.40-AM.mp4" } },
+        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/WhatsApp-Video-2026-07-13-at-10.09.40-AM.mp4 → save as assets/videos/campus-moments.mp4" },
+        { video: { src: "assets/videos/campus-moments.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg" } },
         { h: "Children's Day Celebrations" },
-        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2022/11/CHILDRENS-DAY-22.mp4" } },
+        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2022/11/CHILDRENS-DAY-22.mp4 → save as assets/videos/childrens-day.mp4" },
+        { video: { src: "assets/videos/childrens-day.mp4", poster: "assets/gallery/campus-life.jpg" } },
         { h: "Krishna Janmashtami" },
-        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2023/09/KRISHNASTAMI.mp4" } },
+        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2023/09/KRISHNASTAMI.mp4 → save as assets/videos/janmashtami.mp4" },
+        { video: { src: "assets/videos/janmashtami.mp4", poster: "assets/gallery/campus-1.jpg" } },
       ]),
       // ===== News Room =====
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
@@ -562,27 +586,29 @@ class Component extends DCLogic {
           ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
           ["Founder's Day Blood Donation Camp", "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."],
           ["Freshers' Day — \"Srikaram\"", "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."],
-          ["Science Olympiad Foundation Awards", "Students swept medals across the International English, Science and Computer Science Olympiads, with three teachers honoured as Best District Teachers."],
-          ["State Aquatic Championship — 3 Medals", "Shruti won gold, silver and bronze across butterfly and backstroke events at the Inter-District Aquatic Championship in Visakhapatnam."],
-          ["Chess: State & District Champions", "Thanvika (Class III) placed 1st at the State Level Chess Competition; Sushanth (Class IV) topped the Nandyal District Rapid Chess Selections."],
-          ["International English Olympiad — Bronze", "Class 7 student Jessie Elena Giripogu won an international bronze medal, presented by former CBSE Secretary Mr. Himanshu Gupta, IAS."],
-          ["State Karate Championship", "P. Adharva Dhev of Class II earned recognition at the 6th AP State Karate Championship."],
-          ["Monsoon Seed Ball Drive", "Classes VI and VII marked the start of the monsoon with a \"Roll a Ball… Grow a Forest\" seed-ball activity across the campus."],
+          ["Teachers' Training on Karuna Clubs", "Run with Karuna International, Kurnool Kendra, the programme equipped teachers with activity-based approaches to strengthen Karuna Clubs and nurture compassion and social service."],
           ["Startup Club — Classroom to Boardroom", "Senior secondary students pitched real business ideas to professional investors, blending Montessori self-direction with entrepreneurial practice."],
+          ["Monsoon Seed Ball Drive", "Classes VI and VII marked the start of the monsoon with a \"Roll a Ball… Grow a Forest\" seed-ball activity across the campus."],
+          ["World Zoonoses Day Awareness", "A veterinary surgeon, an animal-welfare volunteer and a Brahma Kumaris speaker led sessions on public health, animal welfare and responsible living."],
+          ["BMI Health Awareness Activity", "Classes VI and VII ran a peer-led Body Mass Index assessment, pairing practical maths with health education."],
+          ["Pre-Primary Orientation Programme", "New Pre-Primary parents were introduced to the Montessori philosophy and school routines ahead of their child's first year."],
+          ["International Yoga Day", "Students marked June 21st with yoga sessions promoting health, mindfulness and physical fitness."],
+          ["Flavours of Creativity", "Classes 8 and 9 explored nutrition and creativity at a culinary event themed \"Tasty bites, Healthy lives.\""],
+          ["Oxford University Press Teacher Workshop", "Faculty took part in a training session with an OUP Master Trainer on classroom methods aligned with the latest NEP guidelines."],
         ] },
         { gallery: [
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg", "Teachers' Training Programme"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg", "National Parents' Day"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Aquatic Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg", "Founder's Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg", "Blood Donation Camp"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg", "Freshers' Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/12-scaled.jpg", "Freshers' Day"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/SEED-scaled.jpg", "Seed Ball Drive"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/zoo-scaled.jpg", "World Zoonoses Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/BMI-scaled.jpg", "BMI Activity"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/PP-scaled.jpg", "Pre-Primary Orientation"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/YOGA-scaled.jpg", "International Yoga Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
         ] },
       ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
@@ -591,7 +617,26 @@ class Component extends DCLogic {
       ]),
       "awards": P("News Room", "#news", "Awards & Achievements", "Celebrating our students and staff.", [
         { p: "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
-        { gallery: true },
+        { list: [
+          ["Science Olympiad Foundation Awards", "Students earned Medals of Appreciation across the International English (IEO), Science (NSO) and Computer Science (ICSO) Olympiads; three faculty members received Best District Teacher Awards for NSO, IMO and ICSO."],
+          ["State Aquatic Championship — 3 Medals", "Shruti won gold (100m Butterfly), silver (200m Backstroke) and bronze (50m Butterfly) at the Inter-District Aquatic Championship in Visakhapatnam."],
+          ["Chess: State & District Champions", "Thanvika (Class III) placed 1st at the State Level Chess Competition; Sushanth (Class IV) topped the Nandyal District Rapid Chess Selections and advanced to state level."],
+          ["International English Olympiad — Bronze", "Class 7 student Jessie Elena Giripogu won an international bronze medal and a ₹10,000 prize, presented by former CBSE Secretary Mr. Himanshu Gupta, IAS."],
+          ["State Karate Championship", "P. Adharva Dhev of Class II earned recognition at the 6th AP State Karate Championship."],
+          ["Olympic Day Association Tournament", "Pride Montessorians were Throwball (Girls) Champions, Handball (Girls) Runners-up and Softball (Boys) Runners-up."],
+          ["\"Best Karuna Club\" Award — Karunostav 2023", "Recognised at Karunostav 2023 in Chennai for outstanding Karuna Club activities conducted through the year."],
+          ["Top 100 Women Achievers in Education", "India Today magazine named a Montessori Indus Schools correspondent among the top 100 women achievers in education for 2023-24."],
+          ["World Teachers' Day — Best Teacher Awards", "Montessori teachers were honoured with Best Teacher Awards organised by APUSMA to mark World Teachers' Day."],
+          ["Rayalaseema Zonal Lawn Tennis — Multiple Medals", "A student won Under-14 and Under-16 titles and Mixed Doubles runner-up, going on to qualify for the State Level Tournament."],
+        ] },
+        { gallery: [
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Aquatic Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/15-scaled.jpg", "Aquatic Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+        ] },
       ]),
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
         { note: "Circulars", sub: "Upload circulars and forms and we'll add download links." },
