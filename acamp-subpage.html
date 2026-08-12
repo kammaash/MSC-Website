@@ -174,7 +174,9 @@
        isHeading  a sub-heading within the page
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
-       isGallery  a 6-tile placeholder grid, with a "photos coming soon" note
+       isGallery  real photos when a page's { gallery: [[src,caption],...] }
+                  entry supplies them; otherwise the original 6-tile
+                  placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
@@ -200,20 +202,48 @@
           </div>
         </sc-if>
         <sc-if value="{{ b.isGallery }}" hint-placeholder-val="{{ false }}">
-          <div class="g g-3" style="margin:20px 0 0">
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-          </div>
-          <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+          <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
+            <div class="g g-3" style="margin:20px 0 0">
+              <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
+                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ false }}">
+            <div class="g g-3" style="margin:20px 0 0">
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            </div>
+            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+          </sc-if>
         </sc-if>
         <sc-if value="{{ b.isNote }}" hint-placeholder-val="{{ false }}">
           <div style="background:#fdeadf;border:1px solid #f6c8ae;border-radius:14px;padding:22px 24px;margin:22px 0 0">
             <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:#a51915">{{ b.text }}</div>
             <div style="font-size:14.5px;color:#6b615b;margin-top:6px">{{ b.sub }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isPerson }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:24px;align-items:center;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:24px;margin:20px 0 0;flex-wrap:wrap">
+            <img src="{{ b.person.src }}" alt="{{ b.person.name }}" style="width:150px;height:150px;border-radius:12px;object-fit:cover;flex:none;border:1px solid #f0e0dc">
+            <div>
+              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#a51915">{{ b.person.name }}</div>
+              <div style="font-size:14px;color:#c2410f;font-weight:600;margin-top:3px">{{ b.person.title }}</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
+            <video controls playsinline style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
+              <source src="{{ b.video.src }}" type="video/mp4">
+            </video>
           </div>
         </sc-if>
       </div>
@@ -338,7 +368,10 @@ class Component extends DCLogic {
     //                { h: "..." }                  sub-heading
     //                { list: [[term, desc], ...] } bulleted term cards
     //                { gallery: true }             placeholder photo grid
+    //                { gallery: [[src,caption],..]}  real photo grid
     //                { note: "...", sub: "..." }   highlighted panel
+    //                { person: {src,name,title} }  portrait + name/title card
+    //                { video: {src} }               embedded <video>
     //
     // A key here is exactly the hash that reaches it, so "library" is served at
     // acamp-subpage.html#library and must match the hrefs used by the branch
@@ -359,13 +392,17 @@ class Component extends DCLogic {
         { list: [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] },
       ]),
       "founders-message": P("About", "#about", "Founder's Message", "A word from the founding vision of the Montessori Schools.", [
-        { p: "Our journey began with twelve children and a simple conviction — that every child, given the right environment, will help themselves to learn. Five decades on, that belief still guides everything we do at Montessori." },
-        { p: "We invite you to visit our campus, meet our teachers, and see how a value-based, child-centred education prepares your child not just for examinations, but for a meaningful and productive life." },
-        { note: "Full message & founder's portrait", sub: "Send us the founder's photograph and message text and we'll place them here." },
+        { person: { src: "assets/people/founder.jpg", name: "Smt. P. Kalyanamma, M.A., B.Ed.", title: "Founder, Montessori Institutions" } },
+        { p: "Fondly known to generations of students and staff as \"Big Aunty\", I founded these institutions over four decades ago, guided by one belief above all: that every child, given the right environment, will help himself to learn. That conviction — Maria Montessori's own — has shaped everything we have built since." },
+        { p: "Our journey has been one of relentless effort and self-belief. From a single classroom to the campus you see today, we have stayed focused on one goal — an education that is happy, value-based and progressive, preparing every child not just for examinations, but for a meaningful and productive life." },
+        { p: "I invite you to visit our campus, meet our teachers, and see this vision in practice." },
+        { p: "\"My work is my relaxation.\"" },
       ]),
       "principals-desk": P("About", "#about", "From the Principal's Desk", "Leadership notes on learning, character and community at Montessori.", [
+        { person: { src: "assets/people/principal.jpg", name: "Smt. B. Sri Jyothi, M.A., B.Ed.", title: "Principal, Montessori School, A-Camp" } },
         { p: "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
-        { note: "Principal's message & photo", sub: "Share the principal's note and portrait to complete this page." },
+        { p: "Our professional teachers love learning and pass that love and excitement to the children." },
+        { p: "We truly value continuity of care and know how important consistency is in a young child's life." },
       ]),
       "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
         { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
@@ -422,26 +459,58 @@ class Component extends DCLogic {
       // ===== Campus & Facilities (the destinations of the facility cards) =====
       "the-campus": P("Campus & Facilities", "#campus", "The Campus", "A verdant, purpose-built campus on the outskirts of Kurnool.", [
         { p: "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
-        { gallery: true },
+        { gallery: [
+          ["assets/gallery/campus-1.jpg", "Campus"],
+          ["assets/gallery/campus-2.jpg", "Campus"],
+          ["assets/gallery/campus-life.jpg", "Campus Life"],
+          ["assets/gallery/classroom.jpg", "Classroom"],
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/SCHOOL-BUILDING.jpg", "Campus"],
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/SCHOOL-BUILDING1.jpg", "Campus"],
+        ] },
       ]),
       "ac-classrooms": P("Campus & Facilities", "#campus", "Classrooms", "Comfortable, focused learning environments.", [
         { p: "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids." },
+        { gallery: [
+          ["assets/gallery/classroom.jpg", "Classroom"],
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/CLASS-ROOM1.jpg", "Classroom"],
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/CLASS-ROOM2-1.jpg", "Classroom"],
+        ] },
       ]),
       "science-labs": P("Campus & Facilities", "#campus", "Labs", "Where theory meets hands-on discovery — science, robotics, maths and computing under one roof.", [
         { p: "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them." },
         { list: [["Science Laboratories", "physics, chemistry and biology labs for hands-on practicals."], ["Robotics Lab", "computational thinking, electronics and problem-solving through building and programming real projects."], ["Math Lab", "manipulatives, models and activities that turn abstract concepts into intuitive understanding."], ["Computer Lab", "modern machines building digital literacy, coding foundations and responsible technology use."]] },
-        { gallery: true },
+        { gallery: [
+          ["assets/gallery/physics-lab-1.jpg", "Physics Lab"],
+          ["assets/gallery/physics-lab-2.jpg", "Physics Lab"],
+          ["assets/gallery/chemistry-lab-1.jpg", "Chemistry Lab"],
+          ["assets/gallery/chemistry-lab-2.jpg", "Chemistry Lab"],
+          ["assets/gallery/computer-lab-1.jpg", "Computer Lab"],
+          ["assets/gallery/computer-lab-2.jpg", "Computer Lab"],
+          ["assets/gallery/math-lab.jpg", "Math Lab"],
+          ["assets/gallery/biology-lab.jpg", "Biology Lab"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/c1-scaled.jpg", "Computer Lab"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/sci1-scaled.jpg", "Science Lab"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/sci2-scaled.jpg", "Science Lab"],
+        ] },
       ]),
       "library": P("Campus & Facilities", "#campus", "Library", "A quiet home for reading, research and discovery.", [
         { p: "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces." },
-        { gallery: true },
+        { gallery: [
+          ["assets/gallery/library-1.jpg", "Library"],
+          ["assets/gallery/library-2.jpg", "Library"],
+          ["assets/gallery/library-3.jpg", "Library"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/li-scaled.jpg", "Library"],
+        ] },
       ]),
       "swimming-pool": P("Campus & Facilities", "#campus", "Swimming Pool", "Safe, supervised aquatics for every learner.", [
         { p: "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program." },
       ]),
       "sports-arena": P("Campus & Facilities", "#campus", "Sports", "Grounds and courts for every game.", [
         { p: "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit." },
-        { gallery: true },
+        { gallery: [
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/G1.jpg", "Playground"],
+          ["http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/G2.jpg", "Playground"],
+        ] },
       ]),
       "music": P("Campus & Facilities", "#campus", "Music", "Voice, rhythm and performance.", [
         { p: "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet." },
@@ -456,13 +525,66 @@ class Component extends DCLogic {
         { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
       ]),
       // ===== Gallery =====
-      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: true }]),
+      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: [
+        ["assets/gallery/campus-1.jpg", "Campus"],
+        ["assets/gallery/campus-2.jpg", "Campus"],
+        ["assets/gallery/campus-life.jpg", "Campus Life"],
+        ["assets/gallery/classroom.jpg", "Classroom"],
+        ["assets/gallery/library-1.jpg", "Library"],
+        ["assets/gallery/library-2.jpg", "Library"],
+        ["assets/gallery/library-3.jpg", "Library"],
+        ["assets/gallery/physics-lab-1.jpg", "Physics Lab"],
+        ["assets/gallery/physics-lab-2.jpg", "Physics Lab"],
+        ["assets/gallery/chemistry-lab-1.jpg", "Chemistry Lab"],
+        ["assets/gallery/chemistry-lab-2.jpg", "Chemistry Lab"],
+        ["assets/gallery/computer-lab-1.jpg", "Computer Lab"],
+        ["assets/gallery/computer-lab-2.jpg", "Computer Lab"],
+        ["assets/gallery/math-lab.jpg", "Math Lab"],
+        ["assets/gallery/biology-lab.jpg", "Biology Lab"],
+      ] }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
-        { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
-        { note: "Video embeds", sub: "Share YouTube links or files and we'll embed them here." },
+        { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
+        { h: "Founder's Day — Blood Donation Camp" },
+        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/BIG-MAM.mp4" } },
+        { h: "Freshers' Day — \"Srikaram\"" },
+        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FRESHERS-DAY.mp4" } },
+        { h: "Campus Moments" },
+        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/WhatsApp-Video-2026-07-13-at-10.09.40-AM.mp4" } },
+        { h: "Children's Day Celebrations" },
+        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2022/11/CHILDRENS-DAY-22.mp4" } },
+        { h: "Krishna Janmashtami" },
+        { video: { src: "https://www.montessoricbseacamp.com/wp-content/uploads/2023/09/KRISHNASTAMI.mp4" } },
       ]),
       // ===== News Room =====
-      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [{ gallery: true }]),
+      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
+        { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
+        { list: [
+          ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
+          ["Founder's Day Blood Donation Camp", "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."],
+          ["Freshers' Day — \"Srikaram\"", "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."],
+          ["Science Olympiad Foundation Awards", "Students swept medals across the International English, Science and Computer Science Olympiads, with three teachers honoured as Best District Teachers."],
+          ["State Aquatic Championship — 3 Medals", "Shruti won gold, silver and bronze across butterfly and backstroke events at the Inter-District Aquatic Championship in Visakhapatnam."],
+          ["Chess: State & District Champions", "Thanvika (Class III) placed 1st at the State Level Chess Competition; Sushanth (Class IV) topped the Nandyal District Rapid Chess Selections."],
+          ["International English Olympiad — Bronze", "Class 7 student Jessie Elena Giripogu won an international bronze medal, presented by former CBSE Secretary Mr. Himanshu Gupta, IAS."],
+          ["State Karate Championship", "P. Adharva Dhev of Class II earned recognition at the 6th AP State Karate Championship."],
+          ["Monsoon Seed Ball Drive", "Classes VI and VII marked the start of the monsoon with a \"Roll a Ball… Grow a Forest\" seed-ball activity across the campus."],
+          ["Startup Club — Classroom to Boardroom", "Senior secondary students pitched real business ideas to professional investors, blending Montessori self-direction with entrepreneurial practice."],
+        ] },
+        { gallery: [
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg", "Teachers' Training Programme"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg", "National Parents' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Aquatic Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg", "Founder's Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg", "Blood Donation Camp"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg", "Freshers' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/12-scaled.jpg", "Freshers' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/SEED-scaled.jpg", "Seed Ball Drive"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+        ] },
+      ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
         { note: "News feed", sub: "Share announcements and we'll build out the news list." },
@@ -516,8 +638,13 @@ class Component extends DCLogic {
       if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p });
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
-      else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true });
+      else if (b.gallery) {
+        const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption]) => ({ src, caption })) : [];
+        blocks.push({ key: "b" + (k++), isGallery: true, hasImages: imgs.length > 0, images: imgs });
+      }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
+      else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
+      else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
     });
 
     return {
