@@ -241,10 +241,10 @@
 
 <!-- HERO
      Full-bleed two-column band: introduction on the left, photo on the right
-     with a quotation banner across its top. The <img> is a 1x1 transparent GIF
-     placeholder, so today the right half shows the quote over a flat peach
-     panel. The hero copy is the one substantial piece of branch-specific text
-     on the page and is genuinely different in the Vidyanagar twin. -->
+     with a quotation banner across its top. The right half now shows a real
+     campus photo (assets/gallery/campus-2.jpg) under the quote banner. The
+     hero copy is the one substantial piece of branch-specific text on the
+     page and is genuinely different in the Vidyanagar twin. -->
 <section id="top" class="g g-hero">
   <div class="g-hero-pad" style="display:flex;flex-direction:column;justify-content:center">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
@@ -260,7 +260,7 @@
     <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
       <p style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”</p>
     </div>
-    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Montessori School, A-Camp" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+    <img src="assets/gallery/campus-2.jpg" alt="Montessori School, A-Camp — students on the campus steps" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
   </div>
 </section>
 
@@ -291,6 +291,26 @@
         <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">Discipline</span>
       </div>
       <p style="font-size:15px;line-height:1.6;color:#f4ddd2;margin:18px 0 0">The three pillars behind every classroom, playground and interaction at Montessori.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER
+     Portrait + short bio, condensed from the founder's page on the group
+     site (montessoricbseacamp.com/founder). Kept to a few sentences in our
+     own words, in the same register as the rest of the About section. -->
+<section id="founder" class="wrap" style="padding-top:0;padding-bottom:78px;scroll-margin-top:110px">
+  <div class="g g-split" style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:20px;padding:40px;align-items:center">
+    <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc">
+      <img src="assets/people/founder.jpg" alt="Smt. P. Kalyanamma, Founder, Montessori Institutions" style="width:100%;height:100%;object-fit:cover;display:block">
+    </div>
+    <div>
+      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Our Founder</div>
+      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.15;color:#a51915;margin:12px 0 0">Smt. P. Kalyanamma, M.A., B.Ed.</h2>
+      <p style="font-size:15px;line-height:1.5;color:#c2410f;font-family:'Quicksand',sans-serif;font-weight:600;margin:6px 0 0">Founder, Montessori Institutions</p>
+      <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:18px 0 0">Fondly known to generations of students and staff as "Big Aunty", Smt. Kalyanamma founded the Montessori Institutions in Kurnool over four decades ago. A self-made educator with sharp analytical thinking and an unwavering resolve to see every goal through, she trained formally in the Montessori method after being inspired by Maria Montessori's founding belief that a child should be guided to help himself.</p>
+      <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:14px 0 0">As Chief Patron, she continues to shape teaching practice across the group, championing methods that support the all-round development of every child.</p>
+      <p style="font-size:15px;line-height:1.6;color:#a51915;font-style:italic;margin:18px 0 0">"My work is my relaxation."</p>
     </div>
   </div>
 </section>
@@ -351,10 +371,12 @@
 </section>
 
 <!-- STUDENT SHOWCASE / VIDEO
-     The <video> has no src yet, so it currently renders as an empty black
-     player. ref="{{ videoRef }}" gives the logic block the element so it can
-     save and restore the playback position across visits. Add the film by
-     giving this element a src (or a <source> child). -->
+     Plays the group's promotional film, hotlinked from the Montessori group
+     site (montessoritechnoschool.com) rather than hosted locally, with a
+     campus-life poster frame (assets/gallery/campus-life.jpg) shown until
+     playback starts. ref="{{ videoRef }}" gives the logic block the element
+     so it can save and restore the playback position across visits. Swap the
+     <source> for a locally hosted file whenever the school supplies one. -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
@@ -363,7 +385,9 @@
       <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
     </div>
     <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
-      <video ref="{{ videoRef }}" controls playsinline muted style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover"></video>
+      <video ref="{{ videoRef }}" controls playsinline muted poster="assets/gallery/campus-life.jpg" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
+        <source src="http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/MONTESSORI-SCHOOL.mp4" type="video/mp4">
+      </video>
     </div>
   </div>
 </section>
@@ -437,10 +461,14 @@
 </section>
 
 <!-- GALLERY
-     A fixed mosaic: two wide tiles spanning two columns each, with four square
-     tiles between them. Written out by hand rather than looped because the
-     span pattern is part of the design. Every tile is a diagonal-stripe
-     placeholder awaiting real photography. -->
+     A fixed mosaic of real campus photography: wide tiles (grid-column:span 2)
+     spanning two columns, alternating with square tiles, each with a bottom
+     gradient caption naming the space (Campus, Classroom, Library, Physics/
+     Chemistry/Computer/Math Lab, Biology Lab, Campus Life). Written out by
+     hand rather than looped because the span pattern is part of the design.
+     Images live in assets/gallery/. No playground/sports or swimming-pool
+     photography was supplied, so those facilities still use icon placeholders
+     further up the page. -->
 <section id="gallery" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
@@ -448,15 +476,26 @@
         <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Gallery</div>
         <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Life in pictures</h2>
       </div>
-      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">more photos coming soon</span>
+      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">a look around the A-Camp campus</span>
     </div>
     <div class="g g-4">
-      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px);border:1px solid #f0e0dc"></div>
+      <div style="grid-column:span 2;position:relative;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/campus-1.jpg" alt="Montessori A-Camp campus entrance" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:18px 16px 10px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px">Campus</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/classroom.jpg" alt="AC classroom in session" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Classroom</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/library-1.jpg" alt="Student reading in the library" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Library</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/physics-lab-1.jpg" alt="Physics laboratory" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Physics Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/chemistry-lab-1.jpg" alt="Chemistry laboratory" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Chemistry Lab</span></div>
+      <div style="grid-column:span 2;position:relative;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/campus-life.jpg" alt="Students reading together on the campus steps" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:18px 16px 10px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px">Campus Life</span></div>
+
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/computer-lab-1.jpg" alt="Computer lab" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Computer Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/math-lab.jpg" alt="Math lab" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Math Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/biology-lab.jpg" alt="Biology laboratory" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Biology Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/library-2.jpg" alt="Library shelves and reading" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Library</span></div>
+      <div style="grid-column:span 2;position:relative;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/campus-2.jpg" alt="Students celebrating on the campus steps" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:18px 16px 10px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px">Campus</span></div>
+
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/library-3.jpg" alt="Library reading corner" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Library</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/physics-lab-2.jpg" alt="Physics lab equipment" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Physics Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/chemistry-lab-2.jpg" alt="Chemistry lab equipment" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Chemistry Lab</span></div>
+      <div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="assets/gallery/computer-lab-2.jpg" alt="Students at the computer lab" style="width:100%;height:100%;object-fit:cover" loading="lazy"><span style="position:absolute;left:0;right:0;bottom:0;padding:16px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">Computer Lab</span></div>
     </div>
   </div>
 </section>
