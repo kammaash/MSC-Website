@@ -50,7 +50,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Nunito:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* Base reset and defaults, identical to the branch page's: shared MSC red
      palette, Nunito body copy, Quicksand headings. riseIn is unused on this
@@ -75,18 +75,6 @@
 
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
-
-  /* ===== Flip cards (real-photo gallery blocks) =====
-     Same mechanism as montessori-acamp.html: .flip is the 3D scene, .flip-in
-     is what rotates, .flip-f/.flip-b are the two faces. Every isGallery
-     block on this page (Events, Awards, Latest News, Photo Gallery, Team,
-     Pre-Primary, Physical Education, …) renders through one shared template
-     further down, so this one ruleset covers all of them. */
-  .flip{perspective:1400px}
-  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d}
-  .flip:hover .flip-in,.flip:focus-within .flip-in{transform:rotateY(180deg)}
-  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:inherit;overflow:hidden}
-  .flip-b{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
 
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
@@ -187,9 +175,8 @@
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
        isGallery  real photos when a page's { gallery: [[src,caption],...] }
-                  entry supplies them, shown as flip cards (hover/focus to
-                  read the caption on the back); otherwise the original
-                  6-tile placeholder grid with a "photos coming soon" note
+                  entry supplies them; otherwise the original 6-tile
+                  placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
@@ -218,13 +205,9 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div tabindex="0" class="flip" style="aspect-ratio:4/3;border-radius:12px">
-                  <div class="flip-in">
-                    <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
-                    <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;justify-content:center;align-items:flex-start">
-                      <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px;color:#fff;line-height:1.35">{{ im.caption }}</span>
-                    </div>
-                  </div>
+                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
                 </div>
               </sc-for>
             </div>
@@ -263,6 +246,22 @@
               Your browser doesn't support embedded video. <a href="{{ b.video.src }}" style="color:#fff">Watch/download it directly</a>.
             </video>
           </div>
+        </sc-if>
+        <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ b.link.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:20px 0 0;text-decoration:none;background:#fff7f4">
+            <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+            <span>
+              <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ b.link.label }}</span>
+              <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ b.link.sub }}</span>
+            </span>
+          </a>
         </sc-if>
       </div>
     </sc-for>
@@ -562,22 +561,20 @@ class Component extends DCLogic {
       ] }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
-        { note: "Why these show a placeholder for now", sub: "The school's WordPress host blocks video requests that don't come from its own domain (\"hotlink protection\") — that's why the .mp4 files won't play from this local page. Each video below now points at a local file under assets/videos/. Download each source file (right-click the link on the school site — or open it in a new tab and use Ctrl+S) and save it with the exact filename listed, and it will start playing here with no further changes." },
-        { h: "Founder's Day — Blood Donation Camp" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/BIG-MAM.mp4 → save as assets/videos/founders-day.mp4" },
-        { video: { src: "assets/videos/founders-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg" } },
+        { h: "Teachers' Training on Karuna Clubs" },
+        { embed: { src: "https://www.youtube.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
+        { h: "State Aquatic Championship" },
+        { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
+        { h: "Startup Club — Classroom to Boardroom" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
         { h: "Freshers' Day — \"Srikaram\"" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/FRESHERS-DAY.mp4 → save as assets/videos/freshers-day.mp4" },
-        { video: { src: "assets/videos/freshers-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg" } },
-        { h: "Campus Moments" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/WhatsApp-Video-2026-07-13-at-10.09.40-AM.mp4 → save as assets/videos/campus-moments.mp4" },
-        { video: { src: "assets/videos/campus-moments.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg" } },
-        { h: "Children's Day Celebrations" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2022/11/CHILDRENS-DAY-22.mp4 → save as assets/videos/childrens-day.mp4" },
-        { video: { src: "assets/videos/childrens-day.mp4", poster: "assets/gallery/campus-life.jpg" } },
-        { h: "Krishna Janmashtami" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2023/09/KRISHNASTAMI.mp4 → save as assets/videos/janmashtami.mp4" },
-        { video: { src: "assets/videos/janmashtami.mp4", poster: "assets/gallery/campus-1.jpg" } },
+        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { h: "Monsoon Seed Ball Drive" },
+        { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
+        { h: "Flavours of Creativity" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
@@ -690,6 +687,8 @@ class Component extends DCLogic {
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
+      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
+      else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
     return {
