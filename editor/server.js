@@ -9,6 +9,7 @@ const { extractContent, replaceContent } = require("./lib/content-io.js");
 const { applyPatch } = require("./lib/patch.js");
 const { signParams } = require("./lib/cloudinary.js");
 const { readLibrary, addRecord, removeRecord, validateRecord } = require("./lib/media-db.js");
+const { parseVideoId } = require("./lib/youtube.js");
 
 const CONTENT_FILES = [
   "index.html", "montessori-acamp.html", "montessori-vidyanagar.html",
@@ -221,7 +222,7 @@ function staleSecretsWarning(editorDir) {
     "tree and was never safe. Delete it and run: npm run setup";
 }
 
-function createServer({ root, config, templates, secrets, token }) {
+function createServer({ root, config, templates, secrets, token, oembedFetch }) {
   // paths.js lives in the repo's editor/ dir, not the (possibly tmp) site root under test.
   const editorDir = __dirname;
   const editorParent = path.dirname(editorDir);
@@ -242,6 +243,10 @@ function createServer({ root, config, templates, secrets, token }) {
   // body of a cross-origin request), so it cannot drive the API even though the port
   // is reachable. Generated even if the caller forgets to pass one.
   const AUTH_TOKEN = token || crypto.randomUUID();
+  // The one outbound call this server ever makes: YouTube's keyless oEmbed lookup,
+  // used to verify a pasted video link and fetch its title. Injectable so tests
+  // never touch the network.
+  const fetchOembed = oembedFetch || fetch;
   const TOKEN_SCRIPT = "<script>window.__EDITOR_TOKEN=" + JSON.stringify(AUTH_TOKEN) + ";</script>";
 
   return http.createServer(async (req, res) => {
@@ -380,6 +385,42 @@ function createServer({ root, config, templates, secrets, token }) {
           apiKey: secrets.cloudinaryApiKey,
           cloudName: shared.cloudName,
         }), "application/json");
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/youtube/resolve") {
+        const body = await readJson(req);
+        if (body === null || typeof body !== "object" || Array.isArray(body) || typeof body.url !== "string") {
+          return send(res, 400, "Invalid request: expected { url: \"...\" }");
+        }
+        const id = parseVideoId(body.url);
+        if (!id) {
+          return send(res, 422, "That doesn't look like a YouTube link. Paste the video's own URL " +
+            "from youtube.com or youtu.be (open the video in YouTube Studio and use Share).");
+        }
+        // oEmbed is public and keyless, and answers 4xx for exactly the videos that
+        // would render as broken players on the site: private, deleted, or embedding
+        // disabled. A network failure must NOT block the editor (offline laptops are
+        // normal here) — the id is already validated, so resolve it unverified and
+        // let the client ask for a name instead of a title.
+        let r;
+        try {
+          r = await fetchOembed(
+            "https://www.youtube.com/oembed?url=" +
+              encodeURIComponent("https://www.youtube.com/watch?v=" + id) + "&format=json",
+            { signal: AbortSignal.timeout(5000) }
+          );
+        } catch {
+          return send(res, 200, JSON.stringify({ id, title: null, unverified: true }), "application/json");
+        }
+        if (!r.ok) {
+          return send(res, 422, "YouTube wouldn't confirm that video (HTTP " + r.status + "). " +
+            "In YouTube Studio, check the video's visibility is Unlisted (not Private) and that " +
+            "embedding is allowed, then paste the link again.");
+        }
+        let meta;
+        try { meta = await r.json(); } catch { meta = null; }
+        const title = meta !== null && typeof meta === "object" && typeof meta.title === "string" ? meta.title : null;
+        return send(res, 200, JSON.stringify({ id, title, unverified: title === null }), "application/json");
       }
 
       // ---- media library (media.json — see lib/media-db.js) ----
