@@ -540,9 +540,9 @@
           <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
           <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori A-Camp</span>
         </div>
-        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">A-Camp, Kurnool, Andhra Pradesh, India — <span data-edit="shared:contact.acampAddress">{{ contact.acampAddress }}</span>.</p>
+        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px"><span data-edit="shared:contact.acampAddress">{{ contact.acampAddress }}</span>.</p>
         <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a> · <a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a></p>
-        <p style="font-size:14px;margin:6px 0 0"><a href="mailto:info@msceducation.net" style="color:#ffd9c4"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
+        <p style="font-size:14px;margin:6px 0 0"><a href="{{ mailtoEmail }}" style="color:#ffd9c4"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
         <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">School</div>
@@ -941,6 +941,11 @@ class Component extends DCLogic {
       // template reads c.t for the text and c.p for the path.
       hero: CONTENT.hero,
       contact: S.contact,
+      // The footer's mailto: href, built here because {{ }} cannot concatenate. The
+      // address used to be hard-coded in the markup as well as rendered from CONTENT,
+      // so the first edit to contact.email would have shown the new address while every
+      // click still mailed the old one. One value, one source.
+      mailtoEmail: "mailto:" + S.contact.email,
       academics: withPaths(CONTENT.academics, "academics"),
       life: withPaths(CONTENT.life, "life"),
       facilities: withPaths(CONTENT.facilities, "facilities"),

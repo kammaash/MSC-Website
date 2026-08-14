@@ -410,7 +410,7 @@
           <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;color:#fff">Montessori Schools</span>
         </div>
         <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">Kurnool, Andhra Pradesh, India — full address to be added.</p>
-        <p style="font-size:14px;margin:14px 0 0"><a href="mailto:info@msceducation.net" class="link-accent" style="color:#e8541b"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
+        <p style="font-size:14px;margin:14px 0 0"><a href="{{ mailtoEmail }}" class="link-accent" style="color:#e8541b"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
         <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">Schools</div>
@@ -740,6 +740,11 @@ class Component extends DCLogic {
 
       hero: CONTENT.hero,
       contact: window.SHARED_CONTENT.contact,
+      // The footer's mailto: href, built here because {{ }} cannot concatenate. The
+      // address used to be hard-coded in the markup as well as rendered from CONTENT,
+      // so the first edit to contact.email would have shown the new address while every
+      // click still mailed the old one. One value, one source.
+      mailtoEmail: "mailto:" + window.SHARED_CONTENT.contact.email,
       stats: withPaths(CONTENT.stats, "stats"),
       timeline: withPaths(CONTENT.timeline, "timeline"),
       schools: withPaths(CONTENT.schools, "schools"),

@@ -9,8 +9,8 @@ window.SHARED_CONTENT = {
   "contact": {
     "phone": "+91 XXXXX XXXXX",
     "email": "info@msceducation.net",
-    "acampAddress": "full address to be added",
-    "vidyanagarAddress": "full address to be added"
+    "acampAddress": "A-Camp, Kurnool, Andhra Pradesh, India — full address to be added",
+    "vidyanagarAddress": "Vidyanagar, Kurnool, Andhra Pradesh, India — full address to be added"
   },
   "news": { "acamp": [], "vidyanagar": [] },
   "galleries": { "acamp": [], "vidyanagar": [] }
