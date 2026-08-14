@@ -65,12 +65,20 @@ test("secrets.json is written mode 0600 and .msc-editor mode 0700", () => {
   assert.equal(fileMode, 0o600, "file must be owner-only");
 });
 
-test("mode is corrected even when .msc-editor already exists looser (mode does not just 'stick' from mkdir)", () => {
+test("mode is corrected even when .msc-editor AND secrets.json already exist looser (mode does not just 'stick' from mkdir/writeFileSync)", () => {
   if (process.platform === "win32") return;
   const homedir = fixtureHome();
   const { contentPath } = fixtureContentJs();
   const secretsDir = path.join(homedir, ".msc-editor");
+  const secretsPathPre = path.join(secretsDir, "secrets.json");
   fs.mkdirSync(secretsDir, { mode: 0o755 }); // pre-existing, wide-open directory
+  // Pre-existing, wide-open FILE too — this is the credential-rotation path (re-running
+  // `npm run setup` to change keys). writeFileSync's `{mode:0o600}` option only applies
+  // when a file is newly created; without the explicit chmodSync in setup.js, overwriting
+  // an existing 0o644 file here would silently leave it at 0o644, and this test's earlier
+  // version (which only pre-created the directory, never the file) could not have caught
+  // that — the file's mode came out right by accident, from creation, not from the chmod.
+  fs.writeFileSync(secretsPathPre, JSON.stringify({ cloudinaryApiKey: "old", cloudinaryApiSecret: "old" }), { mode: 0o644 });
   const { secretsPath } = writeCredentials({
     homedir, contentPath, cloudName: "demo-cloud", apiKey: "key123", apiSecret: "secret456",
   });
@@ -117,6 +125,64 @@ for (const [label, values] of [
     assert.equal(fs.readFileSync(contentPath, "utf8"), src, "content.js must be untouched on rejected input");
   });
 }
+
+// ---- validation: a cloudName that could forge a second CONTENT:END marker is refused ----
+
+test("rejects a cloudName containing CONTENT:BEGIN/END marker text, without writing anything", () => {
+  const homedir = fixtureHome();
+  const { contentPath, src } = fixtureContentJs();
+  assert.throws(
+    () => writeCredentials({ homedir, contentPath, cloudName: "evil /* CONTENT:END */ cloud", apiKey: "k", apiSecret: "s" }),
+    /CONTENT:BEGIN|CONTENT:END/,
+  );
+  assert.equal(fs.existsSync(path.join(homedir, ".msc-editor")), false, "no directory must be created on rejected input");
+  assert.equal(fs.readFileSync(contentPath, "utf8"), src, "content.js must be untouched on rejected input");
+});
+
+// ---- validation: a non-absolute homedir must be refused, not silently resolved against CWD ----
+//
+// This is the exact failure mode server.js's secretsPathFor guards against: os.homedir() can
+// return "" (observed with HOME="") or, in principle, a relative path, and joining that
+// straight into path.join would resolve relative to the process's CWD instead of failing —
+// which, for `npm run setup`, is the repo root. Both tests below run with the process's CWD
+// temporarily pointed at a disposable tmp directory (restored in `finally`, even on failure)
+// specifically so that if this guard were ever removed, the accidental write would land in
+// that disposable directory, never in this actual checkout.
+function withTempCwd(fn) {
+  const cwdGuard = fs.mkdtempSync(path.join(os.tmpdir(), "msc-setup-cwd-"));
+  const originalCwd = process.cwd();
+  process.chdir(cwdGuard);
+  try {
+    fn(cwdGuard);
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(cwdGuard, { recursive: true, force: true });
+  }
+}
+
+test("rejects a relative-path homedir without writing anything, anywhere (including relative to CWD)", () => {
+  withTempCwd((cwdGuard) => {
+    const { contentPath, src } = fixtureContentJs();
+    assert.throws(
+      () => writeCredentials({ homedir: "relative/dir", contentPath, cloudName: "c", apiKey: "k", apiSecret: "s" }),
+      /home folder/,
+    );
+    assert.equal(fs.existsSync(path.join(cwdGuard, "relative")), false, "must not resolve relative to CWD and create anything there");
+    assert.equal(fs.readFileSync(contentPath, "utf8"), src, "content.js must be untouched on rejected input");
+  });
+});
+
+test('rejects an empty-string homedir (HOME="") without writing anything, anywhere (including relative to CWD)', () => {
+  withTempCwd((cwdGuard) => {
+    const { contentPath, src } = fixtureContentJs();
+    assert.throws(
+      () => writeCredentials({ homedir: "", contentPath, cloudName: "c", apiKey: "k", apiSecret: "s" }),
+      /home folder/,
+    );
+    assert.equal(fs.existsSync(path.join(cwdGuard, ".msc-editor")), false, "must not resolve relative to CWD and create anything there");
+    assert.equal(fs.readFileSync(contentPath, "utf8"), src, "content.js must be untouched on rejected input");
+  });
+});
 
 test("trims surrounding whitespace from otherwise-valid values before writing", () => {
   const homedir = fixtureHome();
