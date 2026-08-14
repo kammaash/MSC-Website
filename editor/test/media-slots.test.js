@@ -50,3 +50,11 @@ test("record data never reaches innerHTML", () => {
     assert.ok(!/\$\{/.test(m) && !/\brec\b|\brecord\b/.test(m), "innerHTML with data: " + m);
   }
 });
+
+test("click handler guards against swallowing interactive controls inside slots", () => {
+  // Media slots may wrap list items whose own interactive chrome (buttons, etc.)
+  // lives inside them. The capture-phase click listener must not claim clicks
+  // targeting those controls, or stopPropagation() will prevent them from firing.
+  assert.match(SRC, /e\.target\.closest.*button.*a.*input.*textarea.*select.*\.ed-menu/);
+  assert.match(SRC, /if \(interactive && el\.contains\(interactive\)\) return;/);
+});
