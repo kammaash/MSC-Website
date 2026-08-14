@@ -30,9 +30,11 @@ const MIME = {
   // application/octet-stream and render differently in the editor preview than deployed.
 };
 const INJECT = '<script src="/editor/lib/paths.js"></script>' +
+  '<script src="/editor/lib/media-urls.js"></script>' +
   '<script src="/editor/client/draft.js"></script>' +
   '<script src="/editor/client/editor-client.js"></script>' +
-  '<script src="/editor/client/media.js"></script>'; // after editor-client.js — it needs window.EditorUI
+  '<script src="/editor/client/media.js"></script>' + // after editor-client.js — needs window.EditorUI
+  '<script src="/editor/client/media-slots.js"></script>'; // last — needs EditorUI, EditorMedia, EditorMediaUrls
 
 // Only a bare, single-segment .js filename directly under editor/lib/ or editor/client/ is
 // ever servable. Dots are permitted in the name (e.g. "editor-client.min.js") so a future

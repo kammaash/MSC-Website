@@ -91,6 +91,10 @@
     if (typeof valueOrFn === "function") valueOrFn(P.getPath(obj, p)); // list mutation
     else P.setPath(obj, p, valueOrFn);
   }
+  function getLocal(path) {
+    const [obj, p] = targetFor(path);
+    return P.getPath(obj, p);
+  }
   function rerender() { if (window.__rerender) window.__rerender(); }
 
   // The only two values `el.contentEditable = "..."` ever produces (see the click
@@ -539,6 +543,6 @@
 
   // apiFetch/describeApiError are shared so media.js (loaded right after this file)
   // talks to /api/* with the same token discipline instead of growing a drifting copy.
-  window.EditorUI = { draft, applyLocal, rerender, decorate, update, apiFetch, describeApiError, isEditing: () => editing };
+  window.EditorUI = { draft, applyLocal, getLocal, rerender, decorate, update, apiFetch, describeApiError, isEditing: () => editing };
   update();
 })();
