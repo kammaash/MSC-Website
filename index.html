@@ -255,7 +255,7 @@
 
     <div style="position:relative">
       <div style="aspect-ratio:4/5;border-radius:14px;overflow:hidden;background:#f1e9e2;border:1px solid rgba(38,32,29,.1);animation:fadeIn 1s ease both">
-        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Montessori School Committee students" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+        <img src="{{ heroPhotoSrc }}" data-media-slot="hero.photo" data-media-kind="image" alt="Montessori School Committee students" style="width:100%;height:100%;object-fit:cover" loading="lazy">
       </div>
 
 
@@ -501,7 +501,8 @@ const CONTENT = {
     "title": "Help the child",
     "title2": "to help",
     "titleEm": "himself.",
-    "sub": "Montessori School Committee runs two branches in Kurnool — A-Camp and Vidyanagar — each offering value-based, child-centred Montessori education in an environment built around empathy, discipline and respect."
+    "sub": "Montessori School Committee runs two branches in Kurnool — A-Camp and Vidyanagar — each offering value-based, child-centred Montessori education in an environment built around empathy, discipline and respect.",
+    "photo": ""
   },
   "stats": [
     { "n": "2", "label": "Branches in Kurnool" },
@@ -739,6 +740,10 @@ class Component extends DCLogic {
       navRef: (el) => { this._navEl = el; },
 
       hero: CONTENT.hero,
+      // "" means "no photo chosen yet": render the same 1x1 transparent GIF the
+      // markup used to hard-code, so an empty slot looks exactly as before.
+      heroPhotoSrc: CONTENT.hero.photo ||
+        "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
       contact: window.SHARED_CONTENT.contact,
       // The footer's mailto: href, built here because {{ }} cannot concatenate. The
       // address used to be hard-coded in the markup as well as rendered from CONTENT,
