@@ -53,8 +53,10 @@
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
 <!-- Shared facts (contact details, news, galleries) used across pages. Must
      load before support.js so window.SHARED_CONTENT exists when the runtime
-     boots. These detail pages do not read it yet; it is loaded here so every
-     page in the project offers the same globals. -->
+     boots. The top bar's phone number is the one shared value these detail
+     pages read, and it must come from here rather than from the markup: the
+     landing page and the branch pages already read it from content.js, so a
+     hard-coded copy would go stale the moment anyone edits the number. -->
 <script src="./content.js"></script>
 <!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
@@ -126,7 +128,7 @@
     </a>
     <div class="phone-block" style="text-align:right">
       <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
-      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
+      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a>
     </div>
   </div>
 </div>
@@ -727,7 +729,7 @@ class Component extends DCLogic {
     // Same menu as the branch page, but the dropdown entries are written as
     // compact [label, routeKey] pairs rather than objects, because every one
     // of them resolves to a hash in this same file. Each routeKey must match a
-    // key in the `pages` map below.
+    // key in CONTENT.pages, in the block above this class.
     const rawMenus = [
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
@@ -804,6 +806,10 @@ class Component extends DCLogic {
     return {
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
+      // The top bar's phone number. Shared across every page, so it lives in
+      // content.js rather than in this file's CONTENT block, and is written
+      // data-edit="shared:contact.phone".
+      contact: window.SHARED_CONTENT.contact,
       // Only the four fields the banner and CTA display, plus the CONTENT
       // paths of the two editable ones; `blocks` is passed separately in its
       // normalised form, so current.blocks is not exposed.
