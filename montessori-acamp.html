@@ -36,7 +36,7 @@
     - a sticky peach nav bar whose menus open on hover
     - a floating "current page" pill that appears once you scroll past the nav
       and tracks which section you are looking at
-    - the showcase video, which remembers its playback position
+    - the showcase video (a YouTube embed placed via the editor)
     - an admissions enquiry form (front-end only, sends nothing)
 
   Fonts here are Quicksand + Nunito, distinct from the landing page's
@@ -279,7 +279,7 @@
     <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
       <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
-    <img src="assets/gallery/campus-2.jpg" alt="Montessori School, A-Camp — students on the campus steps" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+    <img src="{{ hero.photo }}" data-media-slot="hero.photo" data-media-kind="image" alt="Montessori School, A-Camp — students on the campus steps" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
   </div>
 </section>
 
@@ -318,12 +318,12 @@
      Portrait + short bio, condensed from the founder's page on the group
      site (montessoricbseacamp.com/founder). Kept to a few sentences in our
      own words, in the same register as the rest of the About section. All
-     five text fields are the `founder` object in CONTENT; the portrait
-     itself is markup, since images are not editable text. -->
+     five text fields plus the portrait are the `founder` object in CONTENT;
+     the portrait is editable via the media drawer like any other image slot. -->
 <section id="founder" class="wrap" style="padding-top:0;padding-bottom:78px;scroll-margin-top:110px">
   <div class="g g-split" style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:20px;padding:40px;align-items:center">
     <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc">
-      <img src="assets/people/founder.jpg" alt="{{ founder.name }}" style="width:100%;height:100%;object-fit:cover;display:block">
+      <img src="{{ founder.photo }}" data-media-slot="founder.photo" data-media-kind="image" alt="{{ founder.name }}" style="width:100%;height:100%;object-fit:cover;display:block">
     </div>
     <div>
       <div data-edit="founder.eyebrow" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ founder.eyebrow }}</div>
@@ -391,13 +391,11 @@
   </div>
 </section>
 
-<!-- STUDENT SHOWCASE / VIDEO
-     Plays the group's promotional film, hotlinked from the Montessori group
-     site (montessoritechnoschool.com) rather than hosted locally, with a
-     campus-life poster frame (assets/gallery/campus-life.jpg) shown until
-     playback starts. ref="{{ videoRef }}" gives the logic block the element
-     so it can save and restore the playback position across visits. Swap the
-     <source> for a locally hosted file whenever the school supplies one. -->
+<!-- STUDENTS SHOWCASE
+     A YouTube embed (an Unlisted video on the school's channel), placed through
+     the editor's media drawer. "" means no video chosen yet — renderVals maps it
+     to about:blank so the frame stays an empty black box (an src of "" would
+     recursively load this very page inside itself). -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
@@ -406,9 +404,7 @@
       <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
     </div>
     <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
-      <video ref="{{ videoRef }}" controls playsinline muted poster="assets/gallery/campus-life.jpg" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
-        <source src="http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/MONTESSORI-SCHOOL.mp4" type="video/mp4">
-      </video>
+      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" data-media-slot="showcase.video" data-media-kind="video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -527,7 +523,7 @@
           <sc-for list="{{ grp.photos }}" as="ph" hint-placeholder-count="4">
             <div tabindex="0" class="flip" style="aspect-ratio:1;border-radius:12px">
               <div class="flip-in">
-                <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ ph.src }}" alt="{{ ph.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
+                <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ ph.src }}" data-media-slot="{{ ph.p }}.src" data-media-kind="image" alt="{{ ph.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
                 <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;align-items:flex-start;justify-content:center;gap:8px">
                   <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ffd9c4;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:999px">{{ grp.label }}</span>
                   <span data-edit="{{ ph.p }}.caption" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px;color:#fff;line-height:1.3">{{ ph.caption }}</span>
@@ -660,11 +656,10 @@
   it reads this page's copy out of the CONTENT block below and adds the
   computed styles and handlers the markup needs.
 
-  componentDidMount wires up four independent behaviours, in order:
+  componentDidMount wires up three independent behaviours, in order:
     1. scroll reveal for [data-reveal] cards
-    2. the showcase video's remembered playback position
-    3. the loading screen's timed fade-out
-    4. the scroll listener driving the nav state and the floating pill
+    2. the loading screen's timed fade-out
+    3. the scroll listener driving the nav state and the floating pill
 */
 
 /*
@@ -718,7 +713,8 @@ const CONTENT = {
     "title": "Montessori School, A-Camp",
     "p1": "Montessori A-Camp is a co-educational & semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.",
     "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
-    "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”"
+    "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”",
+    "photo": "assets/gallery/campus-2.jpg"
   },
   "founder": {
     "eyebrow": "Our Founder",
@@ -726,8 +722,10 @@ const CONTENT = {
     "title": "Founder, Montessori Institutions",
     "p1": "Fondly known to generations of students and staff as \"Big Aunty\", Smt. Kalyanamma founded the Montessori Institutions in Kurnool over four decades ago. A self-made educator with sharp analytical thinking and an unwavering resolve to see every goal through, she trained formally in the Montessori method after being inspired by Maria Montessori's founding belief that a child should be guided to help himself.",
     "p2": "As Chief Patron, she continues to shape teaching practice across the group, championing methods that support the all-round development of every child.",
-    "quote": "\"My work is my relaxation.\""
+    "quote": "\"My work is my relaxation.\"",
+    "photo": "assets/people/founder.jpg"
   },
+  "showcase": { "video": "" },
   "academics": [
     { "tag": "01", "title": "Pedagogy", "desc": "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
     { "tag": "02", "title": "Pre-Primary Program", "desc": "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
@@ -820,20 +818,7 @@ class Component extends DCLogic {
     document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
     this._io = io;
 
-    // ---- 2. Resume the showcase video where the visitor left off ----
-    // The position is written to localStorage on every timeupdate and restored
-    // on the next visit. The key is per branch, so the two branch pages do not
-    // overwrite each other's position.
-    const v = this._videoEl;
-    if (v) {
-      const KEY = "msc_acamp_video_pos";
-      const saved = parseFloat(localStorage.getItem(KEY) || "0");
-      if (saved > 0 && isFinite(saved)) { try { v.currentTime = saved; } catch (e) {} }
-      this._vSave = () => { if (v.currentTime > 0) localStorage.setItem(KEY, String(v.currentTime)); };
-      v.addEventListener("timeupdate", this._vSave);
-    }
-
-    // ---- 3. Loading screen fade-out ----
+    // ---- 2. Loading screen fade-out ----
     // Purely time-based: fade at 1250ms, then remove from the layout at 1900ms
     // once the opacity transition has finished. It is not waiting on any real
     // load event.
@@ -845,7 +830,7 @@ class Component extends DCLogic {
 
     // custom cursor handled globally by cursor.js
 
-    // ---- 4. Nav state and scrollspy ----
+    // ---- 3. Nav state and scrollspy ----
     // Drives two things at once: whether the floating pill is showing, and
     // which section name it displays. static -> collapse-to-pill on
     // scroll-past -> expand on hover.
@@ -887,7 +872,6 @@ class Component extends DCLogic {
   // harmless, but they can be deleted.
   componentWillUnmount() {
     if (this._io) this._io.disconnect();
-    if (this._videoEl && this._vSave) this._videoEl.removeEventListener("timeupdate", this._vSave);
     clearTimeout(this._t1); clearTimeout(this._t2);
     if (this._onMove) window.removeEventListener("mousemove", this._onMove);
     if (this._raf) cancelAnimationFrame(this._raf);
@@ -1036,10 +1020,9 @@ class Component extends DCLogic {
 
     return {
       // ref callbacks: the runtime passes the real DOM node to each of these,
-      // which is how componentDidMount gets hold of the three elements it has
-      // to measure, time or drive imperatively.
+      // which is how componentDidMount gets hold of the two elements it has
+      // to measure or time.
       navRef: (el) => { this._navEl = el; },
-      videoRef: (el) => { this._videoEl = el; },
       loaderRef: (el) => { this._loaderEl = el; },
       navHeaderStyle, navBarStyle, menuRowStyle, currentTab: this.state.currentTab,
       showPill, pillItems, pillHint, pillHref,
@@ -1055,6 +1038,9 @@ class Component extends DCLogic {
       // template reads c.t for the text and c.p for the path.
       hero: CONTENT.hero,
       founder: CONTENT.founder,
+      // "" means "no video chosen yet": about:blank keeps the iframe an empty
+      // black box instead of recursively loading this page inside itself.
+      showcaseVideoSrc: CONTENT.showcase.video || "about:blank",
       contact: S.contact,
       // The footer's mailto: href, built here because {{ }} cannot concatenate. The
       // address used to be hard-coded in the markup as well as rendered from CONTENT,
