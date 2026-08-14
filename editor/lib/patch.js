@@ -4,6 +4,7 @@ const { getPath, setPath, addItem, removeItem, moveItem } = require("./paths.js"
 function validateText(value) {
   if (typeof value !== "string") throw new Error("Text value must be a string");
   if (/<\s*\/?\s*script/i.test(value)) throw new Error("Text may not contain script tags");
+  if (/CONTENT:BEGIN|CONTENT:END/i.test(value)) throw new Error("Text may not contain CONTENT:BEGIN or CONTENT:END markers");
 }
 
 function validateItem(item, template) {
