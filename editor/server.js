@@ -8,11 +8,17 @@ const { execFileSync, execFile } = require("node:child_process");
 const { extractContent, replaceContent } = require("./lib/content-io.js");
 const { applyPatch } = require("./lib/patch.js");
 const { signParams } = require("./lib/cloudinary.js");
+const { readLibrary, addRecord, removeRecord, validateRecord } = require("./lib/media-db.js");
 
 const CONTENT_FILES = [
   "index.html", "montessori-acamp.html", "montessori-vidyanagar.html",
   "acamp-subpage.html", "vidyanagar-subpage.html", "content.js",
 ];
+// What /api/publish commits. CONTENT_FILES stays the /api/save allowlist (media.json has
+// no CONTENT block and is written only through /api/media), but the media library is
+// content in every way that matters to publishing: it must ride the same commit, or an
+// upload would sit uncommitted until some later, unrelated publish quietly swept it up.
+const PUBLISH_FILES = [...CONTENT_FILES, "media.json"];
 const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".json": "application/json", ".css": "text/css", ".png": "image/png",
@@ -25,7 +31,8 @@ const MIME = {
 };
 const INJECT = '<script src="/editor/lib/paths.js"></script>' +
   '<script src="/editor/client/draft.js"></script>' +
-  '<script src="/editor/client/editor-client.js"></script>';
+  '<script src="/editor/client/editor-client.js"></script>' +
+  '<script src="/editor/client/media.js"></script>'; // after editor-client.js — it needs window.EditorUI
 
 // Only a bare, single-segment .js filename directly under editor/lib/ or editor/client/ is
 // ever servable. Dots are permitted in the name (e.g. "editor-client.min.js") so a future
@@ -291,7 +298,7 @@ function createServer({ root, config, templates, secrets, token }) {
         try { body = await readJson(req); }
         catch (e) { return send(res, 400, "Invalid publish request: " + (e.message || e)); }
         const msg = (body.message || "content: update via editor").slice(0, 200);
-        const existing = CONTENT_FILES.filter((f) => fs.existsSync(path.join(root, f)));
+        const existing = PUBLISH_FILES.filter((f) => fs.existsSync(path.join(root, f)));
         // Was unwrapped until fix round 5: a failure here (e.g. a stale `.git/index.lock` left
         // behind by a crashed prior run — realistic, not contrived) fell straight through to
         // the outer catch. execFileSync's non-zero-exit errors carry `.status`, not `.code`, so
@@ -371,6 +378,49 @@ function createServer({ root, config, templates, secrets, token }) {
           apiKey: secrets.cloudinaryApiKey,
           cloudName: shared.cloudName,
         }), "application/json");
+      }
+
+      // ---- media library (media.json — see lib/media-db.js) ----
+      if (req.method === "GET" && url.pathname === "/api/media") {
+        // readLibrary throws a plain (code-less) Error on a corrupt media.json, so the
+        // outer catch forwards its message — which names the file and the fix — instead
+        // of the generic fs-error text.
+        const records = readLibrary(root);
+        // Same source /api/sign uses for cloudName: shared content. The client needs it
+        // to build Cloudinary thumbnail/delivery URLs from each record's bare id.
+        const shared = extractContent(fs.readFileSync(path.join(root, "content.js"), "utf8")).data;
+        return send(res, 200, JSON.stringify({ cloudName: shared.cloudName, records }), "application/json");
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media") {
+        const body = await readJson(req);
+        if (body === null || typeof body !== "object" || Array.isArray(body) ||
+            body.record === null || typeof body.record !== "object" || Array.isArray(body.record) ||
+            body.record === undefined) {
+          return send(res, 400, "Invalid request: expected { record: { id, kind, ... } }");
+        }
+        validateRecord(body.record); // throws => outer catch answers 400 with the named problem
+        // Duplicate is a 409 (a conflict with existing state), not a 400 (a malformed
+        // request) — checked here, before addRecord, because addRecord's own duplicate
+        // throw would be indistinguishable from a validation failure by the outer catch.
+        if (readLibrary(root).some((r) => r && r.id === body.record.id)) {
+          return send(res, 409, "A media record with this id already exists: " + body.record.id);
+        }
+        addRecord(root, body.record);
+        return send(res, 200, JSON.stringify({ ok: true }), "application/json");
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/delete") {
+        const body = await readJson(req);
+        if (body === null || typeof body !== "object" || Array.isArray(body) ||
+            typeof body.id !== "string" || body.id === "") {
+          return send(res, 400, "Invalid request: expected { id: \"...\" }");
+        }
+        // Removes the record from the library only. The asset itself stays in Cloudinary
+        // (deleting there needs the Admin API and is not worth the blast radius here) —
+        // so a mistaken delete never destroys a photo, it just unlists it.
+        if (!removeRecord(root, body.id)) return send(res, 404, "No media record with id: " + body.id);
+        return send(res, 200, JSON.stringify({ ok: true }), "application/json");
       }
 
       // ---- static ----

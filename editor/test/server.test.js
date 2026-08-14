@@ -25,7 +25,7 @@ test("serves html with editor scripts injected before </body>", async () => {
   const { srv, base } = await boot();
   after(() => srv.close());
   const text = await (await fetch(base + "/")).text();
-  assert.match(text, /editor-client\.js"><\/script><\/body>/);
+  assert.match(text, /editor-client\.js"><\/script><script src="\/editor\/client\/media\.js"><\/script><\/body>/);
   assert.match(text, /<h1>Hi<\/h1>/);
   // The per-boot token must be injected before the editor scripts so the client can read it.
   assert.match(text, /window\.__EDITOR_TOKEN=".+?";<\/script><script src="\/editor\/lib\/paths\.js">/);

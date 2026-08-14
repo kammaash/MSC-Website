@@ -185,6 +185,12 @@
       },
       // True while a transaction opened by beginSave() has not been end()ed.
       isSaving() { return inFlight; },
+      // For writes that happen server-side without ever being a pending op — a media
+      // upload lands in media.json the moment /api/media 200s. The disk now differs
+      // from HEAD, which is exactly what `uncommitted` reports; without this, a
+      // media-only session ends with Publish refusing ("No changes to publish") while
+      // the upload sits unpublished on disk.
+      markSavedToDisk() { setUncommitted(true); },
       // Call ONLY when classifyPublishResponse() reports committed: true — which includes
       // both 409s, not just a 200. See that function for why.
       markCommitted() { setUncommitted(false); },

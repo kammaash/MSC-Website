@@ -144,6 +144,23 @@ test("C1: a successful publish ends the transaction — no pending ops, nothing 
   assert.equal(d.hasWork(), false, "Publish's guard must refuse a no-op publish once everything is committed");
 });
 
+test("markSavedToDisk (media uploads) sets the uncommitted bit without any pending ops, persists it, and markCommitted clears it", () => {
+  // A media upload writes media.json on the server the moment it succeeds — no draft op
+  // is ever pending, but the disk now differs from HEAD, exactly the state `uncommitted`
+  // exists to report. Without this, a media-only session ends with Publish refusing
+  // ("No changes to publish") while the upload sits unpublished on disk.
+  const storage = memStore();
+  const d = createDraft("index.html", storage);
+  assert.equal(d.hasWork(), false);
+  d.markSavedToDisk();
+  assert.equal(d.count(), 0, "no pending ops — the write already happened server-side");
+  assert.equal(d.hasUncommitted(), true);
+  assert.equal(d.hasWork(), true, "Publish must have something to gate through");
+  assert.equal(createDraft("index.html", storage).hasUncommitted(), true, "survives a reload");
+  d.markCommitted();
+  assert.equal(d.hasWork(), false);
+});
+
 test("C1: hasWork() is false on a clean draft and true as soon as anything is pending", () => {
   const d = createDraft("index.html");
   assert.equal(d.hasWork(), false);

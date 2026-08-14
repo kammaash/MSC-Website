@@ -44,7 +44,7 @@ const { createServer } = require("../server.js");
 
 const EDITOR_DIR = path.join(__dirname, "..");
 const REPO_ROOT = path.dirname(EDITOR_DIR);
-const LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "paths.js"];
+const LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js"];
 
 // Builds a disposable, production-shaped COPY of the served tree: <tmp>/site/editor/{
 // server.js, lib/*.js[, client/*.js]}, with "site" playing the role of REPO_ROOT (editor's
@@ -266,7 +266,7 @@ test("Fix 3: a dotted client filename (e.g. a minified bundle) is servable; nest
 
 // ---- Positive controls that must still pass ----
 
-test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 200; page HTML still carries the token and three script tags", async () => {
+test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 200; page HTML still carries the token and four script tags", async () => {
   const fixture = buildFixture({ withClient: true });
   let srv;
   try {
@@ -284,7 +284,7 @@ test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 20
 
     const page = await fetch(base + "/");
     const html = await page.text();
-    assert.match(html, /window\.__EDITOR_TOKEN="[^"]+";<\/script><script src="\/editor\/lib\/paths\.js"><\/script><script src="\/editor\/client\/draft\.js"><\/script><script src="\/editor\/client\/editor-client\.js"><\/script><\/body>/);
+    assert.match(html, /window\.__EDITOR_TOKEN="[^"]+";<\/script><script src="\/editor\/lib\/paths\.js"><\/script><script src="\/editor\/client\/draft\.js"><\/script><script src="\/editor\/client\/editor-client\.js"><\/script><script src="\/editor\/client\/media\.js"><\/script><\/body>/);
   } finally {
     if (srv) await new Promise((r) => srv.close(r));
     fixture.cleanup();

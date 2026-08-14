@@ -229,7 +229,7 @@
     if (draft.count() === 0 && draft.hasUncommitted()) {
       if (!confirm(
         "There are no unsaved changes on this page, but this browser remembers changes that " +
-        "were saved and not yet published — usually a Publish that failed part-way.\n\n" +
+        "were saved and not yet published — usually a media upload, or a Publish that failed part-way.\n\n" +
         "Publish them now?\n\n" +
         "If you don't recognise this (for example, this is a different copy of the website), " +
         "click Cancel and tell the site admin."
@@ -517,6 +517,8 @@
   const observe = () => mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["contenteditable"] });
   decorate(); observe();
 
-  window.EditorUI = { draft, applyLocal, rerender, decorate, update, isEditing: () => editing };
+  // apiFetch/describeApiError are shared so media.js (loaded right after this file)
+  // talks to /api/* with the same token discipline instead of growing a drifting copy.
+  window.EditorUI = { draft, applyLocal, rerender, decorate, update, apiFetch, describeApiError, isEditing: () => editing };
   update();
 })();
