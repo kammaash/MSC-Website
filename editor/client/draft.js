@@ -11,6 +11,32 @@
     if (/CONTENT:BEGIN|CONTENT:END/i.test(value)) return "Text may not contain CONTENT:BEGIN or CONTENT:END markers";
     return null;
   }
+  // Applies an add/move/remove op directly to an in-memory array — the single place
+  // that encodes "what a list op means" on the client. Deliberately mirrors
+  // editor/lib/paths.js's addItem/removeItem/moveItem exactly: same splice calls, same
+  // argument order, same bounds guard on remove/move (same error message shape, too).
+  // That file remains the authority (it's what the server actually applies to
+  // content.js on /api/save), so this is a copy that must never drift from it — see
+  // editor/test/list-op-equivalence.test.js, which runs the same ops through both and
+  // asserts identical resulting arrays, including the boundary cases (move
+  // first<->second, last<->second-last, remove first/last). A drift here is the most
+  // damaging failure this editor can have: the browser would show one item moving or
+  // disappearing while /api/save actually moves or removes a different one.
+  function applyListOp(list, op) {
+    if (op.type === "add") { list.push({ ...op.item }); return; }
+    if (op.type === "remove") {
+      if (!Number.isInteger(op.index) || op.index < 0 || op.index >= list.length) throw new Error("Bad index: " + op.index);
+      list.splice(op.index, 1);
+      return;
+    }
+    if (op.type === "move") {
+      for (const i of [op.from, op.to])
+        if (!Number.isInteger(i) || i < 0 || i >= list.length) throw new Error("Bad index: " + i);
+      list.splice(op.to, 0, list.splice(op.from, 1)[0]);
+      return;
+    }
+    throw new Error("Unknown list op type: " + (op && op.type));
+  }
   function createDraft(pageFile) {
     let ops = [];
     const route = (p) => (p.startsWith("shared:") ? ["content.js", p.slice(7)] : [pageFile, p]);
@@ -31,4 +57,5 @@
   }
   exports.createDraft = createDraft;
   exports.rejectText = rejectText;
+  exports.applyListOp = applyListOp;
 })(typeof module !== "undefined" ? module.exports : (window.EditorDraft = {}));

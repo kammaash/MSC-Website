@@ -5,6 +5,7 @@
   const P = window.EditorPaths;
   const pageFile = location.pathname.replace(/^\//, "") || "index.html";
   const draft = window.EditorDraft.createDraft(pageFile);
+  const applyListOp = window.EditorDraft.applyListOp; // shared with lib/paths.js — see doOp() below
   let editing = true;
 
   // Every /api/* call must carry this header — the server mints one random token per
@@ -197,30 +198,48 @@
 
   // ---- collections chrome (Task 12): + Add / ↑ / ↓ / ✕ on [data-list] sections ----
   // Every list op (add/move/remove) is recorded to the draft, applied to the in-memory
-  // content object, and followed by an immediate decorate() — see decorate() below for
-  // why a full rebuild, not a targeted DOM patch, is the only safe way to keep chrome
-  // wired to the right index.
-  function doOp(op, mutate) {
+  // content object, and followed by a decorate() rebuild — see decorate() below for why
+  // a full rebuild, not a targeted DOM patch, is the only safe way to keep chrome wired
+  // to the right index. The actual splice/push arithmetic for each op type lives in
+  // exactly one place — window.EditorDraft.applyListOp (editor/client/draft.js) — used
+  // here AND provably equivalent to editor/lib/paths.js's server-side addItem/
+  // removeItem/moveItem (see editor/test/list-op-equivalence.test.js). Nothing in this
+  // file hand-writes a splice call.
+  function doOp(op) {
+    try {
+      // Apply first, record only on success — same invariant as the text-edit blur
+      // handler above (search "must never reach the draft log" in this file) and for
+      // the same reason: if applyListOp throws (a stale/mismatched list path, an
+      // out-of-range index), the op must not end up in the draft log — there'd be
+      // nothing to remove it later, the change counter would over-report, and Publish
+      // would be the first place the failure surfaces, against a file that by then
+      // disagrees with what's on screen.
+      applyLocal(op.path, (list) => applyListOp(list, op));
+    } catch (err) {
+      alert("Can't apply this change:\n" + err.message);
+      return;
+    }
     draft.listOp(op);
-    applyLocal(op.path, mutate);
     rerender(); update();
-    // Rebuild synchronously here rather than waiting on the debounced MutationObserver
-    // below: that debounce is 120ms, and a fast second click (e.g. double-tapping ↑)
-    // inside that window would fire against chrome still wired to the pre-mutation
-    // array order — the exact stale-index/wrong-item-deleted failure this task calls
-    // out as the one to get right. decorate() is idempotent, so the observer redoing
-    // the same rebuild a moment later (once it notices the DOM change from rerender()
-    // and from this call) is harmless.
-    decorate();
+    // rerender() calls window.__rerender(), which is a plain React 18 `this.setState({})`
+    // (see e.g. montessori-acamp.html's dc-script) on a createRoot root. That update is
+    // auto-batched and its DOM commit is NOT synchronous with this call — decorating on
+    // the very next line would rebuild chrome against the PRE-mutation DOM (an add
+    // wouldn't have its new card yet; a remove/move would still show the old order).
+    // requestAnimationFrame runs after both the microtask queue (where React's batched
+    // flush lands) and the browser's per-frame style/layout work, so by the time this
+    // fires the DOM already reflects the new array. This tightens, but does not by
+    // itself fully replace, the debounced MutationObserver rebuild below — it's what
+    // keeps a fast second click (e.g. double-tapping ↑) from reading a stale index
+    // during the ~1 frame between the click and the observer's own 120ms-later pass.
+    requestAnimationFrame(decorate);
   }
   function onAdd(listPath) {
-    if (listPath.includes("galleries.")) return window.__edUpload
-      ? window.__edUpload(listPath)
-      : alert("Uploads arrive in the next build step.");
+    if (listPath.includes("galleries.")) return window.__edUpload(listPath);
     const item = { date: new Date().toISOString().slice(0, 10), title: "New post", body: "Write the announcement here." };
-    doOp({ type: "add", path: listPath, item }, (l) => l.push({ ...item }));
+    doOp({ type: "add", path: listPath, item });
   }
-  function menuFor(item, listPath, index, length) {
+  function menuFor(listPath, index, length) {
     const m = document.createElement("span");
     m.className = "ed-menu";
     const mk = (label, title, fn) => {
@@ -229,20 +248,25 @@
       b.onclick = (e) => { e.stopPropagation(); e.preventDefault(); fn(); };
       m.appendChild(b);
     };
-    if (index > 0) mk("↑", "Move up", () => doOp({ type: "move", path: listPath, from: index, to: index - 1 }, (l) => l.splice(index - 1, 0, l.splice(index, 1)[0])));
-    if (index < length - 1) mk("↓", "Move down", () => doOp({ type: "move", path: listPath, from: index, to: index + 1 }, (l) => l.splice(index + 1, 0, l.splice(index, 1)[0])));
-    mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }, (l) => l.splice(index, 1)); });
+    if (index > 0) mk("↑", "Move up", () => doOp({ type: "move", path: listPath, from: index, to: index - 1 }));
+    if (index < length - 1) mk("↓", "Move down", () => doOp({ type: "move", path: listPath, from: index, to: index + 1 }));
+    mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }); });
     return m;
   }
   function decorate() {
-    // Guard against tearing down chrome mid-keystroke: this runs not just from doOp()
-    // above but from a debounced MutationObserver reacting to ANY DOM change on the
-    // page — an unrelated section re-rendering, a nav dropdown opening. A rebuild while
-    // the user has a data-edit field open (contenteditable) wouldn't itself corrupt that
-    // field's text (decorate only ever touches .ed-add/.ed-menu nodes), but there's no
-    // reason to run it mid-keystroke either — skip it and let the field's own blur (or
-    // whatever unrelated mutation happens once it's done) retrigger decorate() via the
-    // observer below.
+    // Bail out while a data-edit field is genuinely being typed into. This wouldn't by
+    // itself corrupt that field's text (decorate only ever touches .ed-add/.ed-menu
+    // nodes), but there's no reason to rebuild mid-keystroke — and doing so is exactly
+    // what the MutationObserver below would otherwise be recording as a mutation.
+    // Recovery: the observer is configured with attributes:true/attributeFilter:
+    // ["contenteditable"] specifically so the field's own blur handler removing that
+    // attribute (see the blur listener above) is itself an observed mutation — it
+    // re-arms the 120ms debounce, and by the time that fires isEditableNow(active) is
+    // false, so this guard no longer trips and the rebuild goes through. Without that
+    // attribute observation, a bail here would have nothing left to wake it back up:
+    // typing itself never mutates childList/subtree (plaintext-only edits update a Text
+    // node's characterData, which isn't observed either), so the debounce that already
+    // fired would simply never fire again.
     const active = document.activeElement;
     if (active instanceof HTMLElement && isEditableNow(active)) return;
     document.querySelectorAll(".ed-add,.ed-menu").forEach((n) => n.remove()); // rebuild fresh — never stale indices
@@ -250,7 +274,7 @@
     document.querySelectorAll("[data-list]").forEach((listEl) => {
       const listPath = listEl.getAttribute("data-list");
       const items = listEl.querySelectorAll(":scope [data-item]");
-      items.forEach((it, i) => { it.style.position = "relative"; it.appendChild(menuFor(it, listPath, i, items.length)); });
+      items.forEach((it, i) => it.appendChild(menuFor(listPath, i, items.length))); // position:relative is already on this element in the page's own markup
       const add = document.createElement("button");
       add.className = "ed-add"; add.textContent = "+ Add";
       add.onclick = () => onAdd(listPath);
@@ -264,6 +288,10 @@
       const i = document.createElement("input");
       i.type = "file"; i.accept = accept;
       i.onchange = () => resolve(i.files[0] || null);
+      // Without this, dismissing the file picker without choosing anything resolves
+      // nothing — the promise (and the "await pickFile(...)" below it) hangs forever,
+      // leaking one permanently-pending await per cancelled attempt.
+      i.oncancel = () => resolve(null);
       i.click();
     });
   }
@@ -295,10 +323,21 @@
       // request leaving the machine entirely, for a host that has no business seeing
       // it; it would also force application/json, but Cloudinary's upload endpoint
       // requires multipart FormData.
-      const up = await (await fetch("https://api.cloudinary.com/v1_1/" + s.cloudName + "/auto/upload", { method: "POST", body: fd })).json();
-      if (up.error) throw new Error(up.error.message);
+      const upRes = await fetch("https://api.cloudinary.com/v1_1/" + s.cloudName + "/auto/upload", { method: "POST", body: fd });
+      const up = await upRes.json();
+      // A non-2xx response and/or an {error:{message}} body both mean the upload
+      // failed; either can happen independently (a network proxy could return a non-2xx
+      // with a differently-shaped body). And even a 200 needs its own shape check: an
+      // unexpected response would leave item.id === undefined below, which
+      // JSON.stringify() silently drops from the request body — the tile would still
+      // appear to the user (the local push happens either way) and the failure would
+      // only surface later, at Publish, as a server-side "Item keys must be exactly:
+      // caption,id,kind" 400 against a file the user has since kept editing. Fail here
+      // instead, before doOp ever runs, so the user sees it at the moment it happened.
+      if (!upRes.ok || up.error) throw new Error((up.error && up.error.message) || ("Cloudinary upload failed (HTTP " + upRes.status + ")"));
+      if (typeof up.public_id !== "string" || up.public_id === "") throw new Error("Cloudinary response is missing public_id");
       const item = { kind: up.resource_type === "video" ? "video" : "image", id: up.public_id, caption: "" };
-      doOp({ type: "add", path: listPath, item }, (l) => l.push({ ...item }));
+      doOp({ type: "add", path: listPath, item });
     } catch (err) {
       alert("Upload failed:\n" + err.message);
     } finally {
@@ -307,20 +346,33 @@
   };
 
   // Debounced so a burst of dc-runtime DOM churn (e.g. a whole section re-rendering)
-  // collapses into one rebuild instead of one per mutation record. The disconnect-then-
-  // decorate-then-reconnect order is what stops this from driving itself in a loop:
-  // decorate()'s own writes (removing/adding .ed-add/.ed-menu, same for the DOM changes
-  // doOp()'s rerender() causes) would otherwise queue more mutation records while the
-  // observer is still connected, each one scheduling another decorate(), forever. With
-  // the observer disconnected for the duration of decorate(), those self-caused
-  // mutations are never recorded at all; observe() only starts watching again once
-  // decorate() has already finished reacting to whatever came before.
+  // collapses into one rebuild instead of one per mutation record. Inside THIS
+  // callback, the disconnect-then-decorate-then-reconnect order is what stops it from
+  // driving itself in a loop: decorate()'s own writes (removing/adding .ed-add/
+  // .ed-menu) would otherwise queue more mutation records while the observer is still
+  // connected, each one scheduling another round, forever — disconnecting for the
+  // duration of decorate() means those particular writes are never recorded at all.
+  //
+  // That guarantee is local to this callback, not global: doOp() above triggers its own
+  // decorate() (via requestAnimationFrame, see doOp's comment) with the observer left
+  // connected, so THAT rebuild's DOM writes — and rerender()'s — DO get recorded here
+  // and schedule one more debounced pass 120ms later. That extra pass is harmless
+  // (decorate() is idempotent — same chrome, same indices, nothing left to change) and
+  // it terminates: with no further mutations after it, no new debounce gets scheduled.
+  //
+  // attributes/attributeFilter (added for a data-edit field specifically) is what lets
+  // decorate()'s own mid-keystroke bail-out (see decorate()'s comment) ever get
+  // retried: the field's blur handler removing its contenteditable attribute is the
+  // only DOM change a completed text edit produces — no childList/subtree mutation, no
+  // rerender() call — so without observing that attribute, a bailed-out decorate()
+  // would never be asked to run again until some unrelated part of the page happened to
+  // change.
   let moT;
   const mo = new MutationObserver(() => {
     clearTimeout(moT);
     moT = setTimeout(() => { mo.disconnect(); decorate(); observe(); }, 120);
   });
-  const observe = () => mo.observe(document.body, { childList: true, subtree: true });
+  const observe = () => mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["contenteditable"] });
   decorate(); observe();
 
   window.EditorUI = { draft, applyLocal, rerender, decorate, update, isEditing: () => editing };
