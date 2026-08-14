@@ -193,7 +193,9 @@
        isHeading  a sub-heading within the page
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
-       isGallery  a 6-tile placeholder grid, with a "photos coming soon" note
+       isGallery  real photos when a page's { gallery: [[src,caption],...] }
+                  entry supplies them; otherwise the original 6-tile
+                  placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
@@ -225,21 +227,66 @@
           </div>
         </sc-if>
         <sc-if value="{{ b.isGallery }}" hint-placeholder-val="{{ false }}">
-          <div class="g g-3" style="margin:20px 0 0">
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-            <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
-          </div>
-          <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+          <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
+            <div class="g g-3" style="margin:20px 0 0">
+              <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
+                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ false }}">
+            <div class="g g-3" style="margin:20px 0 0">
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+              <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
+            </div>
+            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+          </sc-if>
         </sc-if>
         <sc-if value="{{ b.isNote }}" hint-placeholder-val="{{ false }}">
           <div style="background:#fdeadf;border:1px solid #f6c8ae;border-radius:14px;padding:22px 24px;margin:22px 0 0">
             <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:#a51915">{{ b.text }}</div>
             <div style="font-size:14.5px;color:#6b615b;margin-top:6px">{{ b.sub }}</div>
           </div>
+        </sc-if>
+        <sc-if value="{{ b.isPerson }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:24px;align-items:center;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:24px;margin:20px 0 0;flex-wrap:wrap">
+            <img src="{{ b.person.src }}" alt="{{ b.person.name }}" style="width:150px;height:150px;border-radius:12px;object-fit:cover;flex:none;border:1px solid #f0e0dc">
+            <div>
+              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#a51915">{{ b.person.name }}</div>
+              <div style="font-size:14px;color:#c2410f;font-weight:600;margin-top:3px">{{ b.person.title }}</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
+            <video controls playsinline preload="metadata" poster="{{ b.video.poster }}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
+              <source src="{{ b.video.src }}" type="video/mp4">
+              Your browser doesn't support embedded video. <a href="{{ b.video.src }}" style="color:#fff">Watch/download it directly</a>.
+            </video>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ b.link.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:20px 0 0;text-decoration:none;background:#fff7f4">
+            <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+            <span>
+              <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ b.link.label }}</span>
+              <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ b.link.sub }}</span>
+            </span>
+          </a>
         </sc-if>
       </div>
     </sc-for>
@@ -341,8 +388,25 @@ const CONTENT = {
       "title": "Core Values",
       "intro": "Empathy, respect and discipline — the three pillars behind every classroom, playground and interaction at Montessori.",
       "blocks": [
-        { "p": "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families." },
-        { "list": [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] }
+        {
+          "p": "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families."
+        },
+        {
+          "list": [
+            [
+              "Empathy",
+              "understanding others and acting with kindness."
+            ],
+            [
+              "Respect",
+              "for people, property, ideas and the environment."
+            ],
+            [
+              "Discipline",
+              "self-direction, focus and follow-through."
+            ]
+          ]
+        }
       ]
     },
     "founders-message": {
@@ -351,9 +415,25 @@ const CONTENT = {
       "title": "Founder's Message",
       "intro": "A word from the founding vision of the Montessori Schools.",
       "blocks": [
-        { "p": "Our journey began with twelve children and a simple conviction — that every child, given the right environment, will help themselves to learn. Five decades on, that belief still guides everything we do at Montessori." },
-        { "p": "We invite you to visit our campus, meet our teachers, and see how a value-based, child-centred education prepares your child not just for examinations, but for a meaningful and productive life." },
-        { "note": "Full message & founder's portrait", "sub": "Send us the founder's photograph and message text and we'll place them here." }
+        {
+          "person": {
+            "src": "assets/people/founder.jpg",
+            "name": "Smt. P. Kalyanamma, M.A., B.Ed.",
+            "title": "Founder, Montessori Institutions"
+          }
+        },
+        {
+          "p": "Fondly known to generations of students and staff as \"Big Aunty\", I founded these institutions over four decades ago, guided by one belief above all: that every child, given the right environment, will help himself to learn. That conviction — Maria Montessori's own — has shaped everything we have built since."
+        },
+        {
+          "p": "Our journey has been one of relentless effort and self-belief. From a single classroom to the campus you see today, we have stayed focused on one goal — an education that is happy, value-based and progressive, preparing every child not just for examinations, but for a meaningful and productive life."
+        },
+        {
+          "p": "I invite you to visit our campus, meet our teachers, and see this vision in practice."
+        },
+        {
+          "p": "\"My work is my relaxation.\""
+        }
       ]
     },
     "principals-desk": {
@@ -362,8 +442,22 @@ const CONTENT = {
       "title": "From the Principal's Desk",
       "intro": "Leadership notes on learning, character and community at Montessori.",
       "blocks": [
-        { "p": "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
-        { "note": "Principal's message & photo", "sub": "Share the principal's note and portrait to complete this page." }
+        {
+          "person": {
+            "src": "assets/people/principal.jpg",
+            "name": "Smt. B. Sri Jyothi, M.A., B.Ed.",
+            "title": "Principal, Montessori School, A-Camp"
+          }
+        },
+        {
+          "p": "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom."
+        },
+        {
+          "p": "Our professional teachers love learning and pass that love and excitement to the children."
+        },
+        {
+          "p": "We truly value continuity of care and know how important consistency is in a young child's life."
+        }
       ]
     },
     "team-monte": {
@@ -372,8 +466,12 @@ const CONTENT = {
       "title": "Team Montessori",
       "intro": "The educators and staff who make Montessori a home away from home.",
       "blocks": [
-        { "p": "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
-        { "gallery": true }
+        {
+          "p": "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care."
+        },
+        {
+          "gallery": true
+        }
       ]
     },
     "affiliations": {
@@ -382,8 +480,18 @@ const CONTENT = {
       "title": "Affiliations",
       "intro": "Recognitions and affiliations that underpin a Montessori education.",
       "blocks": [
-        { "list": [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
-        { "note": "Affiliation details", "sub": "Affiliation details will be added here." }
+        {
+          "list": [
+            [
+              "Montessori School Committee",
+              "the governing society of the Montessori Schools."
+            ]
+          ]
+        },
+        {
+          "note": "Affiliation details",
+          "sub": "Affiliation details will be added here."
+        }
       ]
     },
     "documents": {
@@ -392,8 +500,13 @@ const CONTENT = {
       "title": "Documents",
       "intro": "Mandatory public disclosure and school documents.",
       "blocks": [
-        { "p": "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
-        { "note": "Document downloads", "sub": "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." }
+        {
+          "p": "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards."
+        },
+        {
+          "note": "Document downloads",
+          "sub": "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links."
+        }
       ]
     },
     "house": {
@@ -402,8 +515,29 @@ const CONTENT = {
       "title": "The House System",
       "intro": "Every Montessori student belongs to a house — building belonging and healthy competition.",
       "blocks": [
-        { "p": "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship." },
-        { "list": [["Valour", "courage and leadership."], ["Wisdom", "curiosity and scholarship."], ["Harmony", "teamwork and care."], ["Integrity", "honesty and responsibility."]] }
+        {
+          "p": "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship."
+        },
+        {
+          "list": [
+            [
+              "Valour",
+              "courage and leadership."
+            ],
+            [
+              "Wisdom",
+              "curiosity and scholarship."
+            ],
+            [
+              "Harmony",
+              "teamwork and care."
+            ],
+            [
+              "Integrity",
+              "honesty and responsibility."
+            ]
+          ]
+        }
       ]
     },
     "pre-primary": {
@@ -412,8 +546,12 @@ const CONTENT = {
       "title": "Pre-Primary Program",
       "intro": "A play-based foundation for our youngest learners.",
       "blocks": [
-        { "p": "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life." },
-        { "gallery": true }
+        {
+          "p": "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life."
+        },
+        {
+          "gallery": true
+        }
       ]
     },
     "primary": {
@@ -422,8 +560,25 @@ const CONTENT = {
       "title": "Primary School",
       "intro": "A strong, well-rounded foundation for the primary years.",
       "blocks": [
-        { "p": "The primary school years emphasise strong fundamentals in language and numeracy alongside curiosity-led exploration, preparing students for the years of schooling ahead." },
-        { "list": [["Foundational Skills", "reading, writing and numeracy built through steady practice."], ["Enquiry", "hands-on activities that encourage questions and exploration."], ["Character", "values, habits and independence nurtured alongside academics."]] }
+        {
+          "p": "The primary school years emphasise strong fundamentals in language and numeracy alongside curiosity-led exploration, preparing students for the years of schooling ahead."
+        },
+        {
+          "list": [
+            [
+              "Foundational Skills",
+              "reading, writing and numeracy built through steady practice."
+            ],
+            [
+              "Enquiry",
+              "hands-on activities that encourage questions and exploration."
+            ],
+            [
+              "Character",
+              "values, habits and independence nurtured alongside academics."
+            ]
+          ]
+        }
       ]
     },
     "secondary": {
@@ -432,7 +587,9 @@ const CONTENT = {
       "title": "Secondary School",
       "intro": "A structured, comprehensive curriculum for the secondary years.",
       "blocks": [
-        { "p": "The secondary school years build on a strong foundation, focusing on holistic development through rigorous academics, co-curricular activities and continuous assessment." }
+        {
+          "p": "The secondary school years build on a strong foundation, focusing on holistic development through rigorous academics, co-curricular activities and continuous assessment."
+        }
       ]
     },
     "assessment": {
@@ -441,8 +598,13 @@ const CONTENT = {
       "title": "Assessment Policy & Schedule",
       "intro": "Continuous, fair evaluation that promotes growth.",
       "blocks": [
-        { "p": "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing." },
-        { "note": "Assessment schedule", "sub": "Share the term-wise assessment calendar to publish exact dates." }
+        {
+          "p": "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing."
+        },
+        {
+          "note": "Assessment schedule",
+          "sub": "Share the term-wise assessment calendar to publish exact dates."
+        }
       ]
     },
     "calendar": {
@@ -451,8 +613,13 @@ const CONTENT = {
       "title": "School Calendar",
       "intro": "Key dates, terms and events across the academic year.",
       "blocks": [
-        { "p": "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead." },
-        { "note": "Downloadable calendar", "sub": "Provide the current-session calendar and we'll add it here." }
+        {
+          "p": "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead."
+        },
+        {
+          "note": "Downloadable calendar",
+          "sub": "Provide the current-session calendar and we'll add it here."
+        }
       ]
     },
     "co-curricular": {
@@ -461,7 +628,9 @@ const CONTENT = {
       "title": "Co-Curricular Activity",
       "intro": "Learning that extends beyond the syllabus.",
       "blocks": [
-        { "p": "From public speaking and quizzing to art, music and community service, co-curricular activities build confidence, teamwork and well-rounded character." }
+        {
+          "p": "From public speaking and quizzing to art, music and community service, co-curricular activities build confidence, teamwork and well-rounded character."
+        }
       ]
     },
     "physical-education": {
@@ -470,8 +639,12 @@ const CONTENT = {
       "title": "Physical Education",
       "intro": "Daily sport, movement and well-being.",
       "blocks": [
-        { "p": "Physical education is a daily part of school life, with athletics, team sports and access to the sports arena and swimming pool." },
-        { "gallery": true }
+        {
+          "p": "Physical education is a daily part of school life, with athletics, team sports and access to the sports arena and swimming pool."
+        },
+        {
+          "gallery": true
+        }
       ]
     },
     "clubs": {
@@ -480,7 +653,26 @@ const CONTENT = {
       "title": "Clubs & Societies",
       "intro": "Spaces for every interest to flourish.",
       "blocks": [
-        { "list": [["Robotics & Coding", "build, program and compete."], ["Debate & Literary", "argue, write and present."], ["Arts & Music", "create, perform and exhibit."], ["Eco Club", "sustainability and campus stewardship."]] }
+        {
+          "list": [
+            [
+              "Robotics & Coding",
+              "build, program and compete."
+            ],
+            [
+              "Debate & Literary",
+              "argue, write and present."
+            ],
+            [
+              "Arts & Music",
+              "create, perform and exhibit."
+            ],
+            [
+              "Eco Club",
+              "sustainability and campus stewardship."
+            ]
+          ]
+        }
       ]
     },
     "events": {
@@ -489,8 +681,12 @@ const CONTENT = {
       "title": "Events",
       "intro": "Celebrations, competitions and milestones through the year.",
       "blocks": [
-        { "p": "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together." },
-        { "gallery": true }
+        {
+          "p": "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together."
+        },
+        {
+          "gallery": true
+        }
       ]
     },
     "the-campus": {
@@ -499,8 +695,37 @@ const CONTENT = {
       "title": "The Campus",
       "intro": "A verdant, purpose-built campus on the outskirts of Kurnool.",
       "blocks": [
-        { "p": "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
-        { "gallery": true }
+        {
+          "p": "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities."
+        },
+        {
+          "gallery": [
+            [
+              "assets/gallery/campus-1.jpg",
+              "Campus"
+            ],
+            [
+              "assets/gallery/campus-2.jpg",
+              "Campus"
+            ],
+            [
+              "assets/gallery/campus-life.jpg",
+              "Campus Life"
+            ],
+            [
+              "assets/gallery/classroom.jpg",
+              "Classroom"
+            ],
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/SCHOOL-BUILDING.jpg",
+              "Campus"
+            ],
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/SCHOOL-BUILDING1.jpg",
+              "Campus"
+            ]
+          ]
+        }
       ]
     },
     "ac-classrooms": {
@@ -509,7 +734,25 @@ const CONTENT = {
       "title": "Classrooms",
       "intro": "Comfortable, focused learning environments.",
       "blocks": [
-        { "p": "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids." }
+        {
+          "p": "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids."
+        },
+        {
+          "gallery": [
+            [
+              "assets/gallery/classroom.jpg",
+              "Classroom"
+            ],
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/CLASS-ROOM1.jpg",
+              "Classroom"
+            ],
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/CLASS-ROOM2-1.jpg",
+              "Classroom"
+            ]
+          ]
+        }
       ]
     },
     "science-labs": {
@@ -518,9 +761,77 @@ const CONTENT = {
       "title": "Labs",
       "intro": "Where theory meets hands-on discovery — science, robotics, maths and computing under one roof.",
       "blocks": [
-        { "p": "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them." },
-        { "list": [["Science Laboratories", "physics, chemistry and biology labs for hands-on practicals."], ["Robotics Lab", "computational thinking, electronics and problem-solving through building and programming real projects."], ["Math Lab", "manipulatives, models and activities that turn abstract concepts into intuitive understanding."], ["Computer Lab", "modern machines building digital literacy, coding foundations and responsible technology use."]] },
-        { "gallery": true }
+        {
+          "p": "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them."
+        },
+        {
+          "list": [
+            [
+              "Science Laboratories",
+              "physics, chemistry and biology labs for hands-on practicals."
+            ],
+            [
+              "Robotics Lab",
+              "computational thinking, electronics and problem-solving through building and programming real projects."
+            ],
+            [
+              "Math Lab",
+              "manipulatives, models and activities that turn abstract concepts into intuitive understanding."
+            ],
+            [
+              "Computer Lab",
+              "modern machines building digital literacy, coding foundations and responsible technology use."
+            ]
+          ]
+        },
+        {
+          "gallery": [
+            [
+              "assets/gallery/physics-lab-1.jpg",
+              "Physics Lab"
+            ],
+            [
+              "assets/gallery/physics-lab-2.jpg",
+              "Physics Lab"
+            ],
+            [
+              "assets/gallery/chemistry-lab-1.jpg",
+              "Chemistry Lab"
+            ],
+            [
+              "assets/gallery/chemistry-lab-2.jpg",
+              "Chemistry Lab"
+            ],
+            [
+              "assets/gallery/computer-lab-1.jpg",
+              "Computer Lab"
+            ],
+            [
+              "assets/gallery/computer-lab-2.jpg",
+              "Computer Lab"
+            ],
+            [
+              "assets/gallery/math-lab.jpg",
+              "Math Lab"
+            ],
+            [
+              "assets/gallery/biology-lab.jpg",
+              "Biology Lab"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/c1-scaled.jpg",
+              "Computer Lab"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/sci1-scaled.jpg",
+              "Science Lab"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/sci2-scaled.jpg",
+              "Science Lab"
+            ]
+          ]
+        }
       ]
     },
     "library": {
@@ -529,8 +840,29 @@ const CONTENT = {
       "title": "Library",
       "intro": "A quiet home for reading, research and discovery.",
       "blocks": [
-        { "p": "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces." },
-        { "gallery": true }
+        {
+          "p": "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces."
+        },
+        {
+          "gallery": [
+            [
+              "assets/gallery/library-1.jpg",
+              "Library"
+            ],
+            [
+              "assets/gallery/library-2.jpg",
+              "Library"
+            ],
+            [
+              "assets/gallery/library-3.jpg",
+              "Library"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/li-scaled.jpg",
+              "Library"
+            ]
+          ]
+        }
       ]
     },
     "swimming-pool": {
@@ -539,7 +871,9 @@ const CONTENT = {
       "title": "Swimming Pool",
       "intro": "Safe, supervised aquatics for every learner.",
       "blocks": [
-        { "p": "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program." }
+        {
+          "p": "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program."
+        }
       ]
     },
     "sports-arena": {
@@ -548,8 +882,21 @@ const CONTENT = {
       "title": "Sports",
       "intro": "Grounds and courts for every game.",
       "blocks": [
-        { "p": "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit." },
-        { "gallery": true }
+        {
+          "p": "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit."
+        },
+        {
+          "gallery": [
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/G1.jpg",
+              "Playground"
+            ],
+            [
+              "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/G2.jpg",
+              "Playground"
+            ]
+          ]
+        }
       ]
     },
     "music": {
@@ -558,7 +905,9 @@ const CONTENT = {
       "title": "Music",
       "intro": "Voice, rhythm and performance.",
       "blocks": [
-        { "p": "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet." }
+        {
+          "p": "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet."
+        }
       ]
     },
     "infirmary": {
@@ -567,7 +916,9 @@ const CONTENT = {
       "title": "Infirmary",
       "intro": "Care and well-being on campus.",
       "blocks": [
-        { "p": "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for." }
+        {
+          "p": "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for."
+        }
       ]
     },
     "transport": {
@@ -576,9 +927,16 @@ const CONTENT = {
       "title": "Transport",
       "intro": "Safe, GPS-enabled buses covering Kurnool and the surrounding areas.",
       "blocks": [
-        { "p": "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term." },
-        { "p": "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
-        { "note": "Route map & stop list", "sub": "Share the current route list and we'll publish it here." }
+        {
+          "p": "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term."
+        },
+        {
+          "p": "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office."
+        },
+        {
+          "note": "Route map & stop list",
+          "sub": "Share the current route list and we'll publish it here."
+        }
       ]
     },
     "photo-gallery": {
@@ -587,7 +945,70 @@ const CONTENT = {
       "title": "Photo Gallery",
       "intro": "Moments from life at Montessori.",
       "blocks": [
-        { "gallery": true }
+        {
+          "gallery": [
+            [
+              "assets/gallery/campus-1.jpg",
+              "Campus"
+            ],
+            [
+              "assets/gallery/campus-2.jpg",
+              "Campus"
+            ],
+            [
+              "assets/gallery/campus-life.jpg",
+              "Campus Life"
+            ],
+            [
+              "assets/gallery/classroom.jpg",
+              "Classroom"
+            ],
+            [
+              "assets/gallery/library-1.jpg",
+              "Library"
+            ],
+            [
+              "assets/gallery/library-2.jpg",
+              "Library"
+            ],
+            [
+              "assets/gallery/library-3.jpg",
+              "Library"
+            ],
+            [
+              "assets/gallery/physics-lab-1.jpg",
+              "Physics Lab"
+            ],
+            [
+              "assets/gallery/physics-lab-2.jpg",
+              "Physics Lab"
+            ],
+            [
+              "assets/gallery/chemistry-lab-1.jpg",
+              "Chemistry Lab"
+            ],
+            [
+              "assets/gallery/chemistry-lab-2.jpg",
+              "Chemistry Lab"
+            ],
+            [
+              "assets/gallery/computer-lab-1.jpg",
+              "Computer Lab"
+            ],
+            [
+              "assets/gallery/computer-lab-2.jpg",
+              "Computer Lab"
+            ],
+            [
+              "assets/gallery/math-lab.jpg",
+              "Math Lab"
+            ],
+            [
+              "assets/gallery/biology-lab.jpg",
+              "Biology Lab"
+            ]
+          ]
+        }
       ]
     },
     "videos": {
@@ -596,8 +1017,71 @@ const CONTENT = {
       "title": "Videos",
       "intro": "See Montessori in motion.",
       "blocks": [
-        { "p": "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
-        { "note": "Video embeds", "sub": "Share YouTube links or files and we'll embed them here." }
+        {
+          "p": "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year."
+        },
+        {
+          "h": "Teachers' Training on Karuna Clubs"
+        },
+        {
+          "embed": {
+            "src": "https://www.youtube.com/embed/pXRans1QcxQ",
+            "title": "Teachers' Training on Karuna Clubs"
+          }
+        },
+        {
+          "h": "State Aquatic Championship"
+        },
+        {
+          "embed": {
+            "src": "https://www.youtube.com/embed/lUqBxmTw3KE",
+            "title": "State Aquatic Championship"
+          }
+        },
+        {
+          "h": "Startup Club — Classroom to Boardroom"
+        },
+        {
+          "p": "The uploader has disabled embedding for this one, so it opens directly on YouTube instead."
+        },
+        {
+          "link": {
+            "href": "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0",
+            "label": "Watch on YouTube",
+            "sub": "Startup Club — Classroom to Boardroom"
+          }
+        },
+        {
+          "h": "Freshers' Day — \"Srikaram\""
+        },
+        {
+          "embed": {
+            "src": "https://www.youtube.com/embed/CpffIJ9yprA",
+            "title": "Freshers' Day — Srikaram"
+          }
+        },
+        {
+          "h": "Monsoon Seed Ball Drive"
+        },
+        {
+          "embed": {
+            "src": "https://www.youtube.com/embed/knW7B4cFgOg",
+            "title": "Monsoon Seed Ball Drive"
+          }
+        },
+        {
+          "h": "Flavours of Creativity"
+        },
+        {
+          "p": "The uploader has disabled embedding for this one, so it opens directly on YouTube instead."
+        },
+        {
+          "link": {
+            "href": "https://www.youtube.com/watch?v=cZIK5A0y0dA",
+            "label": "Watch on YouTube",
+            "sub": "Flavours of Creativity"
+          }
+        }
       ]
     },
     "events-news": {
@@ -606,7 +1090,113 @@ const CONTENT = {
       "title": "Events",
       "intro": "Upcoming and recent school events.",
       "blocks": [
-        { "gallery": true }
+        {
+          "p": "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year."
+        },
+        {
+          "list": [
+            [
+              "Golden Jubilee — National Parents' Day",
+              "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."
+            ],
+            [
+              "Founder's Day Blood Donation Camp",
+              "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."
+            ],
+            [
+              "Freshers' Day — \"Srikaram\"",
+              "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."
+            ],
+            [
+              "Teachers' Training on Karuna Clubs",
+              "Run with Karuna International, Kurnool Kendra, the programme equipped teachers with activity-based approaches to strengthen Karuna Clubs and nurture compassion and social service."
+            ],
+            [
+              "Startup Club — Classroom to Boardroom",
+              "Senior secondary students pitched real business ideas to professional investors, blending Montessori self-direction with entrepreneurial practice."
+            ],
+            [
+              "Monsoon Seed Ball Drive",
+              "Classes VI and VII marked the start of the monsoon with a \"Roll a Ball… Grow a Forest\" seed-ball activity across the campus."
+            ],
+            [
+              "World Zoonoses Day Awareness",
+              "A veterinary surgeon, an animal-welfare volunteer and a Brahma Kumaris speaker led sessions on public health, animal welfare and responsible living."
+            ],
+            [
+              "BMI Health Awareness Activity",
+              "Classes VI and VII ran a peer-led Body Mass Index assessment, pairing practical maths with health education."
+            ],
+            [
+              "Pre-Primary Orientation Programme",
+              "New Pre-Primary parents were introduced to the Montessori philosophy and school routines ahead of their child's first year."
+            ],
+            [
+              "International Yoga Day",
+              "Students marked June 21st with yoga sessions promoting health, mindfulness and physical fitness."
+            ],
+            [
+              "Flavours of Creativity",
+              "Classes 8 and 9 explored nutrition and creativity at a culinary event themed \"Tasty bites, Healthy lives.\""
+            ],
+            [
+              "Oxford University Press Teacher Workshop",
+              "Faculty took part in a training session with an OUP Master Trainer on classroom methods aligned with the latest NEP guidelines."
+            ]
+          ]
+        },
+        {
+          "gallery": [
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg",
+              "Teachers' Training Programme"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg",
+              "National Parents' Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg",
+              "Founder's Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg",
+              "Blood Donation Camp"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg",
+              "Freshers' Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/12-scaled.jpg",
+              "Freshers' Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/SEED-scaled.jpg",
+              "Seed Ball Drive"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/zoo-scaled.jpg",
+              "World Zoonoses Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/BMI-scaled.jpg",
+              "BMI Activity"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/PP-scaled.jpg",
+              "Pre-Primary Orientation"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/YOGA-scaled.jpg",
+              "International Yoga Day"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg",
+              "Flavours of Creativity"
+            ]
+          ]
+        }
       ]
     },
     "latest-news": {
@@ -615,8 +1205,13 @@ const CONTENT = {
       "title": "Latest News",
       "intro": "Announcements and updates from Montessori.",
       "blocks": [
-        { "p": "Stay up to date with the latest happenings, notices and stories from across the school." },
-        { "note": "News feed", "sub": "Share announcements and we'll build out the news list." }
+        {
+          "p": "Stay up to date with the latest happenings, notices and stories from across the school."
+        },
+        {
+          "note": "News feed",
+          "sub": "Share announcements and we'll build out the news list."
+        }
       ]
     },
     "awards": {
@@ -625,8 +1220,81 @@ const CONTENT = {
       "title": "Awards & Achievements",
       "intro": "Celebrating our students and staff.",
       "blocks": [
-        { "p": "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
-        { "gallery": true }
+        {
+          "p": "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community."
+        },
+        {
+          "list": [
+            [
+              "Science Olympiad Foundation Awards",
+              "Students earned Medals of Appreciation across the International English (IEO), Science (NSO) and Computer Science (ICSO) Olympiads; three faculty members received Best District Teacher Awards for NSO, IMO and ICSO."
+            ],
+            [
+              "State Aquatic Championship — 3 Medals",
+              "Shruti won gold (100m Butterfly), silver (200m Backstroke) and bronze (50m Butterfly) at the Inter-District Aquatic Championship in Visakhapatnam."
+            ],
+            [
+              "Chess: State & District Champions",
+              "Thanvika (Class III) placed 1st at the State Level Chess Competition; Sushanth (Class IV) topped the Nandyal District Rapid Chess Selections and advanced to state level."
+            ],
+            [
+              "International English Olympiad — Bronze",
+              "Class 7 student Jessie Elena Giripogu won an international bronze medal and a ₹10,000 prize, presented by former CBSE Secretary Mr. Himanshu Gupta, IAS."
+            ],
+            [
+              "State Karate Championship",
+              "P. Adharva Dhev of Class II earned recognition at the 6th AP State Karate Championship."
+            ],
+            [
+              "Olympic Day Association Tournament",
+              "Pride Montessorians were Throwball (Girls) Champions, Handball (Girls) Runners-up and Softball (Boys) Runners-up."
+            ],
+            [
+              "\"Best Karuna Club\" Award — Karunostav 2023",
+              "Recognised at Karunostav 2023 in Chennai for outstanding Karuna Club activities conducted through the year."
+            ],
+            [
+              "Top 100 Women Achievers in Education",
+              "India Today magazine named a Montessori Indus Schools correspondent among the top 100 women achievers in education for 2023-24."
+            ],
+            [
+              "World Teachers' Day — Best Teacher Awards",
+              "Montessori teachers were honoured with Best Teacher Awards organised by APUSMA to mark World Teachers' Day."
+            ],
+            [
+              "Rayalaseema Zonal Lawn Tennis — Multiple Medals",
+              "A student won Under-14 and Under-16 titles and Mixed Doubles runner-up, going on to qualify for the State Level Tournament."
+            ]
+          ]
+        },
+        {
+          "gallery": [
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg",
+              "Aquatic Championship"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/15-scaled.jpg",
+              "Aquatic Championship"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg",
+              "Chess Champions"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg",
+              "English Olympiad"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg",
+              "Karate Championship"
+            ],
+            [
+              "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg",
+              "Olympic Day Tournament"
+            ]
+          ]
+        }
       ]
     },
     "circulars": {
@@ -635,7 +1303,10 @@ const CONTENT = {
       "title": "Circulars & Downloads",
       "intro": "Official notices and downloadable resources.",
       "blocks": [
-        { "note": "Circulars", "sub": "Upload circulars and forms and we'll add download links." }
+        {
+          "note": "Circulars",
+          "sub": "Upload circulars and forms and we'll add download links."
+        }
       ]
     },
     "procedure": {
@@ -644,7 +1315,26 @@ const CONTENT = {
       "title": "Admission Procedure",
       "intro": "Four simple steps to join Montessori.",
       "blocks": [
-        { "list": [["Enquiry & campus visit", "meet our team and tour the campus."], ["Application form", "complete the form for your child's grade and pathway."], ["Interaction / assessment", "a friendly interaction to understand learning needs."], ["Confirmation", "complete enrolment and fee formalities to secure the seat."]] }
+        {
+          "list": [
+            [
+              "Enquiry & campus visit",
+              "meet our team and tour the campus."
+            ],
+            [
+              "Application form",
+              "complete the form for your child's grade and pathway."
+            ],
+            [
+              "Interaction / assessment",
+              "a friendly interaction to understand learning needs."
+            ],
+            [
+              "Confirmation",
+              "complete enrolment and fee formalities to secure the seat."
+            ]
+          ]
+        }
       ]
     },
     "form": {
@@ -653,8 +1343,13 @@ const CONTENT = {
       "title": "Admission Form",
       "intro": "Start your application.",
       "blocks": [
-        { "p": "Complete the enquiry form on our admissions section and our team will share the full application form for your chosen grade and pathway." },
-        { "note": "Online form", "sub": "We can connect this to your Google Form or admissions system." }
+        {
+          "p": "Complete the enquiry form on our admissions section and our team will share the full application form for your chosen grade and pathway."
+        },
+        {
+          "note": "Online form",
+          "sub": "We can connect this to your Google Form or admissions system."
+        }
       ]
     },
     "brochure": {
@@ -663,8 +1358,13 @@ const CONTENT = {
       "title": "Brochure",
       "intro": "Everything about Montessori, in one place.",
       "blocks": [
-        { "p": "Our brochure covers the curriculum, campus, facilities, fees and admissions at a glance." },
-        { "note": "Brochure download", "sub": "Upload the brochure PDF and we'll add a download button." }
+        {
+          "p": "Our brochure covers the curriculum, campus, facilities, fees and admissions at a glance."
+        },
+        {
+          "note": "Brochure download",
+          "sub": "Upload the brochure PDF and we'll add a download button."
+        }
       ]
     },
     "fee": {
@@ -673,8 +1373,13 @@ const CONTENT = {
       "title": "School Fee",
       "intro": "Transparent fee information.",
       "blocks": [
-        { "p": "Fee structures vary by grade and pathway (Pre-Primary, Primary and Secondary)." },
-        { "note": "Fee schedule", "sub": "Share the fee structure and we'll present it clearly here." }
+        {
+          "p": "Fee structures vary by grade and pathway (Pre-Primary, Primary and Secondary)."
+        },
+        {
+          "note": "Fee schedule",
+          "sub": "Share the fee structure and we'll present it clearly here."
+        }
       ]
     }
   },
@@ -684,7 +1389,9 @@ const CONTENT = {
     "title": "Montessori School, A-Camp",
     "intro": "Choose a section from the menu above to explore.",
     "blocks": [
-      { "p": "Select any item from the dropdown navigation to open its dedicated page." }
+      {
+        "p": "Select any item from the dropdown navigation to open its dedicated page."
+      }
     ]
   }
 };
@@ -799,8 +1506,15 @@ class Component extends DCLogic {
       if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p, p });
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h, p });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
-      else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true });
+      else if (b.gallery) {
+        const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption]) => ({ src, caption })) : [];
+        blocks.push({ key: "b" + (k++), isGallery: true, hasImages: imgs.length > 0, images: imgs });
+      }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
+      else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
+      else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
+      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
+      else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
     return {
