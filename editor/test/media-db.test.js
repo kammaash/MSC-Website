@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { readLibrary, addRecord, removeRecord } = require("../lib/media-db.js");
+const { readLibrary, addRecord, removeRecord, validateRecord } = require("../lib/media-db.js");
 
 function tmpRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "msc-media-"));
@@ -48,7 +48,7 @@ test("addRecord persists the record and readLibrary round-trips it", () => {
 test("addRecord prepends — newest upload first", () => {
   const root = tmpRoot();
   addRecord(root, RECORD);
-  const second = { ...RECORD, id: "msc/video-def456", kind: "video" };
+  const second = { ...RECORD, id: "dQw4w9WgXcQ", kind: "video" };
   addRecord(root, second);
   assert.deepEqual(readLibrary(root).map((r) => r.id), [second.id, RECORD.id]);
 });
@@ -116,4 +116,11 @@ test("removeRecord reports false for an id not in the library — file untouched
   addRecord(root, RECORD);
   assert.equal(removeRecord(root, "msc/never-uploaded"), false);
   assert.equal(readLibrary(root).length, 1);
+});
+
+test("kind is the provider: a video id must be an 11-char YouTube id, images stay free-form", () => {
+  validateRecord({ id: "dQw4w9WgXcQ", kind: "video" }); // must not throw
+  assert.throws(() => validateRecord({ id: "msc/clip-1", kind: "video" }), /YouTube/);
+  assert.throws(() => validateRecord({ id: "short", kind: "video" }), /YouTube/);
+  validateRecord({ id: "msc/photo-1", kind: "image" }); // Cloudinary ids unaffected
 });

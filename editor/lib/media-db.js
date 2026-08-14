@@ -7,11 +7,14 @@
 // same as the rest of this zero-dependency editor.
 const fs = require("node:fs");
 const path = require("node:path");
+const { isVideoId } = require("./youtube.js");
 
 // One authority for what a record may contain, patch.js-style: unknown keys are
 // rejected outright so junk can never accumulate in a file that lives forever in git.
-// `id` is the Cloudinary public_id — with cloudName (already in shared content) it
-// derives every delivery/thumbnail URL, so no URL is ever stored.
+// `kind` is the provider: for "image", `id` is the Cloudinary public_id (cloudName +
+// id derives every delivery/thumbnail URL); for "video", `id` is the 11-character
+// YouTube video ID (videos are uploaded manually in YouTube Studio as Unlisted and
+// registered by link — see lib/youtube.js for why the API upload route is off).
 const FIELDS = {
   id: { type: "string", required: true },
   kind: { type: "string", required: true },
@@ -68,6 +71,9 @@ function validateRecord(record) {
   }
   if (record.id === "") throw new Error("Media record id must be a non-empty string");
   if (!KINDS.includes(record.kind)) throw new Error("Media record kind must be one of: " + KINDS.join(", "));
+  if (record.kind === "video" && !isVideoId(record.id)) {
+    throw new Error("A video record's id must be an 11-character YouTube video ID (got: " + record.id + ")");
+  }
 }
 
 function writeLibrary(root, records) {

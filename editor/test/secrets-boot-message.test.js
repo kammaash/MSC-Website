@@ -26,7 +26,7 @@ const path = require("node:path");
 const { spawn } = require("node:child_process");
 
 const REAL_EDITOR_DIR = path.join(__dirname, "..");
-const REAL_LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js"];
+const REAL_LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js", "youtube.js"];
 
 // Builds a throwaway copy of editor/{server.js,lib/*.js} plus its own config.json (port 0,
 // push:false) and collections.json ({}), a fake `open` on its own bin dir, and a fixture $HOME

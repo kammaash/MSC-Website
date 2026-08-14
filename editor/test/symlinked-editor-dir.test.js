@@ -43,7 +43,7 @@ const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 
 const REAL_EDITOR_DIR = path.join(__dirname, "..");
-const REAL_LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js"];
+const REAL_LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js", "youtube.js"];
 
 const RUNNER_SRC = `
 "use strict";

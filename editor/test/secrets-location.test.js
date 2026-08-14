@@ -44,7 +44,7 @@ const { createServer } = require("../server.js");
 
 const EDITOR_DIR = path.join(__dirname, "..");
 const REPO_ROOT = path.dirname(EDITOR_DIR);
-const LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js"];
+const LIB_FILES = ["content-io.js", "patch.js", "cloudinary.js", "media-db.js", "paths.js", "media-urls.js", "youtube.js"];
 
 // Builds a disposable, production-shaped COPY of the served tree: <tmp>/site/editor/{
 // server.js, lib/*.js[, client/*.js]}, with "site" playing the role of REPO_ROOT (editor's
