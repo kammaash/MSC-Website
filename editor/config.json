@@ -1,1 +1,1 @@
-{ "port": 8899, "push": true, "youtube": { "enabled": false } }
+{ "port": 8899, "push": true }
