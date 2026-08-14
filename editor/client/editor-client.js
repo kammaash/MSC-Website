@@ -179,7 +179,6 @@
   bar.querySelector("#ed-exit").onclick = () => {
     editing = !editing;
     bar.querySelector("#ed-exit").textContent = editing ? "Exit" : "Resume";
-    document.querySelectorAll(".ed-add,.ed-menu").forEach((n) => (n.style.display = editing ? "" : "none"));
     if (!editing) {
       // Leaving edit mode must leave nothing mid-edit behind: a lingering hover
       // outline from whatever the mouse was last over, and — more importantly — an
@@ -189,12 +188,92 @@
       const active = document.activeElement;
       if (active instanceof HTMLElement && isEditableNow(active)) active.blur(); // runs the normal commit/validate path
     }
+    // decorate() (Task 12) strips all .ed-add/.ed-menu chrome when !editing and rebuilds
+    // it when re-entering — called last, after the blur() above, so decorate()'s own
+    // "don't run mid-edit" guard never sees the element we just blurred as still active.
+    decorate();
   };
   window.addEventListener("beforeunload", (e) => { if (!discarding && draft.count()) e.preventDefault(); });
 
-  // `decorate` is a placeholder for Task 12 (collections chrome: + Add / up / down / x
-  // menus on list items) to overwrite with real behaviour; exported now, as a no-op, so
-  // any code written against window.EditorUI.decorate before Task 12 lands doesn't throw.
-  window.EditorUI = { draft, applyLocal, rerender, decorate: function () {}, update, isEditing: () => editing };
+  // ---- collections chrome (Task 12): + Add / ↑ / ↓ / ✕ on [data-list] sections ----
+  // Every list op (add/move/remove) is recorded to the draft, applied to the in-memory
+  // content object, and followed by an immediate decorate() — see decorate() below for
+  // why a full rebuild, not a targeted DOM patch, is the only safe way to keep chrome
+  // wired to the right index.
+  function doOp(op, mutate) {
+    draft.listOp(op);
+    applyLocal(op.path, mutate);
+    rerender(); update();
+    // Rebuild synchronously here rather than waiting on the debounced MutationObserver
+    // below: that debounce is 120ms, and a fast second click (e.g. double-tapping ↑)
+    // inside that window would fire against chrome still wired to the pre-mutation
+    // array order — the exact stale-index/wrong-item-deleted failure this task calls
+    // out as the one to get right. decorate() is idempotent, so the observer redoing
+    // the same rebuild a moment later (once it notices the DOM change from rerender()
+    // and from this call) is harmless.
+    decorate();
+  }
+  function onAdd(listPath) {
+    if (listPath.includes("galleries.")) return window.__edUpload
+      ? window.__edUpload(listPath)
+      : alert("Uploads arrive in the next build step.");
+    const item = { date: new Date().toISOString().slice(0, 10), title: "New post", body: "Write the announcement here." };
+    doOp({ type: "add", path: listPath, item }, (l) => l.push({ ...item }));
+  }
+  function menuFor(item, listPath, index, length) {
+    const m = document.createElement("span");
+    m.className = "ed-menu";
+    const mk = (label, title, fn) => {
+      const b = document.createElement("button");
+      b.textContent = label; b.title = title;
+      b.onclick = (e) => { e.stopPropagation(); e.preventDefault(); fn(); };
+      m.appendChild(b);
+    };
+    if (index > 0) mk("↑", "Move up", () => doOp({ type: "move", path: listPath, from: index, to: index - 1 }, (l) => l.splice(index - 1, 0, l.splice(index, 1)[0])));
+    if (index < length - 1) mk("↓", "Move down", () => doOp({ type: "move", path: listPath, from: index, to: index + 1 }, (l) => l.splice(index + 1, 0, l.splice(index, 1)[0])));
+    mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }, (l) => l.splice(index, 1)); });
+    return m;
+  }
+  function decorate() {
+    // Guard against tearing down chrome mid-keystroke: this runs not just from doOp()
+    // above but from a debounced MutationObserver reacting to ANY DOM change on the
+    // page — an unrelated section re-rendering, a nav dropdown opening. A rebuild while
+    // the user has a data-edit field open (contenteditable) wouldn't itself corrupt that
+    // field's text (decorate only ever touches .ed-add/.ed-menu nodes), but there's no
+    // reason to run it mid-keystroke either — skip it and let the field's own blur (or
+    // whatever unrelated mutation happens once it's done) retrigger decorate() via the
+    // observer below.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && isEditableNow(active)) return;
+    document.querySelectorAll(".ed-add,.ed-menu").forEach((n) => n.remove()); // rebuild fresh — never stale indices
+    if (!editing) return;
+    document.querySelectorAll("[data-list]").forEach((listEl) => {
+      const listPath = listEl.getAttribute("data-list");
+      const items = listEl.querySelectorAll(":scope [data-item]");
+      items.forEach((it, i) => { it.style.position = "relative"; it.appendChild(menuFor(it, listPath, i, items.length)); });
+      const add = document.createElement("button");
+      add.className = "ed-add"; add.textContent = "+ Add";
+      add.onclick = () => onAdd(listPath);
+      listEl.parentElement.insertBefore(add, listEl.nextSibling); // sibling, not child: React owns the list's children
+    });
+  }
+  // Debounced so a burst of dc-runtime DOM churn (e.g. a whole section re-rendering)
+  // collapses into one rebuild instead of one per mutation record. The disconnect-then-
+  // decorate-then-reconnect order is what stops this from driving itself in a loop:
+  // decorate()'s own writes (removing/adding .ed-add/.ed-menu, same for the DOM changes
+  // doOp()'s rerender() causes) would otherwise queue more mutation records while the
+  // observer is still connected, each one scheduling another decorate(), forever. With
+  // the observer disconnected for the duration of decorate(), those self-caused
+  // mutations are never recorded at all; observe() only starts watching again once
+  // decorate() has already finished reacting to whatever came before.
+  let moT;
+  const mo = new MutationObserver(() => {
+    clearTimeout(moT);
+    moT = setTimeout(() => { mo.disconnect(); decorate(); observe(); }, 120);
+  });
+  const observe = () => mo.observe(document.body, { childList: true, subtree: true });
+  decorate(); observe();
+
+  window.EditorUI = { draft, applyLocal, rerender, decorate, update, isEditing: () => editing };
   update();
 })();
