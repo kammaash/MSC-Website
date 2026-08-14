@@ -109,8 +109,7 @@
   .g-hero-pad{padding:70px 28px 70px max(28px,calc((100vw - 1280px)/2 + 28px))}
   .g-2{grid-template-columns:1fr 1fr;gap:22px}          /* vision + core values */
   .g-2t{grid-template-columns:1fr 1fr;gap:16px}         /* tighter: school-life and house pairs */
-  .g-3{grid-template-columns:repeat(3,1fr);gap:20px}    /* academics, facilities, news cards */
-  .g-4{grid-template-columns:repeat(4,1fr);gap:12px}    /* gallery mosaic */
+  .g-3{grid-template-columns:repeat(3,1fr);gap:20px}    /* academics, facilities, news and gallery cards */
   /* Four asymmetric two-column splits, each tuned to its own content; all of
      them collapse to a single column at 1024px. */
   .g-split{grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}   /* school life */
@@ -130,7 +129,6 @@
     .g-hero-pad{padding:56px 22px}
     .g-3{grid-template-columns:repeat(2,1fr)}
     .g-split,.g-split2,.g-split3,.g-splitS{grid-template-columns:1fr;gap:36px}
-    .g-4{grid-template-columns:repeat(2,1fr)}
     .g-foot{grid-template-columns:1fr 1fr;gap:32px}
     .h-hero{font-size:40px}
     .h-1{font-size:32px}
@@ -152,11 +150,6 @@
     .h-1{font-size:27px}
     .h-hero br,.h-1 br{content:"";display:inline}
     .h-hero br::after,.h-1 br::after{content:" "}
-  }
-
-  /* ===== Narrow phones: the gallery mosaic finally goes single file ===== */
-  @media (max-width:520px){
-    .g-4{grid-template-columns:1fr}
   }
 </style>
 <script src="cursor.js"></script>
@@ -430,9 +423,13 @@
 </section>
 
 <!-- NEWS ROOM
-     Three cards from the `news` array in CONTENT. The illustrative items here
-     are sample copy, not real announcements, and the striped block at the top
-     of each card is a placeholder standing in for a photograph. -->
+     Cards from the shared news.vidyanagar collection in content.js — a single
+     pool of announcements shared across pages, not local sample copy. Empty
+     until a collaborator adds a real post, in which case the empty state
+     below gives way to the grid. New cards render immediately (no
+     data-reveal): the scroll-reveal observer only ever sees the cards
+     present at mount, so an item added later through the editor would
+     otherwise stay invisible. -->
 <section id="news" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
     <div>
@@ -440,25 +437,26 @@
       <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Latest &amp; upcoming</h2>
     </div>
   </div>
-  <div class="g g-3">
+  <sc-if value="{{ noNews }}"><p style="color:#6b615b;font-size:14.5px">News and announcements coming soon.</p></sc-if>
+  <div class="g g-3" data-list="shared:news.vidyanagar">
     <sc-for list="{{ news }}" as="n" hint-placeholder-count="3">
-      <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;overflow:hidden">
-        <div style="height:120px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px)"></div>
-        <div style="padding:22px 22px 24px">
-          <div data-edit="{{ n.p }}.tag" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#c2410f">{{ n.tag }}</div>
-          <h4 data-edit="{{ n.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:8px 0 0;line-height:1.25">{{ n.title }}</h4>
-          <p data-edit="{{ n.p }}.desc" style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ n.desc }}</p>
-        </div>
-      </div>
+      <article data-item="" style="position:relative;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:22px">
+        <div data-edit="{{ n.p }}.date" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#c2410f">{{ n.date }}</div>
+        <h3 data-edit="{{ n.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:8px 0 0;line-height:1.25">{{ n.title }}</h3>
+        <p data-edit="{{ n.p }}.body" style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ n.body }}</p>
+      </article>
     </sc-for>
   </div>
 </section>
 
 <!-- GALLERY
-     A fixed mosaic: two wide tiles spanning two columns each, with four square
-     tiles between them. Written out by hand rather than looped because the
-     span pattern is part of the design. Every tile is a diagonal-stripe
-     placeholder awaiting real photography. -->
+     A looped grid over the shared galleries.vidyanagar collection in
+     content.js — photos and videos alike, distinguished by `kind`. Cloudinary
+     URLs are built in renderVals since {{ }} cannot concatenate. Empty until
+     a collaborator adds media, in which case the empty state below gives way
+     to the grid. New tiles render immediately (no data-reveal): the
+     scroll-reveal observer only ever sees the tiles present at mount, so a
+     tile added later through the editor would otherwise stay invisible. -->
 <section id="gallery" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
@@ -468,13 +466,15 @@
       </div>
       <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">more photos coming soon</span>
     </div>
-    <div class="g g-4">
-      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 12px,#eaddd9 12px 24px);border:1px solid #f0e0dc"></div>
-      <div style="grid-column:span 2;aspect-ratio:16/10;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px);border:1px solid #f0e0dc"></div>
+    <sc-if value="{{ noGallery }}"><p style="color:#6b615b;font-size:14.5px">Photos and videos coming soon.</p></sc-if>
+    <div class="g g-3" data-list="shared:galleries.vidyanagar">
+      <sc-for list="{{ gallery }}" as="ga" hint-placeholder-count="6">
+        <figure data-item="" style="position:relative;margin:0;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0e0dc">
+          <sc-if value="{{ ga.isImage }}"><img src="{{ ga.url }}" alt="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"></sc-if>
+          <sc-if value="{{ ga.isVideo }}"><video controls preload="none" src="{{ ga.url }}" poster="{{ ga.poster }}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#26201d"></video></sc-if>
+          <figcaption data-edit="{{ ga.p }}.caption" style="padding:10px 12px;font-size:13px;color:#6b615b">{{ ga.caption }}</figcaption>
+        </figure>
+      </sc-for>
     </div>
   </div>
 </section>
@@ -666,11 +666,6 @@ const CONTENT = {
     { "href": "vidyanagar-subpage.html#music", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Music", "desc": "Vocal and instrumental music with regular performances." }
   ],
   "facilityChips": ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
-  "news": [
-    { "tag": "Event", "title": "Grand Art Exhibition", "desc": "Students showcase a term of creativity across painting, sculpture and design." },
-    { "tag": "Achievement", "title": "Inter-school Olympiad wins", "desc": "Our scholars bring home honours in maths and science olympiads." },
-    { "tag": "Circular", "title": "Term calendar released", "desc": "Key dates, holidays and assessment schedules for the new session." }
-  ],
   "steps": [
     { "n": "1", "title": "Enquiry & campus visit", "desc": "Send an enquiry or drop by — meet our team and tour the campus." },
     { "n": "2", "title": "Application form", "desc": "Complete the admission form for your child's grade and pathway." },
@@ -806,6 +801,22 @@ class Component extends DCLogic {
     // The {{ }} language cannot build that string itself, so it is precomputed
     // here.
     const withPaths = (arr, base) => arr.map((it, i) => ({ ...it, p: base + "." + i }));
+    // ---- shared collections (news + gallery) ----
+    // Cloudinary URLs are built here because {{ }} cannot concatenate. Stored
+    // values are public IDs, so every rendered image gets f_auto,q_auto for free.
+    const S = window.SHARED_CONTENT;
+    const cdn = "https://res.cloudinary.com/" + S.cloudName;
+    const news = S.news.vidyanagar.map((it, i) => ({ ...it, p: "shared:news.vidyanagar." + i }));
+    const gallery = S.galleries.vidyanagar.map((it, i) => ({
+      ...it,
+      p: "shared:galleries.vidyanagar." + i,
+      isImage: it.kind === "image",
+      isVideo: it.kind === "video",
+      url: it.kind === "image"
+        ? cdn + "/image/upload/f_auto,q_auto,w_800/" + it.id
+        : cdn + "/video/upload/q_auto/" + it.id + ".mp4",
+      poster: cdn + "/video/upload/so_0,f_jpg,q_auto,w_800/" + it.id + ".jpg",
+    }));
     const open = this.state.openMenu;
     // Every dropdown link points into the branch's detail page, which routes
     // on the hash. This prefix is one of the few genuine differences between
@@ -939,7 +950,8 @@ class Component extends DCLogic {
       life: withPaths(CONTENT.life, "life"),
       facilities: withPaths(CONTENT.facilities, "facilities"),
       facilityChips: CONTENT.facilityChips.map((t, i) => ({ t, p: "facilityChips." + i })),
-      news: withPaths(CONTENT.news, "news"),
+      news, noNews: news.length === 0,
+      gallery, noGallery: gallery.length === 0,
       steps: withPaths(CONTENT.steps, "steps"),
       // ---- Enquiry form wiring ----
       form: this.state.form,
