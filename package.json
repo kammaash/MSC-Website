@@ -1,0 +1,9 @@
+{
+  "name": "msc-website-editor",
+  "private": true,
+  "scripts": {
+    "edit": "node editor/server.js",
+    "test": "node --test editor/test/",
+    "setup": "node editor/setup.js"
+  }
+}
