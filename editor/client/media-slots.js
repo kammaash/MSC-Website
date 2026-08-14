@@ -59,8 +59,13 @@
       if (posterPath) UI.applyLocal(posterPath, posterUrl);
     } catch (err) {
       // Restore prior values so the in-memory content and draft log stay in sync.
-      UI.applyLocal(path, priorValue);
-      if (posterPath) UI.applyLocal(posterPath, priorPosterValue);
+      // The restore itself may throw (e.g. posterPath doesn't exist in content),
+      // which must not mask the original error. Make restore best-effort: swallow
+      // any throw from it so the original error reaches the user.
+      try { UI.applyLocal(path, priorValue); } catch (e) { /* swallow restore error */ }
+      if (posterPath) {
+        try { UI.applyLocal(posterPath, priorPosterValue); } catch (e) { /* swallow restore error */ }
+      }
       alert("Can't place media here:\n" + err.message);
       return;
     }

@@ -58,3 +58,14 @@ test("click handler guards against swallowing interactive controls inside slots"
   assert.match(SRC, /e\.target\.closest.*button.*a.*input.*textarea.*select.*\.ed-menu/);
   assert.match(SRC, /if \(interactive && el\.contains\(interactive\)\) return;/);
 });
+
+test("restore-on-throw is best-effort — restore errors do not mask the original error", () => {
+  // If posterPath doesn't resolve in content, restoring it throws again. That throw
+  // must not escape uncaught (which would skip the alert); instead, it must be
+  // swallowed so the ORIGINAL error message reaches the user. Check that the restore
+  // calls are wrapped in their own try/catch to swallow restore errors.
+  assert.ok(SRC.includes("try { UI.applyLocal(path, priorValue); } catch (e) { /* swallow restore error */ }"),
+    "primary path restore must be wrapped to swallow errors");
+  assert.ok(SRC.includes("try { UI.applyLocal(posterPath, priorPosterValue); } catch (e) { /* swallow restore error */ }"),
+    "poster path restore must be wrapped to swallow errors");
+});
