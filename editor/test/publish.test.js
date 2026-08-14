@@ -153,3 +153,97 @@ test("an oversized publish body is rejected — no commit created", async () => 
   assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
   assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
 });
+
+// ---------------------------------------------------------------------------
+// Pre-merge fix round, must-fix 1: `git add -- <content files>` used to be followed by a
+// BARE `git commit -m msg` (commits the WHOLE index) probed by a whole-index
+// `git diff --cached --quiet`. A single unrelated file staged by anything else sharing
+// this checkout — another tool, a half-finished `git add`, a fresh-Mac git-identity-unset
+// failure mode leaving content files staged from a prior attempt — was, by itself, enough
+// to satisfy that probe and make Publish create a commit with ZERO content changes and
+// that unrelated file in it, while still reporting "Published ✓". The fix pathspec-limits
+// BOTH the probe (`git diff --quiet HEAD -- <existing>`) and the commit
+// (`git commit -- <existing>`) to the exact same files `git add` just staged, so they can
+// never disagree. These four tests are the reviewer's own validated table, reproduced.
+// ---------------------------------------------------------------------------
+
+test("must-fix 1, row 1: unrelated file staged, no content change → 409 'Nothing to publish', nothing committed", async () => {
+  const { root, bare, publish } = await boot({ push: false });
+  fs.writeFileSync(path.join(root, "EVIL_UNRELATED.txt"), "not content — staged by something else sharing this checkout");
+  g(root, "add", "EVIL_UNRELATED.txt");
+  // Sanity: something IS staged (the old whole-index probe would have treated this as
+  // "changes to publish" and committed it).
+  assert.notEqual(g(root, "status", "--porcelain").trim(), "");
+
+  const r = await publish();
+  assert.equal(r.status, 409);
+  assert.equal(await r.text(), "Nothing to publish (no changes).");
+  assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
+  assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
+  // The unrelated file is still staged, exactly where it started — publish must not have
+  // touched it at all, not stage it further and not unstage it either.
+  assert.equal(g(root, "diff", "--cached", "--name-only").trim(), "EVIL_UNRELATED.txt");
+});
+
+test("must-fix 1, row 2: content change + unrelated staged file → commits content only; the unrelated file stays staged, out of HEAD", async () => {
+  const { root, bare, publish } = await boot({ push: false });
+  fs.writeFileSync(path.join(root, "EVIL_UNRELATED.txt"), "not content — staged by something else sharing this checkout");
+  g(root, "add", "EVIL_UNRELATED.txt");
+  fs.writeFileSync(path.join(root, "content.js"), '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"a": "row2"};\n/* CONTENT:END */');
+
+  const r = await publish();
+  assert.equal(r.status, 200);
+  assert.match(g(root, "log", "-1", "--format=%s"), /content: test/); // real commit happened
+  assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // push:false — bare untouched either way
+
+  // The unrelated file must be OUT of the commit that was just made...
+  const committedFiles = g(root, "show", "--name-only", "--format=", "HEAD").trim().split("\n").filter(Boolean);
+  assert.deepEqual(committedFiles, ["content.js"], "only content.js may be in the new commit");
+  // ...but still staged afterward — Publish must neither commit it nor unstage it.
+  assert.equal(g(root, "diff", "--cached", "--name-only").trim(), "EVIL_UNRELATED.txt");
+  assert.ok(!fs.existsSync(path.join(bare, "EVIL_UNRELATED.txt")));
+});
+
+test("must-fix 1, row 3: content file staged then reverted in the worktree → probe and commit agree, nothing committed", async () => {
+  const { root, bare, publish } = await boot({ push: false });
+  const original = fs.readFileSync(path.join(root, "content.js"), "utf8");
+  // Stage a real change...
+  fs.writeFileSync(path.join(root, "content.js"), '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"a": "row3-staged"};\n/* CONTENT:END */');
+  g(root, "add", "content.js");
+  // ...then revert the worktree back to what HEAD already has, WITHOUT unstaging. The
+  // handler's own `git add -- <existing>` (the first thing it does) re-captures this
+  // reverted content into the index before the probe ever runs, so by the time the probe
+  // runs the index (like the worktree) once again matches HEAD exactly.
+  fs.writeFileSync(path.join(root, "content.js"), original);
+
+  const r = await publish();
+  assert.equal(r.status, 409);
+  assert.equal(await r.text(), "Nothing to publish (no changes).");
+  assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
+  assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
+});
+
+test("must-fix 1, row 4: a partially-staged unrelated file (git add -p) is excluded entirely — even the staged hunk stays out of HEAD", async () => {
+  const { root, bare, publish } = await boot({ push: false });
+  // A file already tracked (so a partial `git add -p`-style stage — captured here by
+  // writing, staging, then writing again — makes sense: index != worktree != HEAD, all
+  // three different).
+  fs.writeFileSync(path.join(root, "README_UNRELATED.txt"), "line one\n");
+  g(root, "add", "README_UNRELATED.txt");
+  g(root, "commit", "-m", "add unrelated file");
+  fs.writeFileSync(path.join(root, "README_UNRELATED.txt"), "line one\nline two (staged)\n");
+  g(root, "add", "README_UNRELATED.txt"); // stage "line two"
+  fs.writeFileSync(path.join(root, "README_UNRELATED.txt"), "line one\nline two (staged)\nline three (unstaged)\n");
+  fs.writeFileSync(path.join(root, "content.js"), '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"a": "row4"};\n/* CONTENT:END */');
+
+  const r = await publish();
+  assert.equal(r.status, 200);
+  assert.match(g(root, "log", "-1", "--format=%s"), /content: test/);
+
+  const committedFiles = g(root, "show", "--name-only", "--format=", "HEAD").trim().split("\n").filter(Boolean);
+  assert.deepEqual(committedFiles, ["content.js"], "the partially-staged unrelated file must not appear in the commit at all");
+  // Both the staged hunk and the unstaged edit must still be sitting exactly where they
+  // were — untouched by publish, not folded into HEAD, not unstaged, not discarded.
+  assert.match(g(root, "diff", "--cached", "README_UNRELATED.txt"), /line two \(staged\)/);
+  assert.match(g(root, "diff", "README_UNRELATED.txt"), /line three \(unstaged\)/);
+});

@@ -17,6 +17,11 @@ const MIME = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".json": "application/json", ".css": "text/css", ".png": "image/png",
   ".gif": "image/gif", ".md": "text/plain; charset=utf-8",
+  ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon",
+  // Deliberately NOT .svg: image/svg+xml can carry <script>, so serving one would be
+  // same-origin script execution. Nothing in the repo references an .svg today; this
+  // whole map exists only so a future local photo doesn't fall through to
+  // application/octet-stream and render differently in the editor preview than deployed.
 };
 const INJECT = '<script src="/editor/lib/paths.js"></script>' +
   '<script src="/editor/client/draft.js"></script>' +
@@ -57,8 +62,24 @@ function hasValidCloudinarySecrets(secrets) {
     typeof secrets.cloudinaryApiKey === "string" && secrets.cloudinaryApiKey !== "";
 }
 
-function send(res, status, body, type) {
-  res.writeHead(status, { "content-type": type || "text/plain; charset=utf-8" });
+// `extraHeaders` lets a specific caller add to (never remove) the fixed set below —
+// e.g. the HTML branch adding Cache-Control. The three security headers are unconditional
+// on every response this server ever sends, /api/* included: this is a local, single-user
+// tool, so there is no legitimate caller that ever needs to frame it, sniff a response's
+// content-type against its declared one, or have this origin's pages framed elsewhere.
+// X-Frame-Options/CSP frame-ancestors are DEFENCE IN DEPTH, not the primary fix — the
+// client already refuses to boot when framed (editor-client.js, first statement of the
+// IIFE, before any state or chrome exists — see FC-1 there). That check is real but lives
+// in JS that a framer could in principle fail to load; these headers hold even then, and
+// survive a future refactor of editor-client.js that the client-side check alone could not
+// anticipate.
+function send(res, status, body, type, extraHeaders) {
+  res.writeHead(status, Object.assign({
+    "content-type": type || "text/plain; charset=utf-8",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'",
+    "x-content-type-options": "nosniff",
+  }, extraHeaders));
   res.end(body);
 }
 
@@ -279,10 +300,36 @@ function createServer({ root, config, templates, secrets, token }) {
         // commit and push failures just below, for the same reason.
         try { git(root, ["add", "--", ...existing]); }
         catch (e) { return send(res, 500, "Publish failed: " + redactPaths(e.stderr || e.message, root)); }
+        // Both the emptiness probe and the commit itself are pathspec-limited to `existing`
+        // (the content files this endpoint is actually about), never a bare "whatever is
+        // staged". A bare `git commit -m msg` here used to commit the ENTIRE index — so a
+        // single unrelated file staged by anything else sharing this checkout (another tool,
+        // a half-finished `git add`, a fresh-Mac `git identity unset` leaving content files
+        // staged from a prior failed attempt) was, by itself, enough to satisfy a
+        // whole-index `git diff --cached --quiet` probe and make Publish create a commit
+        // with ZERO content changes and that unrelated file in it — while still reporting
+        // "Published ✓". Limiting both the probe and the commit to the same pathspec as the
+        // preceding `git add` means they can never disagree (both compare worktree-vs-HEAD
+        // over the same paths), and an unrelated staged file is neither counted here nor
+        // included in what gets committed — it simply stays staged, untouched, for whatever
+        // put it there to finish or for the admin to notice.
+        //
+        // `git diff --quiet HEAD` (not `--cached`) is deliberate: it compares the WORKING
+        // TREE at these paths against HEAD, which is what "is there anything of ours to
+        // publish" actually means, and is the same comparison `git commit -- <pathspec>`
+        // below will act on regardless of what else is sitting in the index.
         let hasStagedChanges = true;
-        try { git(root, ["diff", "--cached", "--quiet"]); hasStagedChanges = false; } catch { /* exit !=0 => staged changes */ }
+        try { git(root, ["diff", "--quiet", "HEAD", "--", ...existing]); hasStagedChanges = false; } catch { /* exit !=0 => real changes */ }
         if (!hasStagedChanges) return send(res, 409, "Nothing to publish (no changes).");
-        try { git(root, ["commit", "-m", msg]); }
+        // A pathspec-limited commit is a PARTIAL commit: git refuses it outright during a
+        // conflicted merge ("cannot do a partial commit during a merge") where a bare commit
+        // would instead have silently concluded the merge with unrelated staged content
+        // folded in — strictly safer, and it surfaces as the existing redacted 500 below,
+        // same as any other commit failure. No special-casing needed for that, or for the
+        // pull --rebase a few lines down failing on a still-staged unrelated file ("cannot
+        // pull with rebase: Your index contains uncommitted changes") — that's the existing
+        // sync-failed 409 the client already handles.
+        try { git(root, ["commit", "-m", msg, "--", ...existing]); }
         catch (e) { return send(res, 500, "Publish failed: " + redactPaths(e.stderr || e.message, root)); }
         if (config.push === true && process.env.EDITOR_NO_PUSH !== "1") {
           try { git(root, ["pull", "--rebase"]); git(root, ["push"]); }
@@ -416,8 +463,16 @@ function createServer({ root, config, templates, secrets, token }) {
       if (!fs.statSync(real).isFile()) return send(res, 404, "Not found");
       const ext = path.extname(real).toLowerCase();
       let body = fs.readFileSync(real);
+      // An HTML page carries a per-boot token (TOKEN_SCRIPT) that dies the instant the
+      // editor server restarts — a browser or back/forward cache holding onto an old
+      // response would keep serving a page whose token no longer matches anything the
+      // (new) server will accept, and every /api/* call from it 403s with no clue why.
+      // `no-store` only helps the cached-navigation case; the general case (a tab that was
+      // simply left open across a restart, never re-navigated) is handled client-side —
+      // see editor-client.js's 403 handling.
+      const htmlHeaders = ext === ".html" ? { "cache-control": "no-store" } : undefined;
       if (ext === ".html") body = Buffer.from(body.toString("utf8").replace("</body>", TOKEN_SCRIPT + INJECT + "</body>"));
-      return send(res, 200, body, MIME[ext] || "application/octet-stream");
+      return send(res, 200, body, MIME[ext] || "application/octet-stream", htmlHeaders);
     } catch (e) {
       // Errors thrown by our own validators (content-io.js, patch.js — "Unknown or
       // non-text path", "Text may not contain CONTENT:BEGIN...", etc.) are plain
