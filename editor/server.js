@@ -1,6 +1,7 @@
 "use strict";
 const http = require("node:http");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync, execFile } = require("node:child_process");
@@ -20,6 +21,25 @@ const MIME = {
 const INJECT = '<script src="/editor/lib/paths.js"></script>' +
   '<script src="/editor/client/draft.js"></script>' +
   '<script src="/editor/client/editor-client.js"></script>';
+
+// Only a bare, single-segment .js filename directly under editor/lib/ or editor/client/ is
+// ever servable. Dots are permitted in the name (e.g. "editor-client.min.js") so a future
+// bundle doesn't break silently, but no nested subdirectory and no ".." segment anywhere.
+function editorPathAllowed(relToEditorLower) {
+  if (relToEditorLower.split("/").some((seg) => seg === "..")) return false;
+  return /^(lib|client)\/[a-z0-9_.-]+\.js$/.test(relToEditorLower);
+}
+
+// True if `pLower` (an already-lowercased absolute path, forward-slash-normalised) lies
+// inside the editor directory (`edLower`, also lowercased/normalised) AND does not satisfy
+// the allowlist above. Shared by both authority checks below (pre- and
+// post-symlink-resolution) so the identical rule applies to both.
+function isForbiddenEditorPath(pLower, edLower) {
+  const inEditor = pLower === edLower || pLower.startsWith(edLower + "/");
+  if (!inEditor) return false;
+  const relToEditor = pLower === edLower ? "" : pLower.slice(edLower.length + 1);
+  return !editorPathAllowed(relToEditor);
+}
 
 // Cloudinary upload signing: only these keys may ever be signed, and only for a
 // timestamp close to "now" — otherwise this endpoint is an open signing oracle.
@@ -68,7 +88,7 @@ function createServer({ root, config, templates, secrets, token }) {
   // paths.js lives in the repo's editor/ dir, not the (possibly tmp) site root under test.
   const editorDir = __dirname;
   const editorParent = path.dirname(editorDir);
-  const edLower = path.resolve(editorDir).toLowerCase();
+  const edLower = path.resolve(editorDir).toLowerCase().split(path.sep).join("/");
   // Realpath the two possible `base` directories once, up front. os.tmpdir() (used by
   // every test fixture, and by any real symlinked path) is itself a symlink on macOS
   // (/var -> /private/var), so a plain string join would not match what
@@ -185,34 +205,48 @@ function createServer({ root, config, templates, secrets, token }) {
       const fp = path.resolve(base, rel);
       if (fp !== baseResolved && !fp.startsWith(baseResolved + path.sep)) return send(res, 403, "Forbidden");
 
-      // AUTHORITY, part 1 — the case-insensitive-filesystem bypass. This must work even if
-      // the target file does NOT exist (so status codes never leak "this secret file isn't
-      // even there"), so it runs on `fp` before any fs call: if the resolved path lies
-      // inside the editor directory AT ALL — compared case-insensitively, never with a
-      // case-sensitive prefix test — it MUST match the lib/client allowlist or it is
-      // forbidden: not config.json, not collections.json, not secrets.json, not test files,
-      // not check-paths.js. Independent of which URL casing or which branch got it here.
-      const fpLower = fp.toLowerCase();
-      const inEditorByPath = fpLower === edLower || fpLower.startsWith(edLower + path.sep);
-      if (inEditorByPath) {
-        // Slice the already-lowercased strings rather than calling path.relative(editorDir,
-        // fp): path.relative compares segments as case-SENSITIVE strings, so on a
-        // differently-cased fp (e.g. "/EDITOR/lib/paths.js" vs. editorDir's real
-        // "/.../editor") it would fail to recognise them as the same directory and produce
-        // a bogus "../EDITOR/lib/paths.js" — silently over-blocking a legitimately
-        // allowlisted file requested with different casing.
-        const relToEditor = fpLower.slice(edLower.length + 1).split(path.sep).join("/");
-        if (!/^(lib|client)\/[a-z0-9_-]+\.js$/.test(relToEditor)) return send(res, 403, "Forbidden");
-      }
+      // AUTHORITY, part 1 — pre-symlink, existence-independent. Runs on `fp` (the literal
+      // joined path, not yet touched by the filesystem) before any fs call, so status codes
+      // never leak whether a particular file inside editor/ exists. Catches a case-varied
+      // URL that names a non-allowlisted editor/ file directly (e.g. "/EDITOR/secrets.json"
+      // — case-insensitive, never a case-sensitive prefix test), whether or not that file
+      // is actually there.
+      //
+      // This alone is NOT sufficient: it does not follow symlinks, so a symlink whose own
+      // NAME happens to match the allowlist (e.g. editor/lib/evil.js) would pass here even
+      // though it points somewhere else entirely, and a symlink/hard-link OUTSIDE editor/
+      // that happens to point INTO editor/ (e.g. a root-level "/leak.json" -> editor/x, or a
+      // root-level directory symlink "/pub" -> editor/) is invisible to a check on `fp`
+      // alone, since `fp` itself never lies under editorDir textually. Part 2 below (on the
+      // realpath'd, symlink-resolved path) closes both of those; the two together mean
+      // neither check has to be perfect alone.
+      const fpLower = fp.toLowerCase().split(path.sep).join("/");
+      if (isForbiddenEditorPath(fpLower, edLower)) return send(res, 403, "Forbidden");
 
       let real;
       try { real = fs.realpathSync(fp); }
       catch { return send(res, 404, "Not found"); } // missing file or broken symlink — not a crash
 
-      // AUTHORITY, part 2 — the symlink escape. Re-run containment against the
-      // symlink-RESOLVED path (using the correspondingly realpath'd base computed above): a
+      // AUTHORITY, part 2 — post-symlink. First, containment: re-run it against the
+      // symlink-RESOLVED path (using the correspondingly realpath'd base computed above,
+      // since os.tmpdir() is itself a symlink on macOS — comparing realpath'd `real` against
+      // a non-realpath'd base string would falsely reject legitimate tmp-rooted files). A
       // symlink living under `base` but pointing outside it must not be followed.
       if (real !== baseReal && !real.startsWith(baseReal + path.sep)) return send(res, 403, "Forbidden");
+
+      // Second, the SAME editor allowlist as part 1, now evaluated against the RESOLVED
+      // path — this is the actual fix for round 2's central defect (the allowlist was only
+      // ever checked against `fp`, never against `real`, so a symlink resolving into
+      // editor/ from anywhere — root-level file symlink, root-level directory symlink, or a
+      // same-directory symlink under editor/lib/ pointing at ../secrets.json — passed
+      // straight through). A hard link cannot be caught by any path-based check, including
+      // this one — realpath does not (and by design cannot) resolve a hard link, since a
+      // hard-linked file genuinely IS a normal file, indistinguishable on disk from any
+      // other, in whatever directory it was linked into. That is precisely why the real fix
+      // is Fix 1: nothing sensitive lives under the served tree any more, so there is
+      // nothing left for a hard link to reach.
+      const realLower = real.toLowerCase().split(path.sep).join("/");
+      if (isForbiddenEditorPath(realLower, edLower)) return send(res, 403, "Forbidden");
 
       if (!fs.statSync(real).isFile()) return send(res, 404, "Not found");
       const ext = path.extname(real).toLowerCase();
@@ -231,14 +265,30 @@ if (require.main === module) {
   const root = path.join(__dirname, "..");
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf8"));
   const templates = JSON.parse(fs.readFileSync(path.join(__dirname, "collections.json"), "utf8"));
+  // The Cloudinary secret lives OUTSIDE the repository entirely — a credential inside the
+  // served web root is reachable by construction (case-varied URLs, symlinks, even hard
+  // links; see the static-handler comments above). ~/.msc-editor/secrets.json can never be
+  // requested over HTTP and can never be committed by accident.
+  const secretsPath = path.join(os.homedir(), ".msc-editor", "secrets.json");
   let secrets = null;
-  try { secrets = JSON.parse(fs.readFileSync(path.join(__dirname, "secrets.json"), "utf8")); } catch {}
+  try { secrets = JSON.parse(fs.readFileSync(secretsPath, "utf8")); } catch {}
+  // A stray secrets.json from before this fix would have been inside the served tree.
+  // Warn loudly, but never read, migrate, or delete it automatically — leave that to the
+  // collaborator, deliberately, so nothing here ever touches a credential file on their
+  // say-so alone.
+  const stalePath = path.join(__dirname, "secrets.json");
+  if (fs.existsSync(stalePath)) {
+    console.warn(
+      "WARNING: found " + stalePath + " — this location is inside the served website " +
+      "tree and was never safe. Delete it and run: npm run setup"
+    );
+  }
   const token = crypto.randomUUID();
   const srv = createServer({ root, config, templates, secrets, token });
   srv.listen(config.port, "127.0.0.1", () => {
     const url = "http://localhost:" + config.port + "/";
     console.log("Editor running at " + url);
-    if (!secrets) console.log("(uploads disabled — no editor/secrets.json; run: npm run setup)");
+    if (!secrets) console.log("(uploads disabled — no " + secretsPath + "; run: npm run setup)");
     if (process.env.EDITOR_NO_PUSH === "1") console.log("(EDITOR_NO_PUSH=1 — publish will commit but NOT push)");
     if (process.platform === "darwin") execFile("open", [url]);
   });
