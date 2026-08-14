@@ -35,6 +35,25 @@
   const applyListOp = window.EditorDraft.applyListOp; // shared with lib/paths.js — see doOp() below
   let editing = true;
 
+  // The site's custom cursor (cursor.js) hides the native pointer and draws a pen
+  // that only yields over its own fixed selector list — editable elements aren't in
+  // it, so while editing it actively fights the editor (no I-beam over fields, ink
+  // strokes over drop targets). While editing, hand back the native cursor. apply(),
+  // never set(): the visitor-facing preference in localStorage must survive editing.
+  function setEditingCursor(editingNow) {
+    if (!window.MonteCursor) return; // page without cursor.js
+    window.MonteCursor.apply(editingNow ? "Native" : window.MonteCursor.get());
+  }
+  // cursor.js boots on DOMContentLoaded and its listener was registered earlier in
+  // parse order (it loads in the page's own markup; this file is injected before
+  // </body>), so this listener fires AFTER the pen boots — Native lands last. If the
+  // document is somehow already parsed, MonteCursor exists now and is applied now.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () { setEditingCursor(editing); });
+  } else {
+    setEditingCursor(true);
+  }
+
   // Every /api/* call must carry this header — the server mints one random token per
   // boot and injects it as window.__EDITOR_TOKEN before this script runs (see
   // server.js's TOKEN_SCRIPT). Without it every request 403s; a foreign page cannot
@@ -303,6 +322,7 @@
   bar.querySelector("#ed-exit").onclick = () => {
     editing = !editing;
     bar.querySelector("#ed-exit").textContent = editing ? "Exit" : "Resume";
+    setEditingCursor(editing); // Resume brings Native back; Exit restores the visitor's cursor
     if (!editing) {
       // Leaving edit mode must leave nothing mid-edit behind: a lingering hover
       // outline from whatever the mouse was last over, and — more importantly — an

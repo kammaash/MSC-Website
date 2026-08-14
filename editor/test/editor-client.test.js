@@ -344,3 +344,20 @@ test("node --check passes for draft.js and editor-client.js", () => {
   execFileSync(process.execPath, ["--check", DRAFT]);
   execFileSync(process.execPath, ["--check", EDITOR_CLIENT]);
 });
+
+test("edit mode hands back the native cursor; Exit/Resume toggles it (Task: media slots)", () => {
+  // cursor.js hides the native pointer and draws a pen that yields only over its own
+  // fixed selector list — data-edit/data-media-slot elements aren't in it, so while
+  // editing it fights the editor. The editor must switch to "Native" via apply()
+  // (NEVER set(), which would overwrite the visitor-facing localStorage preference).
+  const block = extractBlockAfter(SRC, "function setEditingCursor(");
+  assert.match(block, /if \(!window\.MonteCursor\) return/);
+  assert.match(block, /MonteCursor\.apply\(/);
+  assert.ok(!/MonteCursor\.set\(/.test(SRC), "must never call MonteCursor.set()");
+  // cursor.js boots on DOMContentLoaded (its listener registered earlier in parse
+  // order), so the editor registers its own DOMContentLoaded listener — which then
+  // fires after the pen has booted, and the Native override lands last.
+  assert.match(SRC, /addEventListener\("DOMContentLoaded", function \(\) \{ setEditingCursor\(/);
+  const exit = extractBlockAfter(SRC, '#ed-exit").onclick');
+  assert.match(exit, /setEditingCursor\(editing\)/);
+});
