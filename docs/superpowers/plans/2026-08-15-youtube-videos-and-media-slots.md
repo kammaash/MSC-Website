@@ -8,13 +8,15 @@
 > STOP that task and escalate to the session (Fable) model to diagnose before re-dispatching.
 > Tasks must run in order — later tasks call functions earlier tasks create.
 
-> **Base state (verify before Task 1):** HEAD is `5b08da0` or a descendant. The old plan
+> **Base state (verify before Task 1):** HEAD is `2222061` or a descendant. The old plan
 > (`2026-08-15-edit-mode-media-slots.md`) executed through its Task 5: the cursor handoff
 > (`aecda7d`), Cloudinary-flavored `media-urls.js` (`c7fd222`), check-paths slot validation
-> (`743bf68`), drawer pick mode + drag (`001d0b1`), and `media-slots.js` + injection
-> (`5b08da0`) are ALL SHIPPED. Its page-migration tasks (index/acamp/vidyanagar) did NOT
-> run — this plan replaces them. If `git log --oneline -5` doesn't show those commits, or
-> the three pages already contain `data-media-slot`, STOP and escalate.
+> (`743bf68`), drawer pick mode + drag (`001d0b1`), `media-slots.js` + injection
+> (`5b08da0`), and a follow-up fix (`2222061`: slot clicks yield to interactive controls;
+> transactional poster apply) are ALL SHIPPED. Its page-migration tasks
+> (index/acamp/vidyanagar) did NOT run — this plan replaces them. If `git log` doesn't
+> show those commits, or the three pages already contain `data-media-slot`, STOP and
+> escalate.
 
 **Goal:** All videos are YouTube-hosted (uploaded manually in YouTube Studio as Unlisted, registered in the editor by pasted link); images stay on Cloudinary; the already-shipped slot machinery switches its video half from Cloudinary to YouTube embeds; and the three main pages get their media slots.
 
@@ -558,40 +560,42 @@ to
   // its own poster frame — so there is no per-kind plumbing here at all.
 ```
 
-4b. In `applyToSlot`, DELETE these three poster lines:
+4b. Replace the ENTIRE `applyToSlot` function (it currently carries poster plumbing, a
+prior-value rollback for the two-path poster transaction — commit `2222061` — and a
+`<video>.load()` rAF block; with the poster path gone there is only ONE write, so a
+throw means nothing was applied and the rollback machinery has nothing left to do) with:
 
 ```js
-    var posterPath = slotEl.getAttribute("data-media-poster");
-```
-
-```js
-      if (posterPath) UI.applyLocal(posterPath, URLS.posterUrl(cloudName, record));
-```
-
-```js
-    if (posterPath) UI.draft.set(posterPath, URLS.posterUrl(cloudName, record));
-```
-
-4c. Still in `applyToSlot`, replace the trailing rAF block:
-
-```js
-    requestAnimationFrame(function () {
-      document.querySelectorAll('video[data-media-slot]').forEach(function (v) {
-        if (v.getAttribute("data-media-slot") === path) v.load();
-      });
-      markEmpties();
-    });
-```
-
-with:
-
-```js
+  function applyToSlot(slotEl, record, cloudName) {
+    var path = slotEl.getAttribute("data-media-slot");
+    var kind = slotEl.getAttribute("data-media-kind");
+    if (record.kind !== kind) {
+      alert("That spot takes a " + kind + ", not a " + record.kind + ".");
+      return;
+    }
+    var url = URLS.deliveryUrl(cloudName, record);
+    try {
+      // Apply first, record only on success — the same invariant as every other
+      // editor mutation (see editor-client.js's doOp): a failed apply must never
+      // leave an op in the draft log. One path, one write: a throw means nothing
+      // was applied, so there is nothing to roll back.
+      UI.applyLocal(path, url);
+    } catch (err) {
+      alert("Can't place media here:\n" + err.message);
+      return;
+    }
+    UI.draft.set(path, url);
+    clearSelection();
+    UI.rerender(); UI.update();
     // rAF lands after the rerender's commit, so the empty-state marking sees the
     // slot's new value (same reasoning as doOp's rAF in editor-client.js).
     requestAnimationFrame(markEmpties);
+  }
 ```
 
-(If the comment above the old block mentions `<video>`/`load()`, delete that comment too.)
+Everything OUTSIDE `applyToSlot` stays untouched — in particular the interactive-control
+click guard (`e.target.closest("button, a, input, textarea, select, .ed-menu")`) from
+commit `2222061` must survive.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
