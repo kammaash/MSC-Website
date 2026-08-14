@@ -453,7 +453,7 @@
     });
   }
   window.__edUpload = async function (listPath) {
-    const file = await pickFile("image/*,video/*");
+    const file = await pickFile("image/*");
     if (!file) return;
     const busy = document.createElement("div");
     busy.textContent = "Uploading " + file.name + "…";
@@ -502,7 +502,13 @@
       // instead, before doOp ever runs, so the user sees it at the moment it happened.
       if (!upRes.ok || up.error) throw new Error((up.error && up.error.message) || ("Cloudinary upload failed (HTTP " + upRes.status + ")"));
       if (typeof up.public_id !== "string" || up.public_id === "") throw new Error("Cloudinary response is missing public_id");
-      const item = { kind: up.resource_type === "video" ? "video" : "image", id: up.public_id, caption: "" };
+      // accept="image/*" is advisory only — the picker can still hand over anything.
+      // Videos don't belong on Cloudinary at all (they're YouTube links, added in
+      // the Media drawer), so a non-image response is refused, not stored.
+      if (up.resource_type !== "image") {
+        throw new Error("Only photos can be added here. Videos go on YouTube — open 🖼 Media → Videos → Add YouTube link.");
+      }
+      const item = { kind: "image", id: up.public_id, caption: "" };
       doOp({ type: "add", path: listPath, item });
     } catch (err) {
       alert("Upload failed:\n" + err.message);

@@ -361,3 +361,13 @@ test("edit mode hands back the native cursor; Exit/Resume toggles it (Task: medi
   const exit = extractBlockAfter(SRC, '#ed-exit").onclick');
   assert.match(exit, /setEditingCursor\(editing\)/);
 });
+
+test("inline gallery upload is photos-only — videos are YouTube links added in the drawer (Task: youtube videos)", () => {
+  assert.match(SRC, /pickFile\("image\/\*"\)/);
+  assert.ok(!/image\/\*,video\/\*/.test(SRC), "the combined image+video accept string must be gone");
+  const up = extractBlockAfter(SRC, "window.__edUpload = async function");
+  // The accept attribute is advisory (a file picker can still hand over anything),
+  // so the Cloudinary response's resource_type is the real gate.
+  assert.match(up, /resource_type !== "image"/);
+  assert.ok(!/resource_type === "video" \? "video" : "image"/.test(SRC), "the video-kind branch must be gone");
+});
