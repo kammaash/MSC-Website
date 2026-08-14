@@ -20,8 +20,17 @@
   As with every page in this project (see index.html for the full explanation
   of the runtime): <helmet> is lifted into <head>, <x-dc> is the markup
   template with {{ }} holes, sc-for loops and sc-if conditionals, and the
-  data-dc-script block at the bottom holds the `Component` class whose
-  renderVals() supplies every value the template reads.
+  data-dc-script block at the bottom holds this page's CONTENT block — every
+  piece of editable copy, as strict JSON between the CONTENT:BEGIN and
+  CONTENT:END marker comments — followed by the `Component` class whose
+  renderVals() reads from CONTENT and supplies every value the template reads.
+
+  One extra attribute appears in the template: data-edit names the CONTENT path
+  an element's text came from, e.g. hero.title. Inside an <sc-for> the item's
+  own path is precomputed as `p`, so the attribute is written as a hole and
+  reads .p first. Paths beginning `shared:` point into content.js instead. The
+  runtime ignores data-edit entirely; the local editor uses it to map a clicked
+  element back to the value behind it.
 
   This page's interactive parts, in the order they appear:
     - a branded loading screen that fades itself out after ~1.9s
@@ -41,6 +50,10 @@
 <title>Montessori School, Vidyanagar, Kurnool | Montessori Schools</title>
 <meta name="description" content="Montessori School, Vidyanagar, Kurnool — a branch of the Montessori Schools, Kurnool. Academics, school life, campus, transport and admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
+<!-- Shared facts (contact details, news, galleries) used across pages. Must
+     load before support.js so window.SHARED_CONTENT exists when the runtime
+     boots. -->
+<script src="./content.js"></script>
 <!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
 </head>
@@ -184,7 +197,7 @@
     </a>
     <div class="phone-block" style="text-align:right">
       <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
-      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
+      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a>
     </div>
   </div>
 </div>
@@ -244,14 +257,15 @@
      Full-bleed two-column band: introduction on the left, photo on the right
      with a quotation banner across its top. The <img> is a 1x1 transparent GIF
      placeholder, so today the right half shows the quote over a flat peach
-     panel. The hero copy is the one substantial piece of branch-specific text
-     on the page and is genuinely different in the A-Camp twin. -->
+     panel. The hero copy is the `hero` object in CONTENT: the one substantial
+     piece of branch-specific text on the page, genuinely different in the
+     A-Camp twin. -->
 <section id="top" class="g g-hero">
   <div class="g-hero-pad" style="display:flex;flex-direction:column;justify-content:center">
-    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
-    <h1 class="h-hero" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori School, Vidyanagar</h1>
-    <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">Montessori School, Vidyanagar is a co-educational day school, established under the aegis of Montessori School Committee, as a valued branch of the Montessori family of schools. Located in the Vidyanagar area of Kurnool city, the school offers a warm, well-appointed campus with state-of-the-art facilities in a specifically designed ambience, replete with centralized AC classrooms and dedicated sporting facilities.</p>
-    <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.</p>
+    <div data-edit="hero.welcome" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">{{ hero.welcome }}</div>
+    <h1 data-edit="hero.title" class="h-hero" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">{{ hero.title }}</h1>
+    <p data-edit="hero.p1" style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">{{ hero.p1 }}</p>
+    <p data-edit="hero.p2" style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">{{ hero.p2 }}</p>
     <div class="hero-btns" style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
       <a href="#admissions" style="background:#a51915;color:#fff;padding:14px 28px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#7f120f">Send enquiry →</a>
       <a href="#about" style="background:#e8541b;color:#fff;padding:14px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#c2410f">Discover the school</a>
@@ -259,7 +273,7 @@
   </div>
   <div style="position:relative;background:#f6e7e2;min-height:420px">
     <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
-      <p style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”</p>
+      <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
     <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
   </div>
@@ -297,10 +311,10 @@
 </section>
 
 <!-- ACADEMICS
-     Six cards from the `academics` array. These describe programmes in general
-     terms only: no board, affiliation or grade range is claimed anywhere on
-     this site, because none has been confirmed. Add those to the array copy
-     once the real curriculum details are available. -->
+     Six cards from the `academics` array in CONTENT. These describe programmes
+     in general terms only: no board, affiliation or grade range is claimed
+     anywhere on this site, because none has been confirmed. Add those to the
+     array copy once the real curriculum details are available. -->
 <section id="academics" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="text-align:center;max-width:620px;margin:0 auto 40px">
@@ -311,8 +325,8 @@
       <sc-for list="{{ academics }}" as="a" hint-placeholder-count="6">
         <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;border-top:4px solid #e8541b">
           <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#c2410f;letter-spacing:.05em">{{ a.tag }}</div>
-          <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin:8px 0 0">{{ a.title }}</h4>
-          <p style="font-size:14.5px;line-height:1.6;color:#6b615b;margin:9px 0 0">{{ a.desc }}</p>
+          <h4 data-edit="{{ a.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin:8px 0 0">{{ a.title }}</h4>
+          <p data-edit="{{ a.p }}.desc" style="font-size:14.5px;line-height:1.6;color:#6b615b;margin:9px 0 0">{{ a.desc }}</p>
         </div>
       </sc-for>
     </div>
@@ -320,9 +334,9 @@
 </section>
 
 <!-- SCHOOL LIFE
-     Left: four short points from the `life` array. Right: the four houses,
-     hard-coded here rather than driven by an array because each has its own
-     fixed swatch colour and the set does not change. -->
+     Left: four short points from the `life` array in CONTENT. Right: the four
+     houses, hard-coded here rather than driven by an array because each has
+     its own fixed swatch colour and the set does not change. -->
 <section id="life" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div class="g g-split">
     <div>
@@ -332,8 +346,8 @@
       <div class="g g-2t" style="margin-top:26px">
         <sc-for list="{{ life }}" as="l" hint-placeholder-count="4">
           <div style="border-left:3px solid #e8541b;padding:2px 0 2px 14px">
-            <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:#a51915">{{ l.title }}</div>
-            <div style="font-size:13.5px;color:#6b615b;line-height:1.5;margin-top:3px">{{ l.desc }}</div>
+            <div data-edit="{{ l.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:#a51915">{{ l.title }}</div>
+            <div data-edit="{{ l.p }}.desc" style="font-size:13.5px;color:#6b615b;line-height:1.5;margin-top:3px">{{ l.desc }}</div>
           </div>
         </sc-for>
       </div>
@@ -370,10 +384,13 @@
 </section>
 
 <!-- CAMPUS & FACILITIES
-     Six linked cards from `facilities`, each opening its detail page in
-     vidyanagar-subpage.html, followed by a row of plain text chips from
-     `facilityChips` for the facilities that have no page of their own. The
-     card icons are transparent-GIF placeholders, so the icon wells are blank.
+     Six linked cards from `facilities` in CONTENT, each opening its detail
+     page in vidyanagar-subpage.html, followed by a row of plain text chips
+     from `facilityChips` for the facilities that have no page of their own.
+     The chips are plain strings in CONTENT, so renderVals() pairs each one
+     with its path: the loop reads c.t for the text and c.p for the data-edit
+     path. The card icons are transparent-GIF placeholders, so the icon wells
+     are blank.
      Unlike the landing page, hover here is pure CSS via style-hover; this page
      has no data-btn/data-card JavaScript effects. -->
 <section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
@@ -387,14 +404,14 @@
         <div style="width:56px;height:56px;border-radius:13px;background:#fdeadf;display:flex;align-items:center;justify-content:center;overflow:hidden">
           <img src="{{ f.icon }}" alt="{{ f.title }}" style="width:32px;height:32px;object-fit:contain">
         </div>
-        <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:21px;color:#a51915;margin:16px 0 0;display:flex;align-items:center;gap:8px">{{ f.title }}<span style="color:#c2410f;font-size:16px">→</span></h4>
-        <p style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ f.desc }}</p>
+        <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:21px;color:#a51915;margin:16px 0 0;display:flex;align-items:center;gap:8px"><span data-edit="{{ f.p }}.title">{{ f.title }}</span><span style="color:#c2410f;font-size:16px">→</span></h4>
+        <p data-edit="{{ f.p }}.desc" style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ f.desc }}</p>
       </a>
     </sc-for>
   </div>
   <div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:9px">
     <sc-for list="{{ facilityChips }}" as="c" hint-placeholder-count="10">
-      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#a51915;background:#fbf3f2;border:1px solid #f0e0dc;padding:8px 14px;border-radius:999px">{{ c }}</span>
+      <span data-edit="{{ c.p }}" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#a51915;background:#fbf3f2;border:1px solid #f0e0dc;padding:8px 14px;border-radius:999px">{{ c.t }}</span>
     </sc-for>
   </div>
 </section>
@@ -413,9 +430,9 @@
 </section>
 
 <!-- NEWS ROOM
-     Three cards from the `news` array. The illustrative items here are sample
-     copy, not real announcements, and the striped block at the top of each
-     card is a placeholder standing in for a photograph. -->
+     Three cards from the `news` array in CONTENT. The illustrative items here
+     are sample copy, not real announcements, and the striped block at the top
+     of each card is a placeholder standing in for a photograph. -->
 <section id="news" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
     <div>
@@ -428,9 +445,9 @@
       <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;overflow:hidden">
         <div style="height:120px;background:repeating-linear-gradient(45deg,#f1e6e4 0 14px,#eaddd9 14px 28px)"></div>
         <div style="padding:22px 22px 24px">
-          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#c2410f">{{ n.tag }}</div>
-          <h4 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:8px 0 0;line-height:1.25">{{ n.title }}</h4>
-          <p style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ n.desc }}</p>
+          <div data-edit="{{ n.p }}.tag" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#c2410f">{{ n.tag }}</div>
+          <h4 data-edit="{{ n.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:8px 0 0;line-height:1.25">{{ n.title }}</h4>
+          <p data-edit="{{ n.p }}.desc" style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ n.desc }}</p>
         </div>
       </div>
     </sc-for>
@@ -463,8 +480,8 @@
 </section>
 
 <!-- ADMISSIONS
-     Left: the four-step procedure from the `steps` array. Right: the enquiry
-     form, whose fields are controlled by form.* in state.
+     Left: the four-step procedure from the `steps` array in CONTENT. Right:
+     the enquiry form, whose fields are controlled by form.* in state.
      IMPORTANT: the form is front-end only. Pressing the button just flips its
      label to "Enquiry received"; nothing is transmitted or stored. Wire
      `submit` to a real endpoint before go-live. The two buttons on the left
@@ -480,8 +497,8 @@
             <div style="display:flex;gap:16px;align-items:flex-start">
               <span style="flex:none;width:36px;height:36px;border-radius:50%;background:#e8541b;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px">{{ s.n }}</span>
               <div>
-                <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px">{{ s.title }}</div>
-                <div style="font-size:14px;color:#f4ddd2;line-height:1.5;margin-top:2px">{{ s.desc }}</div>
+                <div data-edit="{{ s.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px">{{ s.title }}</div>
+                <div data-edit="{{ s.p }}.desc" style="font-size:14px;color:#f4ddd2;line-height:1.5;margin-top:2px">{{ s.desc }}</div>
               </div>
             </div>
           </sc-for>
@@ -513,7 +530,11 @@
 <!-- FOOTER
      Four columns: identity and contact, in-page section links, quick links,
      then the group column pointing at the landing page and the sibling branch.
-     Address, phone numbers and email are all placeholders. -->
+     Address, phone numbers and email come from the shared contact block in
+     content.js, so their edit paths start with `shared:`, and all three are
+     still placeholders. That block holds only one phone number, so both slots
+     in the line below render it — exactly as the two identical placeholders
+     did before. -->
 <footer style="background:#7f120f;color:#f4ddd2">
   <div class="wrap" style="padding-top:60px;padding-bottom:30px">
     <div class="g g-foot">
@@ -522,9 +543,9 @@
           <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
           <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori Vidyanagar</span>
         </div>
-        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">Vidyanagar, Kurnool, Andhra Pradesh, India — full address to be added.</p>
-        <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4">+91 XXXXX XXXXX</a> · <a href="#admissions" style="color:#ffd9c4">+91 XXXXX XXXXX</a></p>
-        <p style="font-size:14px;margin:6px 0 0"><a href="mailto:info@msceducation.net" style="color:#ffd9c4">info@msceducation.net</a></p>
+        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">Vidyanagar, Kurnool, Andhra Pradesh, India — <span data-edit="shared:contact.vidyanagarAddress">{{ contact.vidyanagarAddress }}</span>.</p>
+        <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a> · <a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a></p>
+        <p style="font-size:14px;margin:6px 0 0"><a href="mailto:info@msceducation.net" style="color:#ffd9c4"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
         <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">School</div>
@@ -566,9 +587,9 @@
   PAGE LOGIC
   ==========
   One class named `Component`, extending DCLogic. renderVals() at the bottom
-  returns the flat object every {{ }} hole in the template above reads from,
-  so it holds both this page's content (the academics/facilities/news arrays)
-  and its computed styles and handlers.
+  returns the flat object every {{ }} hole in the template above reads from:
+  it reads this page's copy out of the CONTENT block below and adds the
+  computed styles and handlers the markup needs.
 
   componentDidMount wires up four independent behaviours, in order:
     1. scroll reveal for [data-reveal] cards
@@ -576,6 +597,89 @@
     3. the loading screen's timed fade-out
     4. the scroll listener driving the nav state and the floating pill
 */
+
+/*
+  PAGE CONTENT
+  ============
+  Every piece of editable copy on this page lives in the CONTENT block below.
+  It is plain JSON between two marker comments so the editor tooling
+  (editor/lib/content-io.js) can read and rewrite it without parsing the page.
+  To change the copy on this page, edit CONTENT — not the markup, and not
+  renderVals(), which now only reads from here.
+
+  Keep the block strict JSON: double-quoted keys AND values, no comments and
+  no trailing commas inside the markers, or the editor cannot parse it.
+
+  The contact details in the top bar and the footer are NOT here: they are
+  shared across every page and live in content.js, reached through
+  window.SHARED_CONTENT and written data-edit="shared:contact.phone".
+
+  hero    the welcome line, the school name headline, the two introductory
+          paragraphs and the quotation banner over the hero photo. This is the
+          branch-specific copy: the A-Camp twin says something different.
+  academics  the six academics cards. `tag` is the card's ordinal badge.
+          Deliberately generic: no examination board, affiliation or grade
+          range is claimed, as none has been confirmed.
+  life    the four school-life points shown beside the house panel.
+  facilities  the six linked facility cards. Each `href` must match a key in
+          the `pages` map in vidyanagar-subpage.html, or the link lands on
+          that page's generic fallback. Every `icon` is a transparent-GIF
+          placeholder, so the icon wells currently render blank.
+  facilityChips  plain strings, one per facility with no detail page of its
+          own. Kept as strings rather than objects so the chips stay simple;
+          renderVals() pairs each with its path for data-edit.
+  news    the three news cards. Illustrative sample copy, not real
+          announcements.
+  steps   the four numbered admission steps; `n` is the step number in the
+          circle. Kept in sync by hand with the "procedure" entry in the
+          subpage's content map.
+*/
+/* CONTENT:BEGIN */
+const CONTENT = {
+  "hero": {
+    "welcome": "Welcome to",
+    "title": "Montessori School, Vidyanagar",
+    "p1": "Montessori School, Vidyanagar is a co-educational day school, established under the aegis of Montessori School Committee, as a valued branch of the Montessori family of schools. Located in the Vidyanagar area of Kurnool city, the school offers a warm, well-appointed campus with state-of-the-art facilities in a specifically designed ambience, replete with centralized AC classrooms and dedicated sporting facilities.",
+    "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
+    "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”"
+  },
+  "academics": [
+    { "tag": "01", "title": "Pedagogy", "desc": "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
+    { "tag": "02", "title": "Pre-Primary Program", "desc": "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
+    { "tag": "03", "title": "Primary School", "desc": "Foundational years building strong literacy, numeracy and enquiry habits through guided, hands-on learning." },
+    { "tag": "04", "title": "Secondary School", "desc": "A structured programme focused on holistic development through academics, activities and character." },
+    { "tag": "05", "title": "Lower & Primary", "desc": "Foundational programs building strong literacy, numeracy and enquiry habits." },
+    { "tag": "06", "title": "Assessment Policy", "desc": "A well-defined framework of continuous formative and summative assessment that promotes academic growth." }
+  ],
+  "life": [
+    { "title": "School Timings", "desc": "Structured day with breaks, activity periods and supervised study." },
+    { "title": "Rules & Regulations", "desc": "Clear, kind expectations that build discipline and respect." },
+    { "title": "Clubs & Societies", "desc": "From robotics to debate, drama and eco clubs." },
+    { "title": "Physical Education", "desc": "Daily sport, athletics and access to the sports arena." }
+  ],
+  "facilities": [
+    { "href": "vidyanagar-subpage.html#ac-classrooms", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Classrooms", "desc": "Centrally air-conditioned rooms with smart audio-visual teaching aids." },
+    { "href": "vidyanagar-subpage.html#science-labs", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Labs", "desc": "Science, robotics, maths and computing labs for hands-on discovery." },
+    { "href": "vidyanagar-subpage.html#library", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Library", "desc": "A well-stocked home for reading, reference and independent research." },
+    { "href": "vidyanagar-subpage.html#sports-arena", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Sports", "desc": "Expansive grounds and courts for athletics and team sports." },
+    { "href": "vidyanagar-subpage.html#swimming-pool", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Swimming Pool", "desc": "Safe, supervised aquatics as part of a rounded PE program." },
+    { "href": "vidyanagar-subpage.html#music", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Music", "desc": "Vocal and instrumental music with regular performances." }
+  ],
+  "facilityChips": ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
+  "news": [
+    { "tag": "Event", "title": "Grand Art Exhibition", "desc": "Students showcase a term of creativity across painting, sculpture and design." },
+    { "tag": "Achievement", "title": "Inter-school Olympiad wins", "desc": "Our scholars bring home honours in maths and science olympiads." },
+    { "tag": "Circular", "title": "Term calendar released", "desc": "Key dates, holidays and assessment schedules for the new session." }
+  ],
+  "steps": [
+    { "n": "1", "title": "Enquiry & campus visit", "desc": "Send an enquiry or drop by — meet our team and tour the campus." },
+    { "n": "2", "title": "Application form", "desc": "Complete the admission form for your child's grade and pathway." },
+    { "n": "3", "title": "Interaction / assessment", "desc": "A friendly interaction to understand your child's learning needs." },
+    { "n": "4", "title": "Confirmation", "desc": "Complete enrolment and fee formalities to secure the seat." }
+  ]
+};
+/* CONTENT:END */
+
 class Component extends DCLogic {
   // openMenu     index of the open nav dropdown, or -1 for none
   // navFixed     true once scrolled past the nav (shows the floating pill)
@@ -586,6 +690,14 @@ class Component extends DCLogic {
   state = { openMenu: -1, navFixed: false, pillExpanded: false, currentTab: "Home", form: { name: "", phone: "", track: "Pre-Primary Program", msg: "" }, submitted: false };
 
   componentDidMount() {
+    // ---- Editor hooks ----
+    // The click-to-edit tooling (loaded only by the local editor server) reads
+    // the live content object through window.__CONTENT and asks for a repaint
+    // through window.__rerender after it mutates it. Both are inert on the
+    // deployed site, where nothing ever calls them.
+    window.__CONTENT = CONTENT;
+    window.__rerender = () => this.setState({});
+
     // ---- 1. Scroll reveal ----
     // [data-reveal] elements start transparent and shifted down (set inline in
     // the template) and are released when they first enter the viewport, with
@@ -681,13 +793,19 @@ class Component extends DCLogic {
     if (this._navScroll) window.removeEventListener("scroll", this._navScroll);
   }
 
-  // Everything the template can see. Rebuilt on every render, so the arrays
-  // near the bottom are effectively this page's content source: to change the
-  // copy, edit them rather than the markup.
+  // Everything the template can see. Rebuilt on every render. The copy comes
+  // straight out of the CONTENT block at the top of this script — to change
+  // the wording on this page, edit CONTENT, not this method and not the
+  // markup.
   renderVals() {
     // Field setter factory: set("phone") returns the handler that writes into
     // form.phone. Used by all four admissions inputs.
     const set = (k) => (e) => this.setState({ form: { ...this.state.form, [k]: e.target.value } });
+    // Stamp each element of a CONTENT array with its own path into CONTENT
+    // (e.g. "academics.2"), so a loop can write data-edit="{{ a.p }}.title".
+    // The {{ }} language cannot build that string itself, so it is precomputed
+    // here.
+    const withPaths = (arr, base) => arr.map((it, i) => ({ ...it, p: base + "." + i }));
     const open = this.state.openMenu;
     // Every dropdown link points into the branch's detail page, which routes
     // on the hash. This prefix is one of the few genuine differences between
@@ -810,52 +928,19 @@ class Component extends DCLogic {
       pillLeave: () => this.setState({ pillExpanded: false }),
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
-      // ---- Page content from here down ----
-      // The six academics cards. Deliberately generic: no examination board,
-      // affiliation or grade range is claimed, as none has been confirmed.
-      academics: [
-        { tag: "01", title: "Pedagogy", desc: "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
-        { tag: "02", title: "Pre-Primary Program", desc: "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
-        { tag: "03", title: "Primary School", desc: "Foundational years building strong literacy, numeracy and enquiry habits through guided, hands-on learning." },
-        { tag: "04", title: "Secondary School", desc: "A structured programme focused on holistic development through academics, activities and character." },
-        { tag: "05", title: "Lower & Primary", desc: "Foundational programs building strong literacy, numeracy and enquiry habits." },
-        { tag: "06", title: "Assessment Policy", desc: "A well-defined framework of continuous formative and summative assessment that promotes academic growth." },
-      ],
-      // Four short school-life points shown beside the house panel.
-      life: [
-        { title: "School Timings", desc: "Structured day with breaks, activity periods and supervised study." },
-        { title: "Rules & Regulations", desc: "Clear, kind expectations that build discipline and respect." },
-        { title: "Clubs & Societies", desc: "From robotics to debate, drama and eco clubs." },
-        { title: "Physical Education", desc: "Daily sport, athletics and access to the sports arena." },
-      ],
-      // Facility cards. Each href must match a key in the `pages` map in
-      // vidyanagar-subpage.html, or the link lands on that page's generic fallback.
-      // Every icon is a transparent-GIF placeholder.
-      facilities: [
-        { href: "vidyanagar-subpage.html#ac-classrooms", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Classrooms", desc: "Centrally air-conditioned rooms with smart audio-visual teaching aids." },
-        { href: "vidyanagar-subpage.html#science-labs", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Labs", desc: "Science, robotics, maths and computing labs for hands-on discovery." },
-        { href: "vidyanagar-subpage.html#library", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Library", desc: "A well-stocked home for reading, reference and independent research." },
-        { href: "vidyanagar-subpage.html#sports-arena", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Sports", desc: "Expansive grounds and courts for athletics and team sports." },
-        { href: "vidyanagar-subpage.html#swimming-pool", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Swimming Pool", desc: "Safe, supervised aquatics as part of a rounded PE program." },
-        { href: "vidyanagar-subpage.html#music", icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Music", desc: "Vocal and instrumental music with regular performances." },
-      ],
-      // Plain text chips under the facility cards, for facilities that have no
-      // detail page of their own. Strings only, so they are not links.
-      facilityChips: ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
-      // News cards. Illustrative sample copy, not real announcements.
-      news: [
-        { tag: "Event", title: "Grand Art Exhibition", desc: "Students showcase a term of creativity across painting, sculpture and design." },
-        { tag: "Achievement", title: "Inter-school Olympiad wins", desc: "Our scholars bring home honours in maths and science olympiads." },
-        { tag: "Circular", title: "Term calendar released", desc: "Key dates, holidays and assessment schedules for the new session." },
-      ],
-      // The four numbered admission steps. Kept in sync by hand with the
-      // "procedure" entry in the subpage's content map.
-      steps: [
-        { n: "1", title: "Enquiry & campus visit", desc: "Send an enquiry or drop by — meet our team and tour the campus." },
-        { n: "2", title: "Application form", desc: "Complete the admission form for your child's grade and pathway." },
-        { n: "3", title: "Interaction / assessment", desc: "A friendly interaction to understand your child's learning needs." },
-        { n: "4", title: "Confirmation", desc: "Complete enrolment and fee formalities to secure the seat." },
-      ],
+      // ---- Page content from here down, all read from CONTENT ----
+      // Each array is stamped with per-item paths so its loop can carry
+      // data-edit. facilityChips holds plain strings, which cannot be stamped
+      // that way, so each is paired with its own path here instead: the
+      // template reads c.t for the text and c.p for the path.
+      hero: CONTENT.hero,
+      contact: window.SHARED_CONTENT.contact,
+      academics: withPaths(CONTENT.academics, "academics"),
+      life: withPaths(CONTENT.life, "life"),
+      facilities: withPaths(CONTENT.facilities, "facilities"),
+      facilityChips: CONTENT.facilityChips.map((t, i) => ({ t, p: "facilityChips." + i })),
+      news: withPaths(CONTENT.news, "news"),
+      steps: withPaths(CONTENT.steps, "steps"),
       // ---- Enquiry form wiring ----
       form: this.state.form,
       onName: set("name"), onPhone: set("phone"), onTrack: set("track"), onMsg: set("msg"),
