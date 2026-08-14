@@ -209,7 +209,7 @@
 
 <!-- ============ HERO ============
      Headline and portrait side by side (.g-hero), followed by a four-up strip
-     of statistics driven by the `stats` array in renderVals().
+     of statistics driven by the `stats` array in CONTENT.
      The portrait <img> is a 1x1 transparent GIF standing in for real
      photography; the peach box around it is what you actually see today.
      The stat tiles carry data-reveal, so they fade in when scrolled into view
@@ -221,10 +221,10 @@
         <span style="width:26px;height:1px;background:#e8541b;display:inline-block"></span>Two branches · Kurnool
       </div>
       <h1 class="h-hero" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.03;letter-spacing:-.01em;margin:20px 0 0;animation:riseIn .9s ease both">
-        Help the child<br>to help <em style="font-style:italic;color:#a51915">himself.</em>
+        <span data-edit="hero.title">{{ hero.title }}</span><br><span data-edit="hero.title2">{{ hero.title2 }}</span> <em style="font-style:italic;color:#a51915" data-edit="hero.titleEm">{{ hero.titleEm }}</em>
       </h1>
-      <p style="max-width:496px;font-size:18px;line-height:1.62;color:#5a504a;margin:26px 0 0;animation:riseIn .9s ease .1s both">
-        Montessori School Committee runs two branches in Kurnool — A-Camp and Vidyanagar — each offering value-based, child-centred Montessori education in an environment built around empathy, discipline and respect.
+      <p data-edit="hero.sub" style="max-width:496px;font-size:18px;line-height:1.62;color:#5a504a;margin:26px 0 0;animation:riseIn .9s ease .1s both">
+        {{ hero.sub }}
       </p>
       <div class="row row-btns" style="animation:riseIn .9s ease .2s both">
         <a href="#schools" data-btn="" data-glow="#e8541b" style="background:#a51915;color:#fff;padding:15px 30px;border-radius:999px;font-weight:600;font-size:15px">Explore the schools →</a>
@@ -244,8 +244,8 @@
   <div class="g g-4" style="margin-top:60px;padding-top:30px;border-top:1px solid rgba(38,32,29,.12)">
     <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
       <div data-reveal="" style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease">
-        <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:40px;line-height:1;color:#26201d">{{ s.n }}</div>
-        <div style="font-size:13.5px;color:#6b615b;margin-top:6px;letter-spacing:.01em">{{ s.label }}</div>
+        <div data-edit="{{ s.p }}.n" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:40px;line-height:1;color:#26201d">{{ s.n }}</div>
+        <div data-edit="{{ s.p }}.label" style="font-size:13.5px;color:#6b615b;margin-top:6px;letter-spacing:.01em">{{ s.label }}</div>
       </div>
     </sc-for>
   </div>
@@ -253,7 +253,7 @@
 
 <!-- ============ OUR APPROACH ============
      Statement of the Montessori method, with a vertical rule of points fed by
-     the `timeline` array. Despite the variable name these are themed points
+     the `timeline` array in CONTENT. Despite the name these are themed points
      (Approach / Culture / Values / Consistency), not dates: this section
      replaced an earlier fabricated founding timeline and stays deliberately
      date-free until the real history is supplied. -->
@@ -276,8 +276,8 @@
       <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="4">
         <div data-reveal="" style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;position:relative;padding:0 0 30px 30px">
           <span style="position:absolute;left:-6px;top:4px;width:11px;height:11px;border-radius:50%;background:#e8541b;border:2px solid #faf5f1"></span>
-          <div style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;color:#a51915">{{ t.y }}</div>
-          <div style="font-size:16px;line-height:1.5;color:#332c28;margin-top:5px;max-width:540px">{{ t.t }}</div>
+          <div data-edit="{{ t.p }}.y" style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em;color:#a51915">{{ t.y }}</div>
+          <div data-edit="{{ t.p }}.t" style="font-size:16px;line-height:1.5;color:#332c28;margin-top:5px;max-width:540px">{{ t.t }}</div>
         </div>
       </sc-for>
     </div>
@@ -286,7 +286,7 @@
 
 <!-- ============ SCHOOLS OVERVIEW ============
      The two branch cards, and the main route into the branch sites. Each card
-     is one entry in the `schools` array; sc.page is the destination file and
+     is one entry in the `schools` array in CONTENT; sc.page is the destination file and
      sc.accent / sc.ink / sc.ink2 colour the card, so a third branch would be
      added by appending to that array rather than by copying markup. -->
 <section id="schools" class="wrap" style="padding-top:86px;padding-bottom:30px">
@@ -304,9 +304,9 @@
           <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:#fff;background:rgba(0,0,0,.18);padding:5px 10px;border-radius:6px">{{ sc.imgLabel }}</span>
         </div>
         <div style="padding:26px 28px 28px">
-          <div style="display:inline-flex;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:{{ sc.ink2 }};border:1px solid {{ sc.ink2 }};padding:5px 11px;border-radius:999px">{{ sc.kicker }}</div>
-          <h3 style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:28px;line-height:1.06;margin:13px 0 0">{{ sc.name }}</h3>
-          <p style="font-size:14.5px;line-height:1.58;color:#5a504a;margin:9px 0 0">{{ sc.short }}</p>
+          <div data-edit="{{ sc.p }}.kicker" style="display:inline-flex;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:{{ sc.ink2 }};border:1px solid {{ sc.ink2 }};padding:5px 11px;border-radius:999px">{{ sc.kicker }}</div>
+          <h3 data-edit="{{ sc.p }}.name" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:28px;line-height:1.06;margin:13px 0 0">{{ sc.name }}</h3>
+          <p data-edit="{{ sc.p }}.short" style="font-size:14.5px;line-height:1.58;color:#5a504a;margin:9px 0 0">{{ sc.short }}</p>
           <span style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:{{ sc.ink2 }}">Visit the school page →</span>
         </div>
       </a>
@@ -315,7 +315,7 @@
 </section>
 
 <!-- ============ CAMPUS / FACILITIES ============
-     Six facility cards from the `facilities` array. Each f.icon is currently a
+     Six facility cards from the `facilities` array in CONTENT. Each f.icon is currently a
      1x1 transparent GIF placeholder, so the icon tiles render as empty rounded
      squares until real icons are supplied. Unlike the branch pages, these
      cards do not link anywhere: the group site has no detail pages. -->
@@ -333,8 +333,8 @@
         <div style="width:52px;height:52px;border-radius:12px;background:#fff;border:1px solid rgba(38,32,29,.08);display:flex;align-items:center;justify-content:center;overflow:hidden">
           <img src="{{ f.icon }}" alt="{{ f.title }}" style="width:30px;height:30px;object-fit:contain">
         </div>
-        <h4 style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;margin:16px 0 0">{{ f.title }}</h4>
-        <p style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ f.desc }}</p>
+        <h4 data-edit="{{ f.p }}.title" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;margin:16px 0 0">{{ f.title }}</h4>
+        <p data-edit="{{ f.p }}.desc" style="font-size:14px;line-height:1.55;color:#6b615b;margin:8px 0 0">{{ f.desc }}</p>
       </div>
     </sc-for>
   </div>
@@ -442,6 +442,73 @@
     3. shadows the nav once the page is scrolled,
     4. attaches the pointer effects to [data-btn] and [data-card] elements.
 */
+
+/*
+  PAGE CONTENT
+  ============
+  Every piece of editable copy on this page lives in the CONTENT block below.
+  It is plain JSON between two marker comments so the editor tooling
+  (editor/lib/content-io.js) can read and rewrite it without parsing the page.
+  To change the copy on this page, edit CONTENT — not the markup, and not
+  renderVals(), which now only reads from here.
+
+  Keep the block strict JSON: double-quoted keys AND values, no comments and
+  no trailing commas inside the markers, or the editor cannot parse it.
+
+  hero    the headline and standfirst. The headline is stored in three parts
+          because the rendered <h1> is not plain text: `title` is the first
+          line, `title2` the second, and `titleEm` the italic red word that
+          closes it. A {{ }} hole renders as text, so the <br> and the <em>
+          have to stay in the markup and each fragment gets its own key.
+  stats   hero stat strip. Deliberately non-numeric placeholders: no verified
+          enrolment or founding figures exist for these schools yet, so
+          nothing is invented here. Replace with real numbers when confirmed.
+  timeline  "Our Approach" points. `y` is the label on the left of each marker
+          and `t` the sentence beside it. These replaced a fabricated
+          year-by-year history; keep them undated until the real founding
+          story is available.
+  schools the two branch cards. `page` is the branch site each card opens;
+          accent/ink/ink2 are the card's fill, badge text and accent colours.
+          Both descriptions are holding copy pending real branch details.
+  facilities  facility cards. Every `icon` is the same 1x1 transparent GIF
+          standing in for a real icon, so the icon wells currently render
+          blank.
+*/
+/* CONTENT:BEGIN */
+const CONTENT = {
+  "hero": {
+    "title": "Help the child",
+    "title2": "to help",
+    "titleEm": "himself.",
+    "sub": "Montessori School Committee runs two branches in Kurnool — A-Camp and Vidyanagar — each offering value-based, child-centred Montessori education in an environment built around empathy, discipline and respect."
+  },
+  "stats": [
+    { "n": "2", "label": "Branches in Kurnool" },
+    { "n": "A-Camp", "label": "Branch one" },
+    { "n": "Vidyanagar", "label": "Branch two" },
+    { "n": "TBD", "label": "Details coming soon" }
+  ],
+  "timeline": [
+    { "y": "Approach", "t": "Child-centred learning — every child works at their own pace in a prepared environment." },
+    { "y": "Culture", "t": "Learning without fear, built on empathy, discipline and respect." },
+    { "y": "Values", "t": "Values-first education that shapes character alongside academics." },
+    { "y": "Consistency", "t": "Two branches, one standard — the same care and method at both campuses." }
+  ],
+  "schools": [
+    { "tag": "01", "accent": "#a51915", "ink": "#fff", "ink2": "#a51915", "page": "montessori-acamp.html", "kicker": "Branch · Kurnool", "name": "Montessori School, A-Camp", "short": "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", "imgLabel": "a-camp campus — photo" },
+    { "tag": "02", "accent": "#a51915", "ink": "#fff", "ink2": "#a51915", "page": "montessori-vidyanagar.html", "kicker": "Branch · Kurnool", "name": "Montessori School, Vidyanagar", "short": "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", "imgLabel": "vidyanagar campus — photo" }
+  ],
+  "facilities": [
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Classrooms", "desc": "Child-centred classrooms designed for hands-on, self-paced learning." },
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Library", "desc": "A quiet space for reading and independent exploration." },
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Science Labs", "desc": "Hands-on spaces for practical, age-appropriate science activities." },
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Sports & Play", "desc": "Dedicated play areas supporting healthy, active development." },
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Arts & Music", "desc": "Creative outlets that build confidence and self-expression." },
+    { "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Care & Well-being", "desc": "Attentive, supportive care for every child throughout the school day." }
+  ]
+};
+/* CONTENT:END */
+
 class Component extends DCLogic {
   // The only real state on this page. `form` backs the controlled inputs in
   // the admissions section; `submitted` just swaps the button label, since
@@ -452,6 +519,14 @@ class Component extends DCLogic {
   };
 
   componentDidMount() {
+    // ---- Editor hooks ----
+    // The click-to-edit tooling (loaded only by the local editor server) reads
+    // the live content object through window.__CONTENT and asks for a repaint
+    // through window.__rerender after it mutates it. Both are inert on the
+    // deployed site, where nothing ever calls them.
+    window.__CONTENT = CONTENT;
+    window.__rerender = () => this.setState({});
+
     // ---- Scroll reveal ----
     // Anything marked [data-reveal] starts transparent and nudged down (set
     // inline in the template) and is released the first time it enters the
@@ -625,53 +700,29 @@ class Component extends DCLogic {
     if (this._onScroll) window.removeEventListener("scroll", this._onScroll);
   }
 
-  // Everything the template can see. Note it is rebuilt on every render, so
-  // the arrays below are effectively the page's content source: to change the
-  // copy on this page, edit these, not the markup.
+  // Everything the template can see. Note it is rebuilt on every render. The
+  // copy comes straight out of the CONTENT block at the top of this script —
+  // to change the wording on this page, edit CONTENT, not this method and not
+  // the markup.
   renderVals() {
     // Field setter factory: set("phone") returns the onInput handler that
     // writes into form.phone. Used for all three inputs in the enquiry form.
     const set = (k) => (e) => this.setState({ form: { ...this.state.form, [k]: e.target.value } });
+    // Stamp each element of a CONTENT array with its own path into CONTENT
+    // (e.g. "stats.2"), so a loop can write data-edit="{{ s.p }}.n". The {{ }}
+    // language cannot build that string itself, so it is precomputed here.
+    const withPaths = (arr, base) => arr.map((it, i) => ({ ...it, p: base + "." + i }));
     return {
       // ref callback: the runtime passes the real <header> node here, and the
       // scroll handler in componentDidMount needs it to set the shadow.
       navRef: (el) => { this._navEl = el; },
 
-      // Hero stat strip. Deliberately non-numeric placeholders: no verified
-      // enrolment or founding figures exist for these schools yet, so nothing
-      // is invented here. Replace with real numbers when they are confirmed.
-      stats: [
-        { n: "2", label: "Branches in Kurnool" },
-        { n: "A-Camp", label: "Branch one" },
-        { n: "Vidyanagar", label: "Branch two" },
-        { n: "TBD", label: "Details coming soon" },
-      ],
-      // "Our Approach" points. `y` is the label on the left of each marker and
-      // `t` the sentence beside it. These replaced a fabricated year-by-year
-      // history; keep them undated until the real founding story is available.
-      timeline: [
-        { y: "Approach", t: "Child-centred learning — every child works at their own pace in a prepared environment." },
-        { y: "Culture", t: "Learning without fear, built on empathy, discipline and respect." },
-        { y: "Values", t: "Values-first education that shapes character alongside academics." },
-        { y: "Consistency", t: "Two branches, one standard — the same care and method at both campuses." },
-      ],
-      // The two branch cards. `page` is the branch site each card opens;
-      // accent/ink/ink2 are the card's fill, badge text and accent colours.
-      // Both descriptions are holding copy pending real branch details.
-      schools: [
-        { tag: "01", accent: "#a51915", ink: "#fff", ink2: "#a51915", page: "montessori-acamp.html", kicker: "Branch · Kurnool", name: "Montessori School, A-Camp", short: "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", imgLabel: "a-camp campus — photo" },
-        { tag: "02", accent: "#a51915", ink: "#fff", ink2: "#a51915", page: "montessori-vidyanagar.html", kicker: "Branch · Kurnool", name: "Montessori School, Vidyanagar", short: "A Montessori branch in Kurnool offering child-centred, value-based education. Full details coming soon.", imgLabel: "vidyanagar campus — photo" },
-      ],
-      // Facility cards. Every `icon` is the same 1x1 transparent GIF standing
-      // in for a real icon, so the icon wells currently render blank.
-      facilities: [
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Classrooms", desc: "Child-centred classrooms designed for hands-on, self-paced learning." },
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Library", desc: "A quiet space for reading and independent exploration." },
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Science Labs", desc: "Hands-on spaces for practical, age-appropriate science activities." },
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Sports & Play", desc: "Dedicated play areas supporting healthy, active development." },
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Arts & Music", desc: "Creative outlets that build confidence and self-expression." },
-        { icon: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", title: "Care & Well-being", desc: "Attentive, supportive care for every child throughout the school day." },
-      ],
+      hero: CONTENT.hero,
+      stats: withPaths(CONTENT.stats, "stats"),
+      timeline: withPaths(CONTENT.timeline, "timeline"),
+      schools: withPaths(CONTENT.schools, "schools"),
+      facilities: withPaths(CONTENT.facilities, "facilities"),
+
       // ---- Enquiry form wiring ----
       // form.* feeds the input values; the three setters write back on typing.
       form: this.state.form,
