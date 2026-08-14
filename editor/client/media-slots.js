@@ -36,18 +36,37 @@
     }
     var url = URLS.deliveryUrl(cloudName, record);
     var posterPath = slotEl.getAttribute("data-media-poster");
+    var posterUrl = posterPath ? URLS.posterUrl(cloudName, record) : null;
+
+    // Capture prior values so we can restore them if anything fails. Either both
+    // paths are applied and recorded together, or neither are — a partial mutation
+    // (primary path applied but poster path not, or vice versa) must never reach
+    // the draft log, and must not leave the in-memory content out of sync with it.
+    var priorValue;
+    var priorPosterValue;
     try {
-      // Apply first, record only on success — the same invariant as every other
-      // editor mutation (see editor-client.js's doOp): a failed apply must never
-      // leave an op in the draft log.
+      priorValue = UI.getLocal(path);
+      priorPosterValue = posterPath ? UI.getLocal(posterPath) : null;
+    } catch (e) {
+      // If we can't even read the prior values, the paths are broken; bail out.
+      alert("Can't place media here:\n" + e.message);
+      return;
+    }
+
+    try {
+      // Apply both values. If either throws, both will be restored below.
       UI.applyLocal(path, url);
-      if (posterPath) UI.applyLocal(posterPath, URLS.posterUrl(cloudName, record));
+      if (posterPath) UI.applyLocal(posterPath, posterUrl);
     } catch (err) {
+      // Restore prior values so the in-memory content and draft log stay in sync.
+      UI.applyLocal(path, priorValue);
+      if (posterPath) UI.applyLocal(posterPath, priorPosterValue);
       alert("Can't place media here:\n" + err.message);
       return;
     }
+    // Both applies succeeded; record both to the draft.
     UI.draft.set(path, url);
-    if (posterPath) UI.draft.set(posterPath, URLS.posterUrl(cloudName, record));
+    if (posterPath) UI.draft.set(posterPath, posterUrl);
     clearSelection();
     UI.rerender(); UI.update();
     // A <video> whose src attribute just changed keeps playing the old source until
@@ -87,6 +106,13 @@
     if (!UI.isEditing()) return;
     var el = e.target.closest && e.target.closest("[data-media-slot]");
     if (!el) { clearSelection(); return; }
+    // If the actual click target is on an interactive control inside the slot
+    // (e.g. a list item menu button, or a text input), let that control handle
+    // its own click instead. Media slots may wrap elements with their own
+    // interactive chrome, so only claim the click if it's on the slot itself or
+    // a non-interactive descendant.
+    var interactive = e.target.closest && e.target.closest("button, a, input, textarea, select, .ed-menu");
+    if (interactive && el.contains(interactive)) return;
     e.preventDefault(); e.stopPropagation();
     clearSelection();
     selected = el;
