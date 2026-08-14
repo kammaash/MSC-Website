@@ -5,25 +5,35 @@
   Every "inner" page for the A-Camp branch lives in this single file and is
   selected by the URL hash. acamp-subpage.html#library shows the library page,
   #transport the transport page, and so on. There are roughly thirty such
-  routes, all defined in the `pages` map in the logic block at the bottom.
+  routes, all defined in the CONTENT block at the bottom of this file.
 
   WHY ONE FILE
   ============
   The pages are all the same shape: a red banner with a breadcrumb, then a
   column of text blocks. Rather than thirty near-identical HTML files, the
   layout is written once here and the differences live purely as data. Adding a
-  page means adding one entry to `pages` and linking to its hash; no new file
-  and no new markup.
+  page means adding one entry to CONTENT.pages and linking to its hash; no new
+  file and no new markup.
 
   HOW A ROUTE IS RESOLVED
   =======================
     1. componentDidMount reads location.hash into state.route, and listens for
        hashchange so navigating between routes never reloads the page.
-    2. renderVals() looks the route up in `pages`. An unknown or empty hash
-       falls back to a generic "choose a section" page, so a bad link degrades
-       gracefully instead of rendering blank.
+    2. renderVals() looks the route up in CONTENT.pages. An unknown or empty
+       hash falls back to a generic "choose a section" page, so a bad link
+       degrades gracefully instead of rendering blank.
     3. The chosen page's blocks are normalised into flagged objects that the
        template renders with a chain of sc-if tests (see `blocks` below).
+
+  WHERE THE CONTENT LIVES
+  =======================
+  Every route's copy is in the CONTENT block at the bottom of this file, as
+  strict JSON between the CONTENT:BEGIN and CONTENT:END marker comments;
+  renderVals() only reads from it. Elements rendering an editable value carry
+  data-edit naming that value's path in CONTENT. Those paths depend on the
+  current route, so they are precomputed in renderVals() and written as holes,
+  e.g. data-edit="{{ b.p }}.p". The runtime ignores data-edit entirely; the
+  local editor uses it to map a clicked element back to the value behind it.
 
   TWIN FILE
   =========
@@ -41,6 +51,11 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
+<!-- Shared facts (contact details, news, galleries) used across pages. Must
+     load before support.js so window.SHARED_CONTENT exists when the runtime
+     boots. These detail pages do not read it yet; it is loaded here so every
+     page in the project offers the same globals. -->
+<script src="./content.js"></script>
 <!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
 </head>
@@ -149,7 +164,9 @@
 <!-- PAGE HERO / BREADCRUMB
      Red banner naming the current route: breadcrumb (Home / parent section /
      this page), the title, and the introduction. All four values come from
-     `current`, which is the matched entry from the `pages` map. -->
+     `current`, the entry CONTENT.pages holds for this route (or the fallback
+     entry). The title and intro also carry the CONTENT path they came from,
+     precomputed in renderVals() because a hole cannot build a string. -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap" style="padding-top:46px;padding-bottom:50px">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13.5px;color:#ffd9c4;display:flex;gap:9px;align-items:center;flex-wrap:wrap">
@@ -159,8 +176,8 @@
       <span style="opacity:.5">/</span>
       <span style="color:#fff">{{ current.title }}</span>
     </div>
-    <h1 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:44px;line-height:1.1;margin:16px 0 0">{{ current.title }}</h1>
-    <p style="font-size:17px;line-height:1.65;color:#f4ddd2;margin:14px 0 0;max-width:680px">{{ current.intro }}</p>
+    <h1 data-edit="{{ current.titlePath }}" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:44px;line-height:1.1;margin:16px 0 0">{{ current.title }}</h1>
+    <p data-edit="{{ current.introPath }}" style="font-size:17px;line-height:1.65;color:#f4ddd2;margin:14px 0 0;max-width:680px">{{ current.intro }}</p>
   </div>
 </section>
 
@@ -178,16 +195,22 @@
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
-     here. -->
+     here.
+
+     Only the heading and paragraph blocks carry data-edit: their text is a
+     single editable string, reached at the block's own CONTENT path (b.p, e.g.
+     "pages.library.blocks.0") plus the authoring key that holds it. A list, a
+     gallery and a note are structures rather than one string, so they are not
+     click-editable in this first version. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
   <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
     <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
       <div key="{{ b.key }}">
         <sc-if value="{{ b.isHeading }}" hint-placeholder-val="{{ false }}">
-          <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#a51915;margin:34px 0 0">{{ b.text }}</h2>
+          <h2 data-edit="{{ b.p }}.h" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#a51915;margin:34px 0 0">{{ b.text }}</h2>
         </sc-if>
         <sc-if value="{{ b.isPara }}" hint-placeholder-val="{{ true }}">
-          <p style="font-size:17px;line-height:1.72;color:#4a423c;margin:16px 0 0">{{ b.text }}</p>
+          <p data-edit="{{ b.p }}.p" style="font-size:17px;line-height:1.72;color:#4a423c;margin:16px 0 0">{{ b.text }}</p>
         </sc-if>
         <sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:12px;margin:18px 0 0">
@@ -250,16 +273,421 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 /*
-  PAGE LOGIC: the hash router and the entire content library
-  =========================================================
+  PAGE LOGIC: the hash router
+  ===========================
   Two responsibilities:
     - keep state.route in step with the URL hash,
     - turn that route into the values the template renders.
 
-  The bulk of this block is the `pages` map: the actual prose of every detail
-  page on the A-Camp site. Editing content here is the normal way to work on
+  The prose of every detail page lives in the CONTENT block below rather than
+  in this class: renderVals() looks the route up, then reshapes what it finds
+  into what the markup reads. Editing CONTENT is the normal way to work on
   these pages; the markup above almost never needs to change.
 */
+
+/*
+  PAGE CONTENT
+  ============
+  Every detail page on this branch site is one entry in the CONTENT block
+  below. It is plain JSON between two marker comments so the editor tooling
+  (editor/lib/content-io.js) can read and rewrite it without parsing the page.
+  To change the copy on these pages, edit CONTENT — not the markup, and not
+  renderVals(), which now only reads from here.
+
+  Keep the block strict JSON: double-quoted keys AND values, no comments and
+  no trailing commas inside the markers, or the editor cannot parse it.
+
+  pages     one entry per route. A key here is exactly the hash that reaches
+            it, so "library" is served at acamp-subpage.html#library and must
+            match the hrefs used by the branch page's facility cards and
+            dropdown menus. The entries are in menu order: About, School Life,
+            Academics, Activities, Campus & Facilities, Transport, Gallery,
+            News Room, Admission.
+  fallback  the page shown for an unknown route and for the bare file with no
+            hash at all, so a stale or mistyped link lands on something usable
+            instead of a blank page. Worth remembering when adding a link: a
+            typo fails quietly here rather than erroring.
+
+  Every entry, fallback included, has the same five fields:
+    parent      the section name shown in the breadcrumb
+    parentHref  the section of the branch page to return to. Written out in
+                full, since JSON cannot join "montessori-acamp.html" to a hash
+                the way the code that used to build these entries did.
+    title       page heading, also the last breadcrumb crumb
+    intro       the standfirst under the heading
+    blocks      the body, as a list of one-key objects, each of which becomes
+                a rendered block:
+                  { "p": "..." }                    paragraph
+                  { "h": "..." }                    sub-heading
+                  { "list": [[term, desc], ...] }   bulleted term cards
+                  { "gallery": true }               placeholder photo grid
+                  { "note": "...", "sub": "..." }   highlighted panel
+
+  On content: many pages are written from the general Montessori material and
+  end with a `note` block stating precisely which asset is still needed (a
+  PDF, a photograph, the founder's text). Those notes are visible on the live
+  site by design, so nothing reads as finished when it is not, and so the
+  school can see what to send. Nothing here asserts a board affiliation, a
+  founding date or a statistic, since none has been confirmed.
+*/
+/* CONTENT:BEGIN */
+const CONTENT = {
+  "pages": {
+    "core-values": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "Core Values",
+      "intro": "Empathy, respect and discipline — the three pillars behind every classroom, playground and interaction at Montessori.",
+      "blocks": [
+        { "p": "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families." },
+        { "list": [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] }
+      ]
+    },
+    "founders-message": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "Founder's Message",
+      "intro": "A word from the founding vision of the Montessori Schools.",
+      "blocks": [
+        { "p": "Our journey began with twelve children and a simple conviction — that every child, given the right environment, will help themselves to learn. Five decades on, that belief still guides everything we do at Montessori." },
+        { "p": "We invite you to visit our campus, meet our teachers, and see how a value-based, child-centred education prepares your child not just for examinations, but for a meaningful and productive life." },
+        { "note": "Full message & founder's portrait", "sub": "Send us the founder's photograph and message text and we'll place them here." }
+      ]
+    },
+    "principals-desk": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "From the Principal's Desk",
+      "intro": "Leadership notes on learning, character and community at Montessori.",
+      "blocks": [
+        { "p": "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
+        { "note": "Principal's message & photo", "sub": "Share the principal's note and portrait to complete this page." }
+      ]
+    },
+    "team-monte": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "Team Montessori",
+      "intro": "The educators and staff who make Montessori a home away from home.",
+      "blocks": [
+        { "p": "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
+        { "gallery": true }
+      ]
+    },
+    "affiliations": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "Affiliations",
+      "intro": "Recognitions and affiliations that underpin a Montessori education.",
+      "blocks": [
+        { "list": [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
+        { "note": "Affiliation details", "sub": "Affiliation details will be added here." }
+      ]
+    },
+    "documents": {
+      "parent": "About",
+      "parentHref": "montessori-acamp.html#about",
+      "title": "Documents",
+      "intro": "Mandatory public disclosure and school documents.",
+      "blocks": [
+        { "p": "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
+        { "note": "Document downloads", "sub": "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." }
+      ]
+    },
+    "house": {
+      "parent": "School Life",
+      "parentHref": "montessori-acamp.html#house",
+      "title": "The House System",
+      "intro": "Every Montessori student belongs to a house — building belonging and healthy competition.",
+      "blocks": [
+        { "p": "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship." },
+        { "list": [["Valour", "courage and leadership."], ["Wisdom", "curiosity and scholarship."], ["Harmony", "teamwork and care."], ["Integrity", "honesty and responsibility."]] }
+      ]
+    },
+    "pre-primary": {
+      "parent": "Academics",
+      "parentHref": "montessori-acamp.html#academics",
+      "title": "Pre-Primary Program",
+      "intro": "A play-based foundation for our youngest learners.",
+      "blocks": [
+        { "p": "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life." },
+        { "gallery": true }
+      ]
+    },
+    "primary": {
+      "parent": "Academics",
+      "parentHref": "montessori-acamp.html#academics",
+      "title": "Primary School",
+      "intro": "A strong, well-rounded foundation for the primary years.",
+      "blocks": [
+        { "p": "The primary school years emphasise strong fundamentals in language and numeracy alongside curiosity-led exploration, preparing students for the years of schooling ahead." },
+        { "list": [["Foundational Skills", "reading, writing and numeracy built through steady practice."], ["Enquiry", "hands-on activities that encourage questions and exploration."], ["Character", "values, habits and independence nurtured alongside academics."]] }
+      ]
+    },
+    "secondary": {
+      "parent": "Academics",
+      "parentHref": "montessori-acamp.html#academics",
+      "title": "Secondary School",
+      "intro": "A structured, comprehensive curriculum for the secondary years.",
+      "blocks": [
+        { "p": "The secondary school years build on a strong foundation, focusing on holistic development through rigorous academics, co-curricular activities and continuous assessment." }
+      ]
+    },
+    "assessment": {
+      "parent": "Academics",
+      "parentHref": "montessori-acamp.html#academics",
+      "title": "Assessment Policy & Schedule",
+      "intro": "Continuous, fair evaluation that promotes growth.",
+      "blocks": [
+        { "p": "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing." },
+        { "note": "Assessment schedule", "sub": "Share the term-wise assessment calendar to publish exact dates." }
+      ]
+    },
+    "calendar": {
+      "parent": "Activities",
+      "parentHref": "montessori-acamp.html#life",
+      "title": "School Calendar",
+      "intro": "Key dates, terms and events across the academic year.",
+      "blocks": [
+        { "p": "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead." },
+        { "note": "Downloadable calendar", "sub": "Provide the current-session calendar and we'll add it here." }
+      ]
+    },
+    "co-curricular": {
+      "parent": "Activities",
+      "parentHref": "montessori-acamp.html#life",
+      "title": "Co-Curricular Activity",
+      "intro": "Learning that extends beyond the syllabus.",
+      "blocks": [
+        { "p": "From public speaking and quizzing to art, music and community service, co-curricular activities build confidence, teamwork and well-rounded character." }
+      ]
+    },
+    "physical-education": {
+      "parent": "Activities",
+      "parentHref": "montessori-acamp.html#life",
+      "title": "Physical Education",
+      "intro": "Daily sport, movement and well-being.",
+      "blocks": [
+        { "p": "Physical education is a daily part of school life, with athletics, team sports and access to the sports arena and swimming pool." },
+        { "gallery": true }
+      ]
+    },
+    "clubs": {
+      "parent": "Activities",
+      "parentHref": "montessori-acamp.html#life",
+      "title": "Clubs & Societies",
+      "intro": "Spaces for every interest to flourish.",
+      "blocks": [
+        { "list": [["Robotics & Coding", "build, program and compete."], ["Debate & Literary", "argue, write and present."], ["Arts & Music", "create, perform and exhibit."], ["Eco Club", "sustainability and campus stewardship."]] }
+      ]
+    },
+    "events": {
+      "parent": "Activities",
+      "parentHref": "montessori-acamp.html#life",
+      "title": "Events",
+      "intro": "Celebrations, competitions and milestones through the year.",
+      "blocks": [
+        { "p": "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together." },
+        { "gallery": true }
+      ]
+    },
+    "the-campus": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "The Campus",
+      "intro": "A verdant, purpose-built campus on the outskirts of Kurnool.",
+      "blocks": [
+        { "p": "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
+        { "gallery": true }
+      ]
+    },
+    "ac-classrooms": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Classrooms",
+      "intro": "Comfortable, focused learning environments.",
+      "blocks": [
+        { "p": "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids." }
+      ]
+    },
+    "science-labs": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Labs",
+      "intro": "Where theory meets hands-on discovery — science, robotics, maths and computing under one roof.",
+      "blocks": [
+        { "p": "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them." },
+        { "list": [["Science Laboratories", "physics, chemistry and biology labs for hands-on practicals."], ["Robotics Lab", "computational thinking, electronics and problem-solving through building and programming real projects."], ["Math Lab", "manipulatives, models and activities that turn abstract concepts into intuitive understanding."], ["Computer Lab", "modern machines building digital literacy, coding foundations and responsible technology use."]] },
+        { "gallery": true }
+      ]
+    },
+    "library": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Library",
+      "intro": "A quiet home for reading, research and discovery.",
+      "blocks": [
+        { "p": "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces." },
+        { "gallery": true }
+      ]
+    },
+    "swimming-pool": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Swimming Pool",
+      "intro": "Safe, supervised aquatics for every learner.",
+      "blocks": [
+        { "p": "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program." }
+      ]
+    },
+    "sports-arena": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Sports",
+      "intro": "Grounds and courts for every game.",
+      "blocks": [
+        { "p": "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit." },
+        { "gallery": true }
+      ]
+    },
+    "music": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Music",
+      "intro": "Voice, rhythm and performance.",
+      "blocks": [
+        { "p": "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet." }
+      ]
+    },
+    "infirmary": {
+      "parent": "Campus & Facilities",
+      "parentHref": "montessori-acamp.html#campus",
+      "title": "Infirmary",
+      "intro": "Care and well-being on campus.",
+      "blocks": [
+        { "p": "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for." }
+      ]
+    },
+    "transport": {
+      "parent": "Transport",
+      "parentHref": "montessori-acamp.html#top",
+      "title": "Transport",
+      "intro": "Safe, GPS-enabled buses covering Kurnool and the surrounding areas.",
+      "blocks": [
+        { "p": "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term." },
+        { "p": "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
+        { "note": "Route map & stop list", "sub": "Share the current route list and we'll publish it here." }
+      ]
+    },
+    "photo-gallery": {
+      "parent": "Gallery",
+      "parentHref": "montessori-acamp.html#gallery",
+      "title": "Photo Gallery",
+      "intro": "Moments from life at Montessori.",
+      "blocks": [
+        { "gallery": true }
+      ]
+    },
+    "videos": {
+      "parent": "Gallery",
+      "parentHref": "montessori-acamp.html#gallery",
+      "title": "Videos",
+      "intro": "See Montessori in motion.",
+      "blocks": [
+        { "p": "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
+        { "note": "Video embeds", "sub": "Share YouTube links or files and we'll embed them here." }
+      ]
+    },
+    "events-news": {
+      "parent": "News Room",
+      "parentHref": "montessori-acamp.html#news",
+      "title": "Events",
+      "intro": "Upcoming and recent school events.",
+      "blocks": [
+        { "gallery": true }
+      ]
+    },
+    "latest-news": {
+      "parent": "News Room",
+      "parentHref": "montessori-acamp.html#news",
+      "title": "Latest News",
+      "intro": "Announcements and updates from Montessori.",
+      "blocks": [
+        { "p": "Stay up to date with the latest happenings, notices and stories from across the school." },
+        { "note": "News feed", "sub": "Share announcements and we'll build out the news list." }
+      ]
+    },
+    "awards": {
+      "parent": "News Room",
+      "parentHref": "montessori-acamp.html#news",
+      "title": "Awards & Achievements",
+      "intro": "Celebrating our students and staff.",
+      "blocks": [
+        { "p": "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
+        { "gallery": true }
+      ]
+    },
+    "circulars": {
+      "parent": "News Room",
+      "parentHref": "montessori-acamp.html#news",
+      "title": "Circulars & Downloads",
+      "intro": "Official notices and downloadable resources.",
+      "blocks": [
+        { "note": "Circulars", "sub": "Upload circulars and forms and we'll add download links." }
+      ]
+    },
+    "procedure": {
+      "parent": "Admission",
+      "parentHref": "montessori-acamp.html#admissions",
+      "title": "Admission Procedure",
+      "intro": "Four simple steps to join Montessori.",
+      "blocks": [
+        { "list": [["Enquiry & campus visit", "meet our team and tour the campus."], ["Application form", "complete the form for your child's grade and pathway."], ["Interaction / assessment", "a friendly interaction to understand learning needs."], ["Confirmation", "complete enrolment and fee formalities to secure the seat."]] }
+      ]
+    },
+    "form": {
+      "parent": "Admission",
+      "parentHref": "montessori-acamp.html#admissions",
+      "title": "Admission Form",
+      "intro": "Start your application.",
+      "blocks": [
+        { "p": "Complete the enquiry form on our admissions section and our team will share the full application form for your chosen grade and pathway." },
+        { "note": "Online form", "sub": "We can connect this to your Google Form or admissions system." }
+      ]
+    },
+    "brochure": {
+      "parent": "Admission",
+      "parentHref": "montessori-acamp.html#admissions",
+      "title": "Brochure",
+      "intro": "Everything about Montessori, in one place.",
+      "blocks": [
+        { "p": "Our brochure covers the curriculum, campus, facilities, fees and admissions at a glance." },
+        { "note": "Brochure download", "sub": "Upload the brochure PDF and we'll add a download button." }
+      ]
+    },
+    "fee": {
+      "parent": "Admission",
+      "parentHref": "montessori-acamp.html#admissions",
+      "title": "School Fee",
+      "intro": "Transparent fee information.",
+      "blocks": [
+        { "p": "Fee structures vary by grade and pathway (Pre-Primary, Primary and Secondary)." },
+        { "note": "Fee schedule", "sub": "Share the fee structure and we'll present it clearly here." }
+      ]
+    }
+  },
+  "fallback": {
+    "parent": "Montessori",
+    "parentHref": "montessori-acamp.html#top",
+    "title": "Montessori School, A-Camp",
+    "intro": "Choose a section from the menu above to explore.",
+    "blocks": [
+      { "p": "Select any item from the dropdown navigation to open its dedicated page." }
+    ]
+  }
+};
+/* CONTENT:END */
+
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
@@ -267,6 +695,14 @@ class Component extends DCLogic {
   state = { openMenu: -1, route: "" };
 
   componentDidMount() {
+    // ---- Editor hooks ----
+    // The click-to-edit tooling (loaded only by the local editor server) reads
+    // the live content object through window.__CONTENT and asks for a repaint
+    // through window.__rerender after it mutates it. Both are inert on the
+    // deployed site, where nothing ever calls them.
+    window.__CONTENT = CONTENT;
+    window.__rerender = () => this.setState({});
+
     // Read the hash into state, and scroll back to the top. That scroll matters:
     // moving between routes only swaps content, so without it a visitor who was
     // partway down a long page would land mid-way through the next one. The
@@ -326,180 +762,16 @@ class Component extends DCLogic {
       items: m.items.map(([label, key]) => ({ label, href: "#" + key, color: key === route ? "#a51915" : "#26201d" })),
     }));
 
-    // ---- content map: every detail page on this branch site ----
-    // P() is shorthand for one page, keeping the map below readable:
-    //   parent     the section name shown in the breadcrumb
-    //   parentKey  the section of the branch page to return to
-    //   title      page heading, also the last breadcrumb crumb
-    //   intro      the standfirst under the heading
-    //   blocks     the body, as a list of one-key objects, each of which
-    //              becomes a rendered block:
-    //                { p: "..." }                  paragraph
-    //                { h: "..." }                  sub-heading
-    //                { list: [[term, desc], ...] } bulleted term cards
-    //                { gallery: true }             placeholder photo grid
-    //                { note: "...", sub: "..." }   highlighted panel
-    //
-    // A key here is exactly the hash that reaches it, so "library" is served at
-    // acamp-subpage.html#library and must match the hrefs used by the branch
-    // page's facility cards and dropdown menus.
-    //
-    // On content: many pages are written from the general Montessori material
-    // and end with a `note` block stating precisely which asset is still
-    // needed (a PDF, a photograph, the founder's text). Those notes are
-    // visible on the live site by design, so nothing reads as finished when it
-    // is not, and so the school can see what to send. Nothing here asserts a
-    // board affiliation, a founding date or a statistic, since none has been
-    // confirmed.
-    const P = (parent, parentKey, title, intro, blocks) => ({ parent, parentHref: MI + parentKey, title, intro, blocks });
-    const pages = {
-      // ===== About =====
-      "core-values": P("About", "#about", "Core Values", "Empathy, respect and discipline — the three pillars behind every classroom, playground and interaction at Montessori.", [
-        { p: "Montessori renders a liberal education where the mind flowers without fear. Our values are not posters on a wall; they shape how teachers speak to children, how children treat one another, and how the school engages with families." },
-        { list: [["Empathy", "understanding others and acting with kindness."], ["Respect", "for people, property, ideas and the environment."], ["Discipline", "self-direction, focus and follow-through."]] },
-      ]),
-      "founders-message": P("About", "#about", "Founder's Message", "A word from the founding vision of the Montessori Schools.", [
-        { p: "Our journey began with twelve children and a simple conviction — that every child, given the right environment, will help themselves to learn. Five decades on, that belief still guides everything we do at Montessori." },
-        { p: "We invite you to visit our campus, meet our teachers, and see how a value-based, child-centred education prepares your child not just for examinations, but for a meaningful and productive life." },
-        { note: "Full message & founder's portrait", sub: "Send us the founder's photograph and message text and we'll place them here." },
-      ]),
-      "principals-desk": P("About", "#about", "From the Principal's Desk", "Leadership notes on learning, character and community at Montessori.", [
-        { p: "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
-        { note: "Principal's message & photo", sub: "Share the principal's note and portrait to complete this page." },
-      ]),
-      "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
-        { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
-        { gallery: true },
-      ]),
-      "affiliations": P("About", "#about", "Affiliations", "Recognitions and affiliations that underpin a Montessori education.", [
-        { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
-        { note: "Affiliation details", sub: "Affiliation details will be added here." },
-      ]),
-      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
-        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
-        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
-      ]),
-      // ===== School Life =====
-      "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
-        { p: "Houses earn points through academics, sport, culture and service across the year, culminating in an annual house championship." },
-        { list: [["Valour", "courage and leadership."], ["Wisdom", "curiosity and scholarship."], ["Harmony", "teamwork and care."], ["Integrity", "honesty and responsibility."]] },
-      ]),
-      // ===== Academics =====
-      "pre-primary": P("Academics", "#academics", "Pre-Primary Program", "A play-based foundation for our youngest learners.", [
-        { p: "Our pre-primary curriculum develops cognitive, social and motor skills through engaging, hands-on experiences — building a joyful, confident start to school life." },
-        { gallery: true },
-      ]),
-      "primary": P("Academics", "#academics", "Primary School", "A strong, well-rounded foundation for the primary years.", [
-        { p: "The primary school years emphasise strong fundamentals in language and numeracy alongside curiosity-led exploration, preparing students for the years of schooling ahead." },
-        { list: [["Foundational Skills", "reading, writing and numeracy built through steady practice."], ["Enquiry", "hands-on activities that encourage questions and exploration."], ["Character", "values, habits and independence nurtured alongside academics."]] },
-      ]),
-      "secondary": P("Academics", "#academics", "Secondary School", "A structured, comprehensive curriculum for the secondary years.", [
-        { p: "The secondary school years build on a strong foundation, focusing on holistic development through rigorous academics, co-curricular activities and continuous assessment." },
-      ]),
-      "assessment": P("Academics", "#academics", "Assessment Policy & Schedule", "Continuous, fair evaluation that promotes growth.", [
-        { p: "A well-defined framework ensures continuous assessment through formative and summative methods, promoting academic growth and skill development rather than one-off testing." },
-        { note: "Assessment schedule", sub: "Share the term-wise assessment calendar to publish exact dates." },
-      ]),
-      // ===== Activities =====
-      "calendar": P("Activities", "#life", "School Calendar", "Key dates, terms and events across the academic year.", [
-        { p: "The school calendar sets out terms, holidays, examinations and major events so families can plan ahead." },
-        { note: "Downloadable calendar", sub: "Provide the current-session calendar and we'll add it here." },
-      ]),
-      "co-curricular": P("Activities", "#life", "Co-Curricular Activity", "Learning that extends beyond the syllabus.", [
-        { p: "From public speaking and quizzing to art, music and community service, co-curricular activities build confidence, teamwork and well-rounded character." },
-      ]),
-      "physical-education": P("Activities", "#life", "Physical Education", "Daily sport, movement and well-being.", [
-        { p: "Physical education is a daily part of school life, with athletics, team sports and access to the sports arena and swimming pool." },
-        { gallery: true },
-      ]),
-      "clubs": P("Activities", "#life", "Clubs & Societies", "Spaces for every interest to flourish.", [
-        { list: [["Robotics & Coding", "build, program and compete."], ["Debate & Literary", "argue, write and present."], ["Arts & Music", "create, perform and exhibit."], ["Eco Club", "sustainability and campus stewardship."]] },
-      ]),
-      "events": P("Activities", "#life", "Events", "Celebrations, competitions and milestones through the year.", [
-        { p: "Annual day, sports meet, cultural festivals and exhibitions bring the whole Montessori community together." },
-        { gallery: true },
-      ]),
-      // ===== Campus & Facilities (the destinations of the facility cards) =====
-      "the-campus": P("Campus & Facilities", "#campus", "The Campus", "A verdant, purpose-built campus on the outskirts of Kurnool.", [
-        { p: "Spread over lush green environs, the campus embodies state-of-the-art facilities in a specifically designed ambience — replete with centralized AC classrooms and unique sporting facilities." },
-        { gallery: true },
-      ]),
-      "ac-classrooms": P("Campus & Facilities", "#campus", "Classrooms", "Comfortable, focused learning environments.", [
-        { p: "Centrally air-conditioned classrooms keep learning comfortable through every season, equipped with smart audio-visual teaching aids." },
-      ]),
-      "science-labs": P("Campus & Facilities", "#campus", "Labs", "Where theory meets hands-on discovery — science, robotics, maths and computing under one roof.", [
-        { p: "Dedicated physics, chemistry and biology labs support practical experimentation, giving students the space to test ideas, not just read about them." },
-        { list: [["Science Laboratories", "physics, chemistry and biology labs for hands-on practicals."], ["Robotics Lab", "computational thinking, electronics and problem-solving through building and programming real projects."], ["Math Lab", "manipulatives, models and activities that turn abstract concepts into intuitive understanding."], ["Computer Lab", "modern machines building digital literacy, coding foundations and responsible technology use."]] },
-        { gallery: true },
-      ]),
-      "library": P("Campus & Facilities", "#campus", "Library", "A quiet home for reading, research and discovery.", [
-        { p: "A well-stocked library nurtures a lifelong love of reading and independent research, with reference collections, periodicals and comfortable reading spaces." },
-        { gallery: true },
-      ]),
-      "swimming-pool": P("Campus & Facilities", "#campus", "Swimming Pool", "Safe, supervised aquatics for every learner.", [
-        { p: "Our swimming facility supports lessons and recreation under trained supervision, as part of a rounded physical-education program." },
-      ]),
-      "sports-arena": P("Campus & Facilities", "#campus", "Sports", "Grounds and courts for every game.", [
-        { p: "Expansive playgrounds and courts host athletics and team sports, building fitness, discipline and team spirit." },
-        { gallery: true },
-      ]),
-      "music": P("Campus & Facilities", "#campus", "Music", "Voice, rhythm and performance.", [
-        { p: "Vocal and instrumental music, along with regular performances, give students an expressive creative outlet." },
-      ]),
-      "infirmary": P("Campus & Facilities", "#campus", "Infirmary", "Care and well-being on campus.", [
-        { p: "An on-campus infirmary with trained staff looks after day-to-day health needs and first aid, keeping students safe and cared for." },
-      ]),
-      // ===== Transport =====
-      "transport": P("Transport", "#top", "Transport", "Safe, GPS-enabled buses covering Kurnool and the surrounding areas.", [
-        { p: "A GPS-enabled fleet with trained attendants on every bus brings students to and from school safely, with pick-up and drop timings shared with parents at the start of each term." },
-        { p: "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
-        { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
-      ]),
-      // ===== Gallery =====
-      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: true }]),
-      "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
-        { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
-        { note: "Video embeds", sub: "Share YouTube links or files and we'll embed them here." },
-      ]),
-      // ===== News Room =====
-      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [{ gallery: true }]),
-      "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
-        { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
-        { note: "News feed", sub: "Share announcements and we'll build out the news list." },
-      ]),
-      "awards": P("News Room", "#news", "Awards & Achievements", "Celebrating our students and staff.", [
-        { p: "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
-        { gallery: true },
-      ]),
-      "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
-        { note: "Circulars", sub: "Upload circulars and forms and we'll add download links." },
-      ]),
-      // ===== Admission =====
-      "procedure": P("Admission", "#admissions", "Admission Procedure", "Four simple steps to join Montessori.", [
-        { list: [["Enquiry & campus visit", "meet our team and tour the campus."], ["Application form", "complete the form for your child's grade and pathway."], ["Interaction / assessment", "a friendly interaction to understand learning needs."], ["Confirmation", "complete enrolment and fee formalities to secure the seat."]] },
-      ]),
-      "form": P("Admission", "#admissions", "Admission Form", "Start your application.", [
-        { p: "Complete the enquiry form on our admissions section and our team will share the full application form for your chosen grade and pathway." },
-        { note: "Online form", sub: "We can connect this to your Google Form or admissions system." },
-      ]),
-      "brochure": P("Admission", "#admissions", "Brochure", "Everything about Montessori, in one place.", [
-        { p: "Our brochure covers the curriculum, campus, facilities, fees and admissions at a glance." },
-        { note: "Brochure download", sub: "Upload the brochure PDF and we'll add a download button." },
-      ]),
-      "fee": P("Admission", "#admissions", "School Fee", "Transparent fee information.", [
-        { p: "Fee structures vary by grade and pathway (Pre-Primary, Primary and Secondary)." },
-        { note: "Fee schedule", sub: "Share the fee structure and we'll present it clearly here." },
-      ]),
-    };
-
-    // Shown for an unknown route and for the bare file with no hash at all, so
-    // a stale or mistyped link lands on something usable instead of a blank
-    // page. Worth remembering when adding a link: a typo fails quietly here
-    // rather than erroring.
-    const fallback = P("Montessori", "#top", "Montessori School, A-Camp", "Choose a section from the menu above to explore.", [
-      { p: "Select any item from the dropdown navigation to open its dedicated page." },
-    ]);
-    const current = pages[route] || fallback;
+    // ---- the page for this route ----
+    // The content map itself is the CONTENT block at the top of this script.
+    // An unknown or empty hash resolves to the fallback entry, so a bad link
+    // degrades into a usable page instead of a blank one.
+    const page = CONTENT.pages[route];
+    const current = page || CONTENT.fallback;
+    // Where this page's copy sits in CONTENT, e.g. "pages.library". Every
+    // data-edit path on the page hangs off this prefix, and it is built here
+    // because the {{ }} language can only read a value, never join two.
+    const base = page ? "pages." + route : "fallback";
 
     // ---- Normalise blocks into the flagged form the template renders ----
     // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
@@ -510,11 +782,20 @@ class Component extends DCLogic {
     // `key` gives each block a stable identity for the list rendering, and the
     // list blocks also pre-split each pair into term / separator / description
     // so the markup does not have to concatenate anything.
+    // The two block types that are click-editable also carry `p`, their own
+    // path into CONTENT (e.g. "pages.library.blocks.0"), following the same
+    // per-item convention as the branch pages' withPaths(). The name is reused
+    // deliberately and does not clash: the authoring shape's `p` is a
+    // paragraph's text on the source block `b`, while this `p` is a path on
+    // the new flagged object the template loops over — which is why the
+    // template can write data-edit="{{ b.p }}.p". The index comes from the
+    // source array, so the path keeps pointing at the entry it was built from.
     let k = 0;
     const blocks = [];
-    current.blocks.forEach((b) => {
-      if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p });
-      else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h });
+    current.blocks.forEach((b, i) => {
+      const p = base + ".blocks." + i;
+      if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p, p });
+      else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h, p });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
       else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true });
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
@@ -523,9 +804,13 @@ class Component extends DCLogic {
     return {
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
-      // Only the four fields the banner and CTA display; `blocks` is passed
-      // separately in its normalised form, so current.blocks is not exposed.
-      current: { parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro },
+      // Only the four fields the banner and CTA display, plus the CONTENT
+      // paths of the two editable ones; `blocks` is passed separately in its
+      // normalised form, so current.blocks is not exposed.
+      current: {
+        parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro,
+        titlePath: base + ".title", introPath: base + ".intro",
+      },
       blocks,
     };
   }
