@@ -46,6 +46,17 @@ function isForbiddenEditorPath(pLower, edLower) {
 const SIGNABLE_KEYS = ["timestamp", "folder", "public_id", "eager"];
 const SIGN_TIMESTAMP_SKEW_SECONDS = 120;
 
+// `!secrets` alone lets 42, [], "x", {} — anything truthy — through: they all reach
+// signParams(params, undefined), which happily returns a signature computed over the
+// literal string "undefined" and a 200 with `apiKey` silently missing from the JSON body.
+// Cloudinary then fails the upload with an error that has nothing to do with the real
+// cause. Require the actual shape the signing code needs.
+function hasValidCloudinarySecrets(secrets) {
+  return !!secrets && typeof secrets === "object" &&
+    typeof secrets.cloudinaryApiSecret === "string" && secrets.cloudinaryApiSecret !== "" &&
+    typeof secrets.cloudinaryApiKey === "string" && secrets.cloudinaryApiKey !== "";
+}
+
 function send(res, status, body, type) {
   res.writeHead(status, { "content-type": type || "text/plain; charset=utf-8" });
   res.end(body);
@@ -84,11 +95,81 @@ function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 }
 
+// Pure: where the Cloudinary secret file lives for a given homedir, or null if `homedir`
+// isn't usable as a base path at all. Exported so tests (and loadSecrets below) share one
+// definition of "where" instead of two that could drift.
+function secretsPathFor(homedir) {
+  // os.homedir() can return "" (observed with HOME="") or, on some platforms, throw —
+  // callers pass through whatever they got. A non-absolute value must NOT be joined with
+  // path.join, because path.join("", ".msc-editor", "secrets.json") silently resolves to
+  // a path RELATIVE TO THE SERVER'S CWD — which, for this project, is inside the served
+  // repository (the same tree Fix 1 exists to keep the secret out of).
+  if (typeof homedir !== "string" || !path.isAbsolute(homedir)) return null;
+  return path.join(homedir, ".msc-editor", "secrets.json");
+}
+
+// Pure: given a homedir string, returns the parsed secrets object, or null if uploads
+// should be disabled. Exported and called from the boot block below with os.homedir() —
+// this is the function fix-round-3 (moving the secret to ~/.msc-editor/secrets.json) was
+// named after, and until now it lived entirely inside `if (require.main === module)`,
+// unreachable from any unit test: reverting the path, or deleting the stale-file warning,
+// both left the full suite green.
+//
+// Must NEVER crash regardless of what's at (or isn't at, or instead of) that path — unset
+// HOME, a nonexistent homedir, a homedir that's a symlink, ".msc-editor" existing as a
+// plain FILE, "secrets.json" existing as a DIRECTORY, mode 000, malformed JSON, JSON `null`,
+// a bare number — every one of those must fall back to uploads-disabled, never throw.
+function loadSecrets(homedir) {
+  const secretsPath = secretsPathFor(homedir);
+  if (!secretsPath) {
+    console.warn(
+      "WARNING: could not determine a usable home directory (os.homedir() returned " +
+      JSON.stringify(homedir) + ") — uploads disabled. Set HOME and run: npm run setup"
+    );
+    return null;
+  }
+  let raw;
+  try {
+    raw = fs.readFileSync(secretsPath, "utf8");
+  } catch (e) {
+    // ENOENT ("nothing configured yet") is the ONLY case that should disable silently —
+    // it's the expected state on a fresh checkout before `npm run setup` has run. Anything
+    // else (EACCES, EISDIR, ENOTDIR, ...) is a misconfiguration the collaborator should
+    // know about, not indistinguishable from "not set up". Name the problem, never the
+    // file's contents.
+    if (e.code !== "ENOENT") {
+      console.warn("WARNING: could not read " + secretsPath + " (" + e.code + ") — uploads disabled.");
+    }
+    return null;
+  }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    console.warn("WARNING: " + secretsPath + " is not valid JSON — uploads disabled. Run: npm run setup");
+    return null;
+  }
+}
+
+// Pure: the stale-secrets warning message if a leftover editor/secrets.json still exists
+// (the pre-round-3 location, inside the served tree), or null. Exported for the same
+// reason as loadSecrets: this used to be inline in the boot block, unreachable from a test.
+function staleSecretsWarning(editorDir) {
+  const stalePath = path.join(editorDir, "secrets.json");
+  if (!fs.existsSync(stalePath)) return null;
+  return "WARNING: found " + stalePath + " — this location is inside the served website " +
+    "tree and was never safe. Delete it and run: npm run setup";
+}
+
 function createServer({ root, config, templates, secrets, token }) {
   // paths.js lives in the repo's editor/ dir, not the (possibly tmp) site root under test.
   const editorDir = __dirname;
   const editorParent = path.dirname(editorDir);
-  const edLower = path.resolve(editorDir).toLowerCase().split(path.sep).join("/");
+  // Realpath'd, not just path.resolve'd: `real` (the value this is ultimately compared
+  // against, below) is always realpath'd, so if editorDir itself were ever reached via a
+  // symlink (e.g. under `node --preserve-symlinks` with a symlinked repo checkout) a
+  // non-realpath'd edLower would silently never match `real` again, turning the entire
+  // post-realpath allowlist check into a permanent no-op.
+  const edLower = fs.realpathSync(editorDir).toLowerCase().split(path.sep).join("/");
   // Realpath the two possible `base` directories once, up front. os.tmpdir() (used by
   // every test fixture, and by any real symlinked path) is itself a symlink on macOS
   // (/var -> /private/var), so a plain string join would not match what
@@ -132,6 +213,16 @@ function createServer({ root, config, templates, secrets, token }) {
       if (req.method === "POST" && url.pathname === "/api/save") {
         const body = await readJson(req);
         if (!CONTENT_FILES.includes(body.file)) return send(res, 400, "Unknown file: " + body.file);
+        // A patch that isn't the `{ ops: [...] }` shape (missing entirely, `ops` not an
+        // array, or `patch` itself not an object) must be rejected here. Left unchecked,
+        // applyPatch's own `(patch && patch.ops) || []` silently treats it as "zero ops" —
+        // a 200 "success" that rewrites the file with nothing changed. Because
+        // replaceContent always re-serialises the whole CONTENT block, that no-op still
+        // produces a large spurious diff (reformatting) with no actual edit behind it.
+        if (body.patch === null || typeof body.patch !== "object" || Array.isArray(body.patch) ||
+            !Array.isArray(body.patch.ops)) {
+          return send(res, 400, "Invalid patch: expected { ops: [...] }");
+        }
         const fp = path.join(root, body.file);
         const src = fs.readFileSync(fp, "utf8");
         const { data } = extractContent(src);
@@ -167,9 +258,21 @@ function createServer({ root, config, templates, secrets, token }) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/sign") {
-        if (!secrets) return send(res, 503, "Uploads not configured — run: npm run setup");
+        if (!hasValidCloudinarySecrets(secrets)) return send(res, 503, "Uploads not configured — run: npm run setup");
         const body = await readJson(req);
-        const params = body.paramsToSign || {};
+        // A JSON body of literal `null` (or a non-object) makes `body.paramsToSign` throw
+        // before the `|| {}` fallback ever runs — guard the body's own shape first, then
+        // paramsToSign's, so a hostile/malformed body 400s instead of leaking a raw
+        // "Cannot read properties of null" TypeError.
+        if (body === null || typeof body !== "object" || Array.isArray(body)) {
+          return send(res, 400, "Invalid request body");
+        }
+        const paramsToSign = body.paramsToSign;
+        if (paramsToSign !== undefined && paramsToSign !== null &&
+            (typeof paramsToSign !== "object" || Array.isArray(paramsToSign))) {
+          return send(res, 400, "paramsToSign must be an object");
+        }
+        const params = paramsToSign || {};
         for (const k of Object.keys(params)) {
           if (!SIGNABLE_KEYS.includes(k)) return send(res, 400, "Unsupported sign parameter: " + k);
         }
@@ -242,11 +345,35 @@ function createServer({ root, config, templates, secrets, token }) {
       // straight through). A hard link cannot be caught by any path-based check, including
       // this one — realpath does not (and by design cannot) resolve a hard link, since a
       // hard-linked file genuinely IS a normal file, indistinguishable on disk from any
-      // other, in whatever directory it was linked into. That is precisely why the real fix
-      // is Fix 1: nothing sensitive lives under the served tree any more, so there is
-      // nothing left for a hard link to reach.
+      // other, in whatever directory it was linked into.
+      //
+      // This is an ACCEPTED residual risk, not a closed one, and moving the secret to
+      // ~/.msc-editor/secrets.json (Fix round 3) does NOT close it: `ln
+      // ~/.msc-editor/secrets.json <repo>/harmless.txt` then `GET /harmless.txt` still
+      // serves the secret — moving the file only changes where the link has to point, not
+      // whether one can be made. The reason this is still acceptable is the OTHER half of
+      // the original reasoning, which does hold: creating that hard link requires local
+      // filesystem write access to the served tree in the first place, and an attacker who
+      // already has that can simply open ~/.msc-editor/secrets.json directly — the hard
+      // link gains them nothing they didn't already have. See secrets-location.test.js for
+      // the demonstration (not a code guard, since none is possible here).
       const realLower = real.toLowerCase().split(path.sep).join("/");
       if (isForbiddenEditorPath(realLower, edLower)) return send(res, 403, "Forbidden");
+
+      // AUTHORITY, part 3 — the SAME dot-segment rule as the outer check above (which runs
+      // on `rel`, derived from the URL — i.e. PRE-resolution), re-run here against the
+      // RESOLVED path. Without this, a symlink whose URL name contains no dot segment but
+      // which resolves INTO a dotfile/dotdir sails straight through: a symlinked directory
+      // pointing at .git, a case-varied symlink directory, an absolute symlink straight at
+      // .git/config, or a symlink at .env. Since `/api/publish` runs `git pull` (line ~159),
+      // such a symlink can arrive via an ordinary `git pull` from a collaborator, not just a
+      // locally-planted attack — a strictly lower bar than the hard-link vector above.
+      // Computed relative to `baseReal` (not the absolute path) so a repo legitimately
+      // checked out UNDER a dotted directory (e.g. "~/.local/share/MSC-Website") is not
+      // falsely blocked; `real === baseReal` is handled directly rather than slicing, which
+      // would otherwise cut at the wrong offset.
+      const relReal = real === baseReal ? "" : real.slice(baseReal.length + 1);
+      if (relReal.split(path.sep).some((seg) => seg.startsWith("."))) return send(res, 403, "Forbidden");
 
       if (!fs.statSync(real).isFile()) return send(res, 404, "Not found");
       const ext = path.extname(real).toLowerCase();
@@ -254,12 +381,27 @@ function createServer({ root, config, templates, secrets, token }) {
       if (ext === ".html") body = Buffer.from(body.toString("utf8").replace("</body>", TOKEN_SCRIPT + INJECT + "</body>"));
       return send(res, 200, body, MIME[ext] || "application/octet-stream");
     } catch (e) {
+      // Errors thrown by our own validators (content-io.js, patch.js — "Unknown or
+      // non-text path", "Text may not contain CONTENT:BEGIN...", etc.) are plain
+      // `new Error(...)` with no `.code`, and their messages are deliberate, useful
+      // feedback — safe to send as-is. Node's own fs/OS errors (ENOENT, EACCES, EISDIR,
+      // ENOTDIR, ...) always carry `.code`, and their `.message` embeds the absolute local
+      // path that failed (e.g. "EACCES: permission denied, open '/private/var/.../x'") —
+      // never send that to an unauthenticated caller. Log the real error for the
+      // collaborator running the server; send a generic message to the client.
+      if (e && e.code) {
+        console.error("Unexpected error handling " + req.method + " " + url.pathname + ":", e);
+        return send(res, 400, "Unexpected server error — see the editor server's terminal output for details.");
+      }
       return send(res, 400, String(e.message || e));
     }
   });
 }
 
-module.exports = { createServer, CONTENT_FILES, readJson };
+module.exports = {
+  createServer, CONTENT_FILES, readJson,
+  loadSecrets, secretsPathFor, staleSecretsWarning, hasValidCloudinarySecrets,
+};
 
 if (require.main === module) {
   const root = path.join(__dirname, "..");
@@ -269,26 +411,34 @@ if (require.main === module) {
   // served web root is reachable by construction (case-varied URLs, symlinks, even hard
   // links; see the static-handler comments above). ~/.msc-editor/secrets.json can never be
   // requested over HTTP and can never be committed by accident.
-  const secretsPath = path.join(os.homedir(), ".msc-editor", "secrets.json");
-  let secrets = null;
-  try { secrets = JSON.parse(fs.readFileSync(secretsPath, "utf8")); } catch {}
+  const secretsPath = secretsPathFor(os.homedir());
+  const secrets = loadSecrets(os.homedir());
   // A stray secrets.json from before this fix would have been inside the served tree.
   // Warn loudly, but never read, migrate, or delete it automatically — leave that to the
   // collaborator, deliberately, so nothing here ever touches a credential file on their
   // say-so alone.
-  const stalePath = path.join(__dirname, "secrets.json");
-  if (fs.existsSync(stalePath)) {
-    console.warn(
-      "WARNING: found " + stalePath + " — this location is inside the served website " +
-      "tree and was never safe. Delete it and run: npm run setup"
-    );
-  }
+  const staleWarning = staleSecretsWarning(__dirname);
+  if (staleWarning) console.warn(staleWarning);
   const token = crypto.randomUUID();
   const srv = createServer({ root, config, templates, secrets, token });
+  // A second editor process (or anything else already bound to the port) must not crash
+  // with a raw stack trace in front of non-technical staff — name the actual problem.
+  srv.on("error", (e) => {
+    if (e.code === "EADDRINUSE") {
+      console.error(
+        "Port " + config.port + " is already in use — is the editor already running? " +
+        "Close it, or change \"port\" in editor/config.json."
+      );
+      process.exit(1);
+    }
+    throw e;
+  });
   srv.listen(config.port, "127.0.0.1", () => {
     const url = "http://localhost:" + config.port + "/";
     console.log("Editor running at " + url);
-    if (!secrets) console.log("(uploads disabled — no " + secretsPath + "; run: npm run setup)");
+    if (!secrets) {
+      console.log("(uploads disabled — no " + (secretsPath || "usable home directory") + "; run: npm run setup)");
+    }
     if (process.env.EDITOR_NO_PUSH === "1") console.log("(EDITOR_NO_PUSH=1 — publish will commit but NOT push)");
     if (process.platform === "darwin") execFile("open", [url]);
   });

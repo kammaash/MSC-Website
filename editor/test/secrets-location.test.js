@@ -115,13 +115,19 @@ test("five leak vectors are all closed: root file symlink, root directory symlin
 
 // ---- Hard link: no path-based check can catch this. Assert what's reachable, not realpath behaviour. ----
 
-test("Fix 1: no secret file exists anywhere under the served tree — hard links have nothing to reach", async () => {
+test("Fix 1: the real secrets file lives outside both served directories (necessary, but NOT sufficient against hard links — see below)", async () => {
   // fs.realpathSync cannot distinguish a hard-linked file from any other ordinary file in
   // its directory (by design — a hard link IS the file, not a pointer to it), so no
-  // path-based guard in server.js can ever detect or block one. Proving this is closed
-  // means proving there is nothing SENSITIVE left under the served tree (root or editor/)
-  // for a hard link to expose in the first place — the actual fix (Fix 1), not a route
-  // check.
+  // path-based guard in server.js can ever detect or block one. Round 4 PROVED that moving
+  // the secret to ~/.msc-editor/secrets.json does NOT close the hard-link vector: `ln
+  // ~/.msc-editor/secrets.json <repo>/harmless.txt` then `GET /harmless.txt` still serves
+  // it. What this test actually establishes is narrower and still true: the secret's
+  // real, canonical location is outside both served directories, so at minimum no URL
+  // alone (no path trick, no case variant, no symlink) can reach it — reaching it now
+  // requires an attacker who can already create a hard link inside the served tree, i.e.
+  // one who already has local filesystem write access and could just read
+  // ~/.msc-editor/secrets.json directly. See server.js's AUTHORITY part 2 comment for the
+  // full reasoning.
   const realSecretsPath = path.join(os.homedir(), ".msc-editor", "secrets.json");
 
   // The real secrets location must not be textually inside either directory this server
@@ -140,12 +146,15 @@ test("Fix 1: no secret file exists anywhere under the served tree — hard links
   assert.equal(fs.existsSync(path.join(EDITOR_DIR, "secrets.json")), false);
 });
 
-test("demonstration only (not a code guard): a hard link INTO a test fixture is indistinguishable from an ordinary file — this is exactly why Fix 1, not a route check, is the real fix", async () => {
+test("demonstration only (not a code guard): a hard link INTO a test fixture is indistinguishable from an ordinary file — no path-based check, in server.js or anywhere else, can close this", async () => {
   // This test is NOT asserting a security property server.js enforces — there is none to
   // enforce here, by design (see the coordinator's note: realpath cannot resolve hard
   // links). It exists only to make the architectural limit concrete: within our OWN
   // disposable tmp fixture (never touching the real secret), a hard link to a "canary" file
-  // is served exactly like any other file, because it genuinely IS just another file.
+  // is served exactly like any other file, because it genuinely IS just another file. This
+  // is accepted, not fixed: creating the hard link in the first place requires local
+  // filesystem write access to the served tree, at which point the real secrets file is
+  // directly readable anyway — the hard link gains an attacker nothing new.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "msc-hardlink-demo-"));
   const root = path.join(dir, "site");
   fs.mkdirSync(root);

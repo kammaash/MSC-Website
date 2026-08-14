@@ -61,21 +61,32 @@ test("GET /editor/lib/paths.js (allowlisted) still works", async () => {
 // A tmp-dir-rooted fixture CANNOT reproduce this: fp would be tmpRoot/EDITOR/secrets.json,
 // which genuinely doesn't exist, so it 404s either way and masks the bug. This test must
 // use root === path.dirname(editorDir) — the real repo root — exactly like production.
+//
+// Fix round 4 (finding 6): this test used to plant the REAL editor/secrets.json (with a
+// backup/restore of any real content) to exercise the case-insensitive path. That is exactly
+// the file secrets-location.test.js asserts is ABSENT, and `node --test` runs test files in
+// parallel processes — a race that mutation testing surfaced even though 8 clean runs never
+// hit it. The property under test ("a case-varied URL cannot reach a non-allowlisted file
+// inside editor/") is not specific to the filename "secrets.json"; use a uniquely-named
+// per-run canary instead, exactly like secrets-location.test.js already does, so this file
+// never creates the real secrets.json at all.
 test("case-insensitive bypass: /EDITOR, /Editor, /eDiToR paths never leak real editor files (production-shaped root)", async () => {
   const EDITOR_DIR = path.join(__dirname, "..");
   const REPO_ROOT = path.dirname(EDITOR_DIR);
-  const secretsPath = path.join(EDITOR_DIR, "secrets.json");
+  const canaryName = "_r4_case_canary_" + crypto.randomUUID() + ".json";
+  const canaryPath = path.join(EDITOR_DIR, canaryName);
   const secretMarker = "SECRET-MARKER-" + crypto.randomUUID();
-  const existedBefore = fs.existsSync(secretsPath);
-  const backup = existedBefore ? fs.readFileSync(secretsPath) : null;
-  fs.writeFileSync(secretsPath, JSON.stringify({ cloudinaryApiSecret: secretMarker }));
+  fs.writeFileSync(canaryPath, JSON.stringify({ cloudinaryApiSecret: secretMarker }));
 
   const token = crypto.randomUUID();
   const srv = createServer({ root: REPO_ROOT, config: { push: false }, templates: {}, secrets: null, token });
   await new Promise((r) => srv.listen(0, "127.0.0.1", r));
   try {
     const base = "http://127.0.0.1:" + srv.address().port;
-    const variants = ["/EDITOR/secrets.json", "/Editor/secrets.json", "/EDITOR/config.json", "/eDiToR/check-paths.js"];
+    const variants = [
+      "/EDITOR/" + canaryName, "/Editor/" + canaryName.toUpperCase(),
+      "/EDITOR/config.json", "/eDiToR/check-paths.js",
+    ];
     for (const p of variants) {
       const r = await fetch(base + p);
       assert.equal(r.status, 403, `expected 403 for ${p}, got ${r.status}`);
@@ -94,8 +105,7 @@ test("case-insensitive bypass: /EDITOR, /Editor, /eDiToR paths never leak real e
     assert.equal(okMixedCase.status, 200);
   } finally {
     await new Promise((r) => srv.close(r));
-    if (existedBefore) fs.writeFileSync(secretsPath, backup);
-    else fs.rmSync(secretsPath, { force: true });
+    fs.rmSync(canaryPath, { force: true });
   }
 });
 
@@ -117,6 +127,314 @@ test("a symlink under the served root pointing outside it is never followed — 
   assert.ok(r.status === 403 || r.status === 404, `expected 403 or 404, got ${r.status}`);
   const text = await r.text();
   assert.ok(!text.includes("TOP-SECRET-OUTSIDE-CONTENT"));
+});
+
+// ---- Fix round 4, Fix 1: the dot-segment rule must apply to the RESOLVED path too ----
+//
+// server.js blocked dot-prefixed segments (.git, .env, ...) only on `rel`, derived from the
+// URL — i.e. PRE-resolution. A symlink whose own URL name has no dot segment, but which
+// RESOLVES into a dotfile/dotdir, sailed straight through. This matters more than the
+// accepted hard-link vector: a symlink can be committed to git and delivered to a
+// collaborator by an ordinary `git pull`, which /api/publish runs automatically — a hard
+// link cannot travel that way. Each case here plants a REAL .git-shaped or .env-shaped
+// fixture with a canary marker and proves both the status code and that the marker never
+// appears in the response body.
+function tmpSiteWithDotfiles() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "msc-sec-dotseg-"));
+  fs.writeFileSync(path.join(dir, "index.html"), "<html><body><h1>Hi</h1></body></html>");
+  const gitDir = path.join(dir, ".git");
+  fs.mkdirSync(gitDir);
+  const gitMarker = "GIT-CONFIG-MARKER-" + crypto.randomUUID();
+  fs.writeFileSync(path.join(gitDir, "config"), gitMarker);
+  const envMarker = "ENV-SECRET-MARKER-" + crypto.randomUUID();
+  fs.writeFileSync(path.join(dir, ".env"), envMarker);
+  return { dir, gitDir, gitMarker, envMarker };
+}
+
+test("Fix 1: a symlinked DIRECTORY pointing at .git is blocked, even though its own URL segment has no dot", async () => {
+  const { dir, gitDir, gitMarker } = tmpSiteWithDotfiles();
+  fs.symlinkSync(gitDir, path.join(dir, "gitdir"), "dir");
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const r = await fetch(base + "/gitdir/config");
+    assert.equal(r.status, 403, `expected 403, got ${r.status}`);
+    assert.ok(!(await r.text()).includes(gitMarker));
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 1: a CASE-VARIED request for a symlinked directory into .git is also blocked (production-shaped, case-insensitive fs)", async () => {
+  const { dir, gitDir, gitMarker } = tmpSiteWithDotfiles();
+  fs.symlinkSync(gitDir, path.join(dir, "gitdir"), "dir");
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const r = await fetch(base + "/GITDIR/config");
+    assert.equal(r.status, 403, `expected 403, got ${r.status}`);
+    assert.ok(!(await r.text()).includes(gitMarker));
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 1: an ABSOLUTE symlink straight at .git/config is blocked", async () => {
+  const { dir, gitDir, gitMarker } = tmpSiteWithDotfiles();
+  fs.symlinkSync(path.join(gitDir, "config"), path.join(dir, "abs-gitconfig.txt"), "file");
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const r = await fetch(base + "/abs-gitconfig.txt");
+    assert.equal(r.status, 403, `expected 403, got ${r.status}`);
+    assert.ok(!(await r.text()).includes(gitMarker));
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 1: a symlink to .env is blocked", async () => {
+  const { dir, envMarker } = tmpSiteWithDotfiles();
+  fs.symlinkSync(path.join(dir, ".env"), path.join(dir, "env.txt"), "file");
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const r = await fetch(base + "/env.txt");
+    assert.equal(r.status, 403, `expected 403, got ${r.status}`);
+    assert.ok(!(await r.text()).includes(envMarker));
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 1: direct (non-symlink) requests still work as before — /.git/config and /.env are 403", async () => {
+  const { dir, gitMarker, envMarker } = tmpSiteWithDotfiles();
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    for (const p of ["/.git/config", "/.env"]) {
+      const r = await fetch(base + p);
+      assert.equal(r.status, 403, `expected 403 for ${p}, got ${r.status}`);
+      const text = await r.text();
+      assert.ok(!text.includes(gitMarker) && !text.includes(envMarker));
+    }
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 1: positive control — a symlink to a normal (non-dotted) file is still served, not over-blocked", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "msc-sec-dotseg-ok-"));
+  fs.writeFileSync(path.join(dir, "index.html"), "<html><body><h1>Hi</h1></body></html>");
+  const marker = "OK-MARKER-" + crypto.randomUUID();
+  fs.writeFileSync(path.join(dir, "real.txt"), marker);
+  fs.symlinkSync(path.join(dir, "real.txt"), path.join(dir, "aliased.txt"), "file");
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: dir, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const r = await fetch(base + "/aliased.txt");
+    assert.equal(r.status, 200);
+    assert.equal(await r.text(), marker);
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+// ---- Fix round 4, Fix 3: /api/sign must validate the SECRETS SHAPE, not just truthiness ----
+//
+// `!secrets` alone lets 42, [], "x", {} all reach signParams(params, undefined) — a 200
+// with a signature computed over the literal string "undefined" and `apiKey` silently
+// missing, which then fails on Cloudinary's side with an unrelated error.
+test("Fix 3: /api/sign 503s (not 200-with-garbage) when secrets has the wrong shape", async () => {
+  const shapes = [42, [], "x", {}, { cloudinaryApiKey: "k" }, { cloudinaryApiSecret: "s" },
+    { cloudinaryApiKey: "", cloudinaryApiSecret: "s" }, { cloudinaryApiKey: "k", cloudinaryApiSecret: "" },
+    { cloudinaryApiKey: 1, cloudinaryApiSecret: "s" }, null];
+  for (const secrets of shapes) {
+    const root = tmpSite();
+    const token = crypto.randomUUID();
+    const srv = createServer({ root, config: { push: false }, templates: {}, secrets, token });
+    await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+    try {
+      const r = await fetch("http://127.0.0.1:" + srv.address().port + "/api/sign", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-editor-token": token },
+        body: JSON.stringify({ paramsToSign: { timestamp: Math.floor(Date.now() / 1000) } }),
+      });
+      assert.equal(r.status, 503, `expected 503 for secrets=${JSON.stringify(secrets)}, got ${r.status}`);
+    } finally {
+      await new Promise((res) => srv.close(res));
+    }
+  }
+});
+
+test("Fix 3: /api/sign still 200s with a correctly-shaped secrets object", async () => {
+  const root = tmpSite();
+  fs.writeFileSync(path.join(root, "content.js"),
+    '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"cloudName": "demo"};\n/* CONTENT:END */');
+  const token = crypto.randomUUID();
+  const secrets = { cloudinaryApiKey: "key123", cloudinaryApiSecret: "secret123" };
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const r = await fetch("http://127.0.0.1:" + srv.address().port + "/api/sign", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-editor-token": token },
+      body: JSON.stringify({ paramsToSign: { timestamp: Math.floor(Date.now() / 1000) } }),
+    });
+    assert.equal(r.status, 200);
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+// ---- Fix round 4, Fix 7: a literal `null` (or non-object) JSON body must not crash /api/sign ----
+
+test("Fix 7: POST /api/sign with a literal `null` body 400s instead of raising a raw TypeError", async () => {
+  const root = tmpSite();
+  fs.writeFileSync(path.join(root, "content.js"),
+    '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"cloudName": "demo"};\n/* CONTENT:END */');
+  const token = crypto.randomUUID();
+  const secrets = { cloudinaryApiKey: "key123", cloudinaryApiSecret: "secret123" };
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const r = await fetch("http://127.0.0.1:" + srv.address().port + "/api/sign", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-editor-token": token },
+      body: "null",
+    });
+    assert.equal(r.status, 400);
+    const text = await r.text();
+    assert.ok(!/Cannot read propert/.test(text), "must not leak a raw TypeError message");
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 7: POST /api/sign with paramsToSign as a non-object (a string) 400s", async () => {
+  const root = tmpSite();
+  fs.writeFileSync(path.join(root, "content.js"),
+    '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"cloudName": "demo"};\n/* CONTENT:END */');
+  const token = crypto.randomUUID();
+  const secrets = { cloudinaryApiKey: "key123", cloudinaryApiSecret: "secret123" };
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const r = await fetch("http://127.0.0.1:" + srv.address().port + "/api/sign", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-editor-token": token },
+      body: JSON.stringify({ paramsToSign: "timestamp" }),
+    });
+    assert.equal(r.status, 400);
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+// ---- Fix round 4, Fix 7: a malformed /api/save patch (not { ops: [...] }) must 400, not silently no-op ----
+
+test("Fix 7: /api/save rejects a patch that isn't { ops: [...] } — file untouched, not a silent 200 no-op", async () => {
+  const root = tmpSite();
+  const page = `<html><body><x-dc></x-dc><script type="text/x-dc" data-dc-script>
+/* CONTENT:BEGIN */
+const CONTENT = { "hero": { "title": "Old" } };
+/* CONTENT:END */
+class Component {}
+</script></body></html>`;
+  fs.writeFileSync(path.join(root, "index.html"), page);
+  const token = crypto.randomUUID();
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const before = fs.readFileSync(path.join(root, "index.html"), "utf8");
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const badPatches = [{ ops: "not-an-array" }, "a string", null, 42, { notOps: [] }, []];
+    for (const patch of badPatches) {
+      const r = await fetch(base + "/api/save", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-editor-token": token },
+        body: JSON.stringify({ file: "index.html", patch }),
+      });
+      assert.equal(r.status, 400, `expected 400 for patch=${JSON.stringify(patch)}, got ${r.status}`);
+    }
+    assert.equal(fs.readFileSync(path.join(root, "index.html"), "utf8"), before, "file must be byte-identical — no ops silently applied");
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+// ---- Fix round 4, Fix 4: unexpected fs-level exceptions must not leak absolute local paths ----
+
+test("Fix 4: an unreadable file under root does not leak its absolute path to the client (error logged server-side instead)", async () => {
+  const root = tmpSite();
+  const lockedPath = path.join(root, "locked.txt");
+  fs.writeFileSync(lockedPath, "shh");
+  fs.chmodSync(lockedPath, 0o000);
+  if (process.getuid && process.getuid() === 0) {
+    // Running as root ignores file permission bits entirely — this guard cannot be
+    // exercised under root and would otherwise false-fail on some CI/container setups.
+    fs.chmodSync(lockedPath, 0o644);
+    return;
+  }
+  const token = crypto.randomUUID();
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  const origConsoleError = console.error;
+  let loggedServerSide = false;
+  console.error = (...args) => { loggedServerSide = true; };
+  try {
+    const r = await fetch("http://127.0.0.1:" + srv.address().port + "/locked.txt");
+    assert.equal(r.status, 400);
+    const text = await r.text();
+    assert.ok(!text.includes(root), `response must not contain the absolute local path, got: ${text}`);
+    assert.ok(!text.includes("EACCES"), `response must not contain the raw error code, got: ${text}`);
+    assert.equal(loggedServerSide, true, "the real error must still be logged server-side for the collaborator running the server");
+  } finally {
+    console.error = origConsoleError;
+    fs.chmodSync(lockedPath, 0o644);
+    await new Promise((res) => srv.close(res));
+  }
+});
+
+test("Fix 4: a validation error from applyPatch (not a raw fs error) still returns its specific, useful message — contrast case, must NOT be genericised", async () => {
+  // Only unexpected fs/OS errors (identified by e.code) are genericised by Fix 4. Errors
+  // thrown by our own validators — like applyPatch's "Unknown or non-text path" — carry no
+  // `.code` and are deliberate, useful feedback that must keep flowing to the client as-is.
+  const root = tmpSite();
+  const page = `<html><body><x-dc></x-dc><script type="text/x-dc" data-dc-script>
+/* CONTENT:BEGIN */
+const CONTENT = { "hero": { "title": "Old" } };
+/* CONTENT:END */
+class Component {}
+</script></body></html>`;
+  fs.writeFileSync(path.join(root, "index.html"), page);
+  const token = crypto.randomUUID();
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const r = await fetch("http://127.0.0.1:" + srv.address().port + "/api/save", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-editor-token": token },
+      body: JSON.stringify({ file: "index.html", patch: { ops: [{ type: "set", path: "hero.nope", value: "x" }] } }),
+    });
+    assert.equal(r.status, 400);
+    const text = await r.text();
+    assert.match(text, /Unknown or non-text path/);
+  } finally {
+    await new Promise((res) => srv.close(res));
+  }
 });
 
 // ---- content-type strictness (fold-in C) ----
