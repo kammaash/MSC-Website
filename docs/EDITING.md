@@ -22,6 +22,12 @@ public site with no editing controls at all — no outlines, no "+ Add", nothing
 deliberate: the version of the site that actually goes live carries no editing code in it at all,
 so there is nothing for a website visitor to ever click on or discover.
 
+### Edit in one tab at a time
+If the site is already open in another browser tab or window (yours or someone else's),
+close it before you start editing. The editor doesn't check what's already on the page
+before saving, so a second tab can silently overwrite or delete a change the first one just
+made.
+
 ### Discard has a limit
 **Discard** (or reloading the page) only throws away changes that have not been saved yet. Once
 you press **Publish** and it has started saving files, those already-saved changes cannot be

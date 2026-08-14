@@ -530,8 +530,15 @@
      Address, phone numbers and email come from the shared contact block in
      content.js, so their edit paths start with `shared:`, and all three are
      still placeholders. That block holds only one phone number, so both slots
-     in the line below render it — exactly as the two identical placeholders
-     did before. -->
+     in the line below render it. Only the FIRST slot carries data-edit: the
+     blur handler in editor-client.js applies a change and calls update(), but
+     not rerender() (a full React remount on every text edit would be needless
+     churn), so a second independently-editable span bound to the exact same
+     path would keep showing the OLD value on screen after the first slot was
+     edited — right up until the next full page load — while the saved file
+     already had the new one. The second slot is plain markup with no
+     data-edit, so it mirrors the first via the ordinary {{ }} render and can
+     never fall out of sync with it. -->
 <footer style="background:#7f120f;color:#f4ddd2">
   <div class="wrap" style="padding-top:60px;padding-bottom:30px">
     <div class="g g-foot">
@@ -541,7 +548,7 @@
           <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori A-Camp</span>
         </div>
         <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px"><span data-edit="shared:contact.acampAddress">{{ contact.acampAddress }}</span>.</p>
-        <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a> · <a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a></p>
+        <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a> · <a href="#admissions" style="color:#ffd9c4"><span>{{ contact.phone }}</span></a></p>
         <p style="font-size:14px;margin:6px 0 0"><a href="{{ mailtoEmail }}" style="color:#ffd9c4"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
