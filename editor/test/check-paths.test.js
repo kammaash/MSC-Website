@@ -136,3 +136,24 @@ test("shared: paths report why content.js was unusable", () => {
 test("stripComments leaves ordinary markup alone", () => {
   assert.equal(stripComments('<a href="https://x.test/a//b">k</a>'), '<a href="https://x.test/a//b">k</a>');
 });
+
+test("a data-media-slot path that resolves to a string passes; an unresolved one fails", () => {
+  const root = fixture({ "index.html": page('const CONTENT = { "hero": { "photo": "" } };', '<img data-media-slot="hero.photo">') });
+  assert.deepEqual(checkPaths(root, ["index.html"]).errors, []);
+
+  const bad = fixture({ "index.html": page('const CONTENT = { "hero": { "photo": "" } };', '<img data-media-slot="hero.photoo">') });
+  assert.equal(checkPaths(bad, ["index.html"]).errors.length, 1);
+  assert.match(checkPaths(bad, ["index.html"]).errors[0], /hero\.photoo/);
+});
+
+test("a data-media-slot path resolving to a non-string is an error (same discipline as data-edit)", () => {
+  const root = fixture({ "index.html": page('const CONTENT = { "hero": { "photo": "" } };', '<img data-media-slot="hero">') });
+  const { errors } = checkPaths(root, ["index.html"]);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /must name a text value/);
+});
+
+test("an interpolated data-media-slot (gallery items) is skipped, like data-edit", () => {
+  const root = fixture({ "index.html": page('const CONTENT = { "hero": { "photo": "" } };', '<img data-media-slot="{{ ph.p }}.src">') });
+  assert.deepEqual(checkPaths(root, ["index.html"]).errors, []);
+});

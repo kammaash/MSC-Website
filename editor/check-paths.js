@@ -70,7 +70,7 @@ function checkPaths(root, pages = PAGES) {
       continue;
     }
 
-    for (const m of stripComments(src).matchAll(/data-(edit|list)="([^"{]+)"/g)) {
+    for (const m of stripComments(src).matchAll(/data-(edit|list|media-slot|media-poster)="([^"{]+)"/g)) {
       const attr = m[1];
       const raw = m[2];
       const isShared = raw.startsWith("shared:");
@@ -86,8 +86,8 @@ function checkPaths(root, pages = PAGES) {
       // with the failure surfacing at Publish rather than at the click. "Resolves to
       // something" was too weak a check to catch that. data-list is deliberately left
       // alone: those paths resolve to arrays by definition.
-      if (attr === "edit" && typeof value !== "string") {
-        errors.push(`${page}: ${raw} resolves to ${describe(value)}, but data-edit must name a text value`);
+      if ((attr === "edit" || attr === "media-slot" || attr === "media-poster") && typeof value !== "string") {
+        errors.push(`${page}: ${raw} resolves to ${describe(value)}, but data-${attr} must name a text value`);
       }
     }
   }
@@ -101,5 +101,5 @@ if (require.main === module) {
   const { errors } = checkPaths(path.join(__dirname, ".."));
   for (const e of errors) console.error(e);
   if (errors.length) { console.error(errors.length + " check-paths failure(s)"); process.exit(1); }
-  console.log("check-paths: all static data-edit/data-list paths resolve");
+  console.log("check-paths: all static data-edit/data-list/data-media-slot/data-media-poster paths resolve");
 }
