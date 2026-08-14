@@ -132,21 +132,90 @@ test("I3(a): a client-side validation rejection also restores text and returns b
   assert.ok(rejectIdx < draftSetIdx, "rejectText check must run before the op is recorded");
 });
 
-test("I3(b): saveAll marks the session as saved on the first successful write, and Discard warns honestly when that's true", () => {
-  const saveAllBlock = extractBlockAfter(SRC, "function saveAll(");
-  assert.match(saveAllBlock, /savedThisSession = true/);
-
+test("I3(b): Discard warns honestly whenever anything is saved-but-uncommitted, and still has its plain path", () => {
   const discardBlock = extractBlockAfter(SRC, '#ed-discard").onclick');
-  assert.match(discardBlock, /savedThisSession/);
+  // Keyed on the draft's persisted transaction state, NOT a session-lifetime flag —
+  // the fact is about the files on disk and survives Discard's own reload.
+  assert.match(discardBlock, /draft\.hasUncommitted\(\)/);
   assert.match(discardBlock, /not undo/i);
   // The plain "nothing saved yet" path must still exist and still be reachable
   // (it stays the everyday case — most sessions publish without a partial failure).
   assert.match(discardBlock, /draft\.count\(\)\s*&&\s*!confirm/);
 
-  // Publishing clears the flag — once saved changes are committed, Discard no longer
-  // needs to warn about anything left dangling.
+  // The old in-memory flag must be gone entirely: it was the thing that reset to a
+  // clean-looking state on reload while the edits were still sitting in the repo.
+  assert.doesNotMatch(SRC, /savedThisSession/, "the in-memory-only saved flag must be replaced by the draft's persisted state");
+});
+
+// ---- C1: the save/publish transaction ----
+
+test("C1: saveAll sends a beginSave() snapshot and retires each file's ops the moment its save returns 200", () => {
+  const saveAllBlock = extractBlockAfter(SRC, "function saveAll(");
+  assert.match(saveAllBlock, /draft\.beginSave\(\)/, "saveAll must open a transaction, not read a plain patch list");
+  assert.doesNotMatch(saveAllBlock, /draft\.toPatches\(\)/, "toPatches() is a read-only view; sending from it can never retire an op");
+
+  const okIdx = saveAllBlock.indexOf("if (!r.ok)");
+  const markIdx = saveAllBlock.indexOf("tx.markSaved(file)");
+  assert.ok(okIdx !== -1 && markIdx !== -1, "expected the !r.ok throw and the markSaved call");
+  assert.ok(okIdx < markIdx, "ops may only be retired AFTER the response is confirmed 200");
+});
+
+test("C1: the Publish guard admits the saved-but-uncommitted case, so the retry is possible", () => {
   const publishBlock = extractBlockAfter(SRC, '#ed-publish").onclick');
-  assert.match(publishBlock, /savedThisSession = false/);
+  // The trap this fix could easily have created: guarding on the pending count alone
+  // now that a successful save empties the log would refuse the retry outright and
+  // strand the saved edits until some unrelated later publish swept them up.
+  assert.match(publishBlock, /if\s*\(!draft\.hasWork\(\)\)\s*return alert\(/);
+  assert.doesNotMatch(publishBlock, /draft\.count\(\)\s*===\s*0/, "must not gate Publish on the pending count alone");
+
+  // The transaction only ends on a confirmed 200 from /api/publish.
+  const okIdx = publishBlock.indexOf("if (!r.ok)");
+  const committedIdx = publishBlock.indexOf("draft.markCommitted()");
+  assert.ok(okIdx !== -1 && committedIdx !== -1, "expected the !r.ok throw and the markCommitted call");
+  assert.ok(okIdx < committedIdx, "markCommitted may only run after the publish response is confirmed 200");
+
+  // And the failure path must tell the user where their work actually is.
+  assert.match(publishBlock, /catch \(err\)[\s\S]*draft\.hasUncommitted\(\)/);
+  assert.match(publishBlock, /Publish again/i);
+});
+
+test("C1: the change counter reports the uncommitted state, so a reloaded page can't claim '0 changes'", () => {
+  const updateBlock = extractBlockAfter(SRC, "function update(");
+  assert.match(updateBlock, /draft\.hasUncommitted\(\)/);
+  assert.match(updateBlock, /saved, not published/);
+});
+
+test("C1: the draft is created with a persistent store, probed defensively", () => {
+  assert.match(SRC, /createDraft\(pageFile,\s*store\)/);
+  assert.match(SRC, /try \{ store = window\.localStorage; \} catch \{ store = null; \}/);
+});
+
+test("M5: the Cloudinary response body is parsed defensively, so a proxy's HTML page can't become the error message", () => {
+  const uploadBody = extractBlockAfter(SRC, "window.__edUpload = async function (listPath) {");
+  const parseIdx = uploadBody.indexOf("upRes.json()");
+  const okCheckIdx = uploadBody.indexOf("if (!upRes.ok || up.error)");
+  assert.ok(parseIdx !== -1 && okCheckIdx !== -1, "expected the body parse and the status/error check");
+  // The parse must be guarded rather than allowed to throw: an unguarded
+  // `await upRes.json()` on an HTML error page surfaces "Unexpected token '<'" instead
+  // of the HTTP status this branch exists to report.
+  assert.match(uploadBody, /try \{ up = await upRes\.json\(\); \} catch \{ up = null; \}/);
+  assert.doesNotMatch(uploadBody, /const up = await upRes\.json\(\);/, "the parse must not be able to throw past the status check");
+  assert.match(uploadBody, /HTTP " \+ upRes\.status/, "a non-2xx must still report its status");
+});
+
+test("M6: doOp's timing comment is true about requestAnimationFrame and about both callers' React lanes", () => {
+  const doOpBlock = extractBlockAfter(SRC, "function doOp(");
+  // rAF runs at the start of a frame, BEFORE style recalc and layout — the old comment
+  // claimed it ran after them.
+  assert.match(doOpBlock, /before the browser's\s*\/\/\s*style recalc and layout/);
+  assert.doesNotMatch(doOpBlock, /runs after both the microtask queue/, "the corrected sentence must replace the old claim");
+  // And it must distinguish the two callers: a chrome button's native onclick (SyncLane
+  // -> microtask) from __edUpload's post-await continuation (DefaultLane -> Scheduler
+  // MessageChannel, a task).
+  assert.match(doOpBlock, /SyncLane/);
+  assert.match(doOpBlock, /DefaultLane/);
+  assert.match(doOpBlock, /MessageChannel/);
+  assert.match(doOpBlock, /microtask/);
 });
 
 test("M3: beforeunload is suppressed for Discard's own reload, not for any other way of leaving", () => {

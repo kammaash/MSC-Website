@@ -4,7 +4,12 @@
   window.__EDITOR_BOOTED = true;
   const P = window.EditorPaths;
   const pageFile = location.pathname.replace(/^\//, "") || "index.html";
-  const draft = window.EditorDraft.createDraft(pageFile);
+  // The draft persists its "saved to disk but not committed" bit here. Property access
+  // on window.localStorage itself throws in some privacy modes, so it is probed once and
+  // degraded to null — the draft treats a missing store as "nothing remembered".
+  let store = null;
+  try { store = window.localStorage; } catch { store = null; }
+  const draft = window.EditorDraft.createDraft(pageFile, store);
   const applyListOp = window.EditorDraft.applyListOp; // shared with lib/paths.js — see doOp() below
   let editing = true;
 
@@ -63,7 +68,17 @@
   document.body.appendChild(bar);
 
   const countEl = bar.querySelector("#ed-count");
-  function update() { countEl.textContent = draft.count() + " change" + (draft.count() === 1 ? "" : "s"); }
+  // Reports both halves of the transaction (see draft.js's createDraft), because they
+  // are separately true: edits can be pending in this browser, already saved to disk
+  // and awaiting a commit, or both at once. Showing only the pending count is what let
+  // a reloaded page claim "0 changes" while saved edits sat in the working tree.
+  function update() {
+    const n = draft.count();
+    const parts = [];
+    if (n || !draft.hasUncommitted()) parts.push(n + " change" + (n === 1 ? "" : "s"));
+    if (draft.hasUncommitted()) parts.push("saved, not published");
+    countEl.textContent = parts.join(" · ");
+  }
 
   // ---- text editing ----
   document.body.addEventListener("mouseover", (e) => {
@@ -132,32 +147,46 @@
   }, true);
 
   // ---- publish / discard / exit ----
-  // Set the moment any /api/save returns 200. Each save writes its file to disk
-  // immediately (server.js's /api/save handler), so if a later file in the same
-  // saveAll() run gets rejected (script tags, a CONTENT marker slipping past the
-  // client-side rejectText check some other way, etc.), the earlier file's edit is
-  // already on disk — permanently, until the *next* successful publish quietly commits
-  // it. Once this is true, Discard reloading the page can no longer promise a clean
-  // revert, so it must say so instead of silently lying about what "discard" undid.
-  let savedThisSession = false;
+  // Publish is a two-step transaction — write every file, then commit them all — and
+  // the draft models it as one (see the long comment over createDraft in draft.js).
+  // Each /api/save writes its file to disk immediately, so a run that succeeds on
+  // content.js and then fails on index.html has already changed the repo permanently;
+  // and once a file is on disk, its ops are durable and must never be sent again.
+  // markSaved(file) retires them from the log the instant the 200 comes back, which is
+  // what makes the "Publish failed → click Publish again" retry safe: the second run
+  // has nothing left to replay and goes straight to the commit.
   async function saveAll() {
-    const byFile = draft.toPatches();
-    for (const [file, patch] of Object.entries(byFile)) {
+    const tx = draft.beginSave();
+    for (const [file, patch] of Object.entries(tx.patches)) {
       const r = await apiFetch("/api/save", { method: "POST", body: JSON.stringify({ file, patch }) });
       if (!r.ok) throw new Error(await r.text());
-      savedThisSession = true;
+      tx.markSaved(file);
+      update(); // the count drops file by file, and the bar starts saying "saved, not published"
     }
   }
   bar.querySelector("#ed-publish").onclick = async () => {
-    if (draft.count() === 0) return alert("No changes to publish.");
+    // Deliberately hasWork(), not count() === 0. After a save succeeds and the commit
+    // fails, there are zero pending ops and the work is still unpublished — sitting on
+    // disk. Gating on the count would refuse the one action that finishes the job.
+    if (!draft.hasWork()) return alert("No changes to publish.");
     try {
-      await saveAll();
+      await saveAll(); // a retry after a commit failure finds nothing to send and falls straight through
       const r = await apiFetch("/api/publish", { method: "POST", body: JSON.stringify({ message: "content: update via editor" }) });
       if (!r.ok) throw new Error(await r.text());
-      draft.clear(); update();
-      savedThisSession = false; // everything saved this session just got committed — nothing left for Discard to misrepresent
+      draft.markCommitted(); update();
       alert("Published ✓ — the live site updates in about a minute.");
-    } catch (err) { alert("Publish failed:\n" + err.message); }
+    } catch (err) {
+      update(); // a partial save may have moved some ops from pending to uncommitted
+      // Say plainly where the work ended up. The realistic failures here (git identity
+      // unset, a stale index.lock, a push conflict) all leave the edits safely written,
+      // and the user's instinct — press Publish again — is now exactly the right move.
+      alert(
+        "Publish failed:\n" + err.message +
+        (draft.hasUncommitted()
+          ? "\n\nYour changes ARE saved to disk — nothing was lost. Press Publish again to retry the commit; it will not duplicate or delete anything."
+          : "")
+      );
+    }
   };
   // beforeunload's own guard must not fire for a reload Discard itself triggers —
   // otherwise every discard pops a second, redundant "leave site?" browser prompt on
@@ -165,10 +194,14 @@
   // because it must stay false for every OTHER way the page might unload.
   let discarding = false;
   bar.querySelector("#ed-discard").onclick = () => {
-    if (savedThisSession) {
+    // hasUncommitted() rather than a session-lifetime flag: the fact being reported is
+    // about the files on disk, and it outlives this page. It is restored from storage
+    // on boot, so the page the user lands on AFTER a discard still tells them the truth
+    // instead of resetting to a clean-looking "0 changes".
+    if (draft.hasUncommitted()) {
       const rest = draft.count() ? " and " + draft.count() + " more unsaved change(s) will be lost" : "";
       if (!confirm(
-        "Some changes were already saved to disk this session — reloading will NOT undo them " +
+        "Some changes are already saved to disk and not yet published — reloading will NOT undo them " +
         "(they'll be picked up by the next Publish)" + rest + ". Reload anyway?"
       )) return;
     } else if (draft.count() && !confirm("Throw away " + draft.count() + " unsaved change(s)?")) {
@@ -226,12 +259,22 @@
     // auto-batched and its DOM commit is NOT synchronous with this call — decorating on
     // the very next line would rebuild chrome against the PRE-mutation DOM (an add
     // wouldn't have its new card yet; a remove/move would still show the old order).
-    // requestAnimationFrame runs after both the microtask queue (where React's batched
-    // flush lands) and the browser's per-frame style/layout work, so by the time this
-    // fires the DOM already reflects the new array. This tightens, but does not by
-    // itself fully replace, the debounced MutationObserver rebuild below — it's what
-    // keeps a fast second click (e.g. double-tapping ↑) from reading a stale index
-    // during the ~1 frame between the click and the observer's own 120ms-later pass.
+    //
+    // WHERE React's flush actually lands depends on how doOp got here, and the two
+    // callers differ. From a chrome button's native onclick (↑ / ↓ / ✕ / "+ Add") the
+    // update is discrete priority — SyncLane — and flushes in a microtask, i.e. before
+    // the next frame. From window.__edUpload the doOp call happens in a post-`await`
+    // continuation, where React 18 assigns DefaultLane and schedules through the
+    // Scheduler's MessageChannel: that is a task, not a microtask, and it is not
+    // guaranteed to have run by the time any given frame callback fires.
+    //
+    // requestAnimationFrame itself runs at the START of a frame — before the browser's
+    // style recalc and layout for that frame, not after them. So it reliably covers the
+    // microtask case (the DOM is already committed by then) and only usually covers the
+    // MessageChannel case. That is fine: this is a latency optimisation, not the
+    // correctness guarantee. The debounced MutationObserver rebuild below converges
+    // either way; rAF is what keeps a fast second click (e.g. double-tapping ↑) from
+    // reading a stale index during the ~1 frame before the observer's 120ms pass.
     requestAnimationFrame(decorate);
   }
   function onAdd(listPath) {
@@ -324,7 +367,16 @@
       // it; it would also force application/json, but Cloudinary's upload endpoint
       // requires multipart FormData.
       const upRes = await fetch("https://api.cloudinary.com/v1_1/" + s.cloudName + "/auto/upload", { method: "POST", body: fd });
-      const up = await upRes.json();
+      // Parsing must never be able to become the reported failure. A proxy that
+      // intercepts this request answers with an HTML error page, and an unguarded
+      // `await upRes.json()` throws "Unexpected token '<'" — which is then the message
+      // the user sees, hiding the HTTP status the checks below exist to report. An
+      // unparseable (or non-object) body simply means "no structured error here": a
+      // non-2xx falls through to the HTTP-status message, and a 2xx falls through to
+      // the missing-public_id message. Both name what actually went wrong.
+      let up;
+      try { up = await upRes.json(); } catch { up = null; }
+      if (!up || typeof up !== "object") up = {};
       // A non-2xx response and/or an {error:{message}} body both mean the upload
       // failed; either can happen independently (a network proxy could return a non-2xx
       // with a differently-shaped body). And even a 200 needs its own shape check: an
