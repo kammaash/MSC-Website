@@ -37,7 +37,7 @@
     - a sticky peach nav bar whose menus open on hover
     - a floating "current page" pill that appears once you scroll past the nav
       and tracks which section you are looking at
-    - the showcase video, which remembers its playback position
+    - the showcase video (a YouTube embed placed via the editor)
     - an admissions enquiry form (front-end only, sends nothing)
 
   Fonts here are Quicksand + Nunito, distinct from the landing page's
@@ -268,7 +268,7 @@
     <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
       <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
-    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+    <img src="{{ heroPhotoSrc }}" data-media-slot="hero.photo" data-media-kind="image" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
   </div>
 </section>
 
@@ -358,11 +358,11 @@
   </div>
 </section>
 
-<!-- STUDENT SHOWCASE / VIDEO
-     The <video> has no src yet, so it currently renders as an empty black
-     player. ref="{{ videoRef }}" gives the logic block the element so it can
-     save and restore the playback position across visits. Add the film by
-     giving this element a src (or a <source> child). -->
+<!-- STUDENTS SHOWCASE
+     A YouTube embed (an Unlisted video on the school's channel), placed through
+     the editor's media drawer. "" means no video chosen yet — renderVals maps it
+     to about:blank so the frame stays an empty black box (an src of "" would
+     recursively load this very page inside itself). -->
 <section style="background:#a51915;color:#fff">
   <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
@@ -371,7 +371,7 @@
       <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
     </div>
     <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
-      <video ref="{{ videoRef }}" controls playsinline muted style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover"></video>
+      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" data-media-slot="showcase.video" data-media-kind="video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -451,8 +451,10 @@
 
 <!-- GALLERY
      A looped grid over the shared galleries.vidyanagar collection in
-     content.js — photos and videos alike, distinguished by `kind`. Cloudinary
-     URLs are built in renderVals since {{ }} cannot concatenate. Empty until
+     content.js — photos and videos alike, distinguished by `kind`. Delivery
+     URLs are built in renderVals since {{ }} cannot concatenate — Cloudinary
+     for photos, YouTube embeds for videos (item id = YouTube video ID).
+     Empty until
      a collaborator adds media, in which case the empty state below gives way
      to the grid. New tiles render immediately (no data-reveal): the
      scroll-reveal observer only ever sees the tiles present at mount, so a
@@ -471,7 +473,7 @@
       <sc-for list="{{ gallery }}" as="ga" hint-placeholder-count="6">
         <figure data-item="" style="position:relative;margin:0;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0e0dc">
           <sc-if value="{{ ga.isImage }}"><img src="{{ ga.url }}" alt="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"></sc-if>
-          <sc-if value="{{ ga.isVideo }}"><video controls preload="none" src="{{ ga.url }}" poster="{{ ga.poster }}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#26201d"></video></sc-if>
+          <sc-if value="{{ ga.isVideo }}"><iframe src="{{ ga.url }}" title="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;border:0;display:block;background:#26201d" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></sc-if>
           <figcaption data-edit="{{ ga.p }}.caption" style="padding:10px 12px;font-size:13px;color:#6b615b">{{ ga.caption }}</figcaption>
         </figure>
       </sc-for>
@@ -598,11 +600,10 @@
   it reads this page's copy out of the CONTENT block below and adds the
   computed styles and handlers the markup needs.
 
-  componentDidMount wires up four independent behaviours, in order:
+  componentDidMount wires up three independent behaviours, in order:
     1. scroll reveal for [data-reveal] cards
-    2. the showcase video's remembered playback position
-    3. the loading screen's timed fade-out
-    4. the scroll listener driving the nav state and the floating pill
+    2. the loading screen's timed fade-out
+    3. the scroll listener driving the nav state and the floating pill
 */
 
 /*
@@ -646,8 +647,10 @@ const CONTENT = {
     "title": "Montessori School, Vidyanagar",
     "p1": "Montessori School, Vidyanagar is a co-educational day school, established under the aegis of Montessori School Committee, as a valued branch of the Montessori family of schools. Located in the Vidyanagar area of Kurnool city, the school offers a warm, well-appointed campus with state-of-the-art facilities in a specifically designed ambience, replete with centralized AC classrooms and dedicated sporting facilities.",
     "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
-    "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”"
+    "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”",
+    "photo": ""
   },
+  "showcase": { "video": "" },
   "academics": [
     { "tag": "01", "title": "Pedagogy", "desc": "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
     { "tag": "02", "title": "Pre-Primary Program", "desc": "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
@@ -717,20 +720,7 @@ class Component extends DCLogic {
     document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
     this._io = io;
 
-    // ---- 2. Resume the showcase video where the visitor left off ----
-    // The position is written to localStorage on every timeupdate and restored
-    // on the next visit. The key is per branch, so the two branch pages do not
-    // overwrite each other's position.
-    const v = this._videoEl;
-    if (v) {
-      const KEY = "msc_vidyanagar_video_pos";
-      const saved = parseFloat(localStorage.getItem(KEY) || "0");
-      if (saved > 0 && isFinite(saved)) { try { v.currentTime = saved; } catch (e) {} }
-      this._vSave = () => { if (v.currentTime > 0) localStorage.setItem(KEY, String(v.currentTime)); };
-      v.addEventListener("timeupdate", this._vSave);
-    }
-
-    // ---- 3. Loading screen fade-out ----
+    // ---- 2. Loading screen fade-out ----
     // Purely time-based: fade at 1250ms, then remove from the layout at 1900ms
     // once the opacity transition has finished. It is not waiting on any real
     // load event.
@@ -742,7 +732,7 @@ class Component extends DCLogic {
 
     // custom cursor handled globally by cursor.js
 
-    // ---- 4. Nav state and scrollspy ----
+    // ---- 3. Nav state and scrollspy ----
     // Drives two things at once: whether the floating pill is showing, and
     // which section name it displays. static -> collapse-to-pill on
     // scroll-past -> expand on hover.
@@ -784,7 +774,6 @@ class Component extends DCLogic {
   // harmless, but they can be deleted.
   componentWillUnmount() {
     if (this._io) this._io.disconnect();
-    if (this._videoEl && this._vSave) this._videoEl.removeEventListener("timeupdate", this._vSave);
     clearTimeout(this._t1); clearTimeout(this._t2);
     if (this._onMove) window.removeEventListener("mousemove", this._onMove);
     if (this._raf) cancelAnimationFrame(this._raf);
@@ -807,7 +796,7 @@ class Component extends DCLogic {
     // here.
     const withPaths = (arr, base) => arr.map((it, i) => ({ ...it, p: base + "." + i }));
     // ---- shared collections (news + gallery) ----
-    // Cloudinary URLs are built here because {{ }} cannot concatenate. Stored
+    // Delivery URLs are built here because {{ }} cannot concatenate. Stored
     // values are public IDs, so every rendered image gets f_auto,q_auto for free.
     const S = window.SHARED_CONTENT;
     const cdn = "https://res.cloudinary.com/" + S.cloudName;
@@ -817,10 +806,11 @@ class Component extends DCLogic {
       p: "shared:galleries.vidyanagar." + i,
       isImage: it.kind === "image",
       isVideo: it.kind === "video",
+      // Photos are Cloudinary public IDs; videos are YouTube video IDs — embedded
+      // via the privacy-enhanced host, end-screen suggestions kept to this channel.
       url: it.kind === "image"
         ? cdn + "/image/upload/f_auto,q_auto,w_800/" + it.id
-        : cdn + "/video/upload/q_auto/" + it.id + ".mp4",
-      poster: cdn + "/video/upload/so_0,f_jpg,q_auto,w_800/" + it.id + ".jpg",
+        : "https://www.youtube-nocookie.com/embed/" + it.id + "?rel=0",
     }));
     const open = this.state.openMenu;
     // Every dropdown link points into the branch's detail page, which routes
@@ -932,10 +922,9 @@ class Component extends DCLogic {
 
     return {
       // ref callbacks: the runtime passes the real DOM node to each of these,
-      // which is how componentDidMount gets hold of the three elements it has
-      // to measure, time or drive imperatively.
+      // which is how componentDidMount gets hold of the two elements it has
+      // to measure or time.
       navRef: (el) => { this._navEl = el; },
-      videoRef: (el) => { this._videoEl = el; },
       loaderRef: (el) => { this._loaderEl = el; },
       navHeaderStyle, navBarStyle, menuRowStyle, currentTab: this.state.currentTab,
       showPill, pillItems, pillHint, pillHref,
@@ -950,6 +939,11 @@ class Component extends DCLogic {
       // that way, so each is paired with its own path here instead: the
       // template reads c.t for the text and c.p for the path.
       hero: CONTENT.hero,
+      heroPhotoSrc: CONTENT.hero.photo ||
+        "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+      // "" means "no video chosen yet": about:blank keeps the iframe an empty
+      // black box instead of recursively loading this page inside itself.
+      showcaseVideoSrc: CONTENT.showcase.video || "about:blank",
       contact: S.contact,
       // The footer's mailto: href, built here because {{ }} cannot concatenate. The
       // address used to be hard-coded in the markup as well as rendered from CONTENT,
