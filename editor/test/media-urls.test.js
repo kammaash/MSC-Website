@@ -1,11 +1,10 @@
 "use strict";
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { deliveryUrl, posterUrl } = require("../lib/media-urls.js");
+const { deliveryUrl, embedUrl } = require("../lib/media-urls.js");
 
-// The URL shapes are pinned to the convention the site already renders with —
-// montessori-vidyanagar.html's gallery mapping (~line 815-824). If these change,
-// change them there too.
+// Image shape is pinned to the convention the site already renders with —
+// montessori-vidyanagar.html's gallery mapping. If it changes, change both.
 test("deliveryUrl for an image uses f_auto,q_auto,w_1600 under /image/upload", () => {
   assert.equal(
     deliveryUrl("demo-cloud", { id: "msc/photo-1", kind: "image" }),
@@ -13,21 +12,22 @@ test("deliveryUrl for an image uses f_auto,q_auto,w_1600 under /image/upload", (
   );
 });
 
-test("deliveryUrl for a video uses q_auto under /video/upload with an .mp4 extension", () => {
+test("deliveryUrl for a video is the privacy-enhanced YouTube embed, rel=0", () => {
   assert.equal(
-    deliveryUrl("demo-cloud", { id: "msc/clip-1", kind: "video" }),
-    "https://res.cloudinary.com/demo-cloud/video/upload/q_auto/msc/clip-1.mp4"
+    deliveryUrl("demo-cloud", { id: "dQw4w9WgXcQ", kind: "video" }),
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0"
   );
 });
 
-test("posterUrl derives the first-frame jpg exactly like the vidyanagar gallery does", () => {
-  assert.equal(
-    posterUrl("demo-cloud", { id: "msc/clip-1", kind: "video" }),
-    "https://res.cloudinary.com/demo-cloud/video/upload/so_0,f_jpg,q_auto,w_800/msc/clip-1.jpg"
-  );
+test("embedUrl derives the same shape from a bare id", () => {
+  assert.equal(embedUrl("dQw4w9WgXcQ"), "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0");
 });
 
-test("public_id slashes survive but URL-hostile characters are escaped", () => {
+test("posterUrl is gone — YouTube provides its own poster frames", () => {
+  assert.equal(require("../lib/media-urls.js").posterUrl, undefined);
+});
+
+test("image public_id slashes survive but URL-hostile characters are escaped", () => {
   // encodeURI keeps "/" (public_ids are folder-scoped) but escapes spaces etc.
   assert.match(deliveryUrl("c", { id: "a b/c", kind: "image" }), /\/a%20b\/c$/);
 });

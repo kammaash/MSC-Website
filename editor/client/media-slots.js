@@ -1,7 +1,9 @@
 (function () {
   "use strict";
   // Selection + drag-and-drop for media slots. A slot is an element carrying
-  // data-media-slot="<content path>" (+ data-media-kind, optional data-media-poster).
+  // data-media-slot="<content path>" (+ data-media-kind). Video slots are <iframe>
+  // YouTube embeds: a src change reloads the frame on its own, and YouTube brings
+  // its own poster frame — so there is no per-kind plumbing here at all.
   // Placing media ONLY writes URL strings at those paths through the same draft
   // pipeline as text edits — it can never create or move elements, which is the
   // whole "structure and styling stay intact" guarantee.
@@ -35,55 +37,22 @@
       return;
     }
     var url = URLS.deliveryUrl(cloudName, record);
-    var posterPath = slotEl.getAttribute("data-media-poster");
-    var posterUrl = posterPath ? URLS.posterUrl(cloudName, record) : null;
-
-    // Capture prior values so we can restore them if anything fails. Either both
-    // paths are applied and recorded together, or neither are — a partial mutation
-    // (primary path applied but poster path not, or vice versa) must never reach
-    // the draft log, and must not leave the in-memory content out of sync with it.
-    var priorValue;
-    var priorPosterValue;
     try {
-      priorValue = UI.getLocal(path);
-      priorPosterValue = posterPath ? UI.getLocal(posterPath) : null;
-    } catch (e) {
-      // If we can't even read the prior values, the paths are broken; bail out.
-      alert("Can't place media here:\n" + e.message);
-      return;
-    }
-
-    try {
-      // Apply both values. If either throws, both will be restored below.
+      // Apply first, record only on success — the same invariant as every other
+      // editor mutation (see editor-client.js's doOp): a failed apply must never
+      // leave an op in the draft log. One path, one write: a throw means nothing
+      // was applied, so there is nothing to roll back.
       UI.applyLocal(path, url);
-      if (posterPath) UI.applyLocal(posterPath, posterUrl);
     } catch (err) {
-      // Restore prior values so the in-memory content and draft log stay in sync.
-      // The restore itself may throw (e.g. posterPath doesn't exist in content),
-      // which must not mask the original error. Make restore best-effort: swallow
-      // any throw from it so the original error reaches the user.
-      try { UI.applyLocal(path, priorValue); } catch (e) { /* swallow restore error */ }
-      if (posterPath) {
-        try { UI.applyLocal(posterPath, priorPosterValue); } catch (e) { /* swallow restore error */ }
-      }
       alert("Can't place media here:\n" + err.message);
       return;
     }
-    // Both applies succeeded; record both to the draft.
     UI.draft.set(path, url);
-    if (posterPath) UI.draft.set(posterPath, posterUrl);
     clearSelection();
     UI.rerender(); UI.update();
-    // A <video> whose src attribute just changed keeps playing the old source until
-    // load() is called; the element may be replaced by the rerender, so find it
-    // fresh. rAF usually lands after React's commit; the marking observer below
-    // converges the empty-state classes either way (same reasoning as doOp's rAF).
-    requestAnimationFrame(function () {
-      document.querySelectorAll('video[data-media-slot]').forEach(function (v) {
-        if (v.getAttribute("data-media-slot") === path) v.load();
-      });
-      markEmpties();
-    });
+    // rAF lands after the rerender's commit, so the empty-state marking sees the
+    // slot's new value (same reasoning as doOp's rAF in editor-client.js).
+    requestAnimationFrame(markEmpties);
   }
 
   // Dashed marking for slots whose content value is currently "" — they read as
