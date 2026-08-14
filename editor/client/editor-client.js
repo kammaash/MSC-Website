@@ -179,35 +179,88 @@
   // has nothing left to replay and goes straight to the commit.
   async function saveAll() {
     const tx = draft.beginSave();
-    for (const [file, patch] of Object.entries(tx.patches)) {
-      const r = await apiFetch("/api/save", { method: "POST", body: JSON.stringify({ file, patch }) });
-      if (!r.ok) throw new Error(await r.text());
-      tx.markSaved(file);
-      update(); // the count drops file by file, and the bar starts saying "saved, not published"
+    try {
+      for (const [file, patch] of Object.entries(tx.patches)) {
+        const r = await apiFetch("/api/save", { method: "POST", body: JSON.stringify({ file, patch }) });
+        if (!r.ok) throw new Error(await r.text());
+        tx.markSaved(file);
+        update(); // the count drops file by file, and the bar starts saying "saved, not published"
+      }
+    } finally {
+      tx.end(); // release the draft's one-transaction-at-a-time interlock, however this ended
     }
   }
-  bar.querySelector("#ed-publish").onclick = async () => {
+  const publishBtn = bar.querySelector("#ed-publish");
+  // Publish is the one handler that must not overlap itself. Retiring ops after a 200
+  // makes the SEQUENTIAL retry safe, but two clicks in quick succession start two runs
+  // that both snapshot the same still-pending ops before either markSaved fires — and the
+  // "add" lands on disk twice. The button is disabled for the duration (what the user
+  // sees) and re-entry is ignored outright (what a stray programmatic call hits); the
+  // draft's own interlock in beginSave() is the backstop behind both.
+  let publishing = false;
+  publishBtn.onclick = async () => {
+    if (publishing) return;
     // Deliberately hasWork(), not count() === 0. After a save succeeds and the commit
     // fails, there are zero pending ops and the work is still unpublished — sitting on
     // disk. Gating on the count would refuse the one action that finishes the job.
     if (!draft.hasWork()) return alert("No changes to publish.");
+    // STALE-BIT CONFIRM. hasWork() with zero pending ops rests entirely on the persisted
+    // "saved, not published" bit, and that bit is scoped to http://localhost:<port>, not
+    // to a checkout (see draft.js's STORAGE_KEY). A second clone served on the same port
+    // inherits it, and publishing on a false bit would `git add` + commit whatever happens
+    // to be dirty in THAT repo — something the old count-only guard made unreachable. One
+    // question makes it harmless; the everyday retry (which is exactly this state) costs
+    // the user a single Enter.
+    if (draft.count() === 0 && draft.hasUncommitted()) {
+      if (!confirm(
+        "There are no unsaved changes on this page, but this browser remembers changes that " +
+        "were saved and not yet published — usually a Publish that failed part-way.\n\n" +
+        "Publish them now?\n\n" +
+        "If you don't recognise this (for example, this is a different copy of the website), " +
+        "click Cancel and tell the site admin."
+      )) return;
+    }
+    publishing = true;
+    publishBtn.disabled = true;
     try {
       await saveAll(); // a retry after a commit failure finds nothing to send and falls straight through
       const r = await apiFetch("/api/publish", { method: "POST", body: JSON.stringify({ message: "content: update via editor" }) });
-      if (!r.ok) throw new Error(await r.text());
+      // The body is read exactly once, then classified. A 2xx is NOT the only outcome that
+      // ends the transaction: both of the server's 409s do too (see draft.js's
+      // classifyPublishResponse). Treating them as plain failures left the bit set with no
+      // way out — every further click answered "Nothing to publish (no changes)" while
+      // still inviting a retry that could not help.
+      const text = await r.text();
+      const outcome = window.EditorDraft.classifyPublishResponse(r.status, text);
+      if (!outcome.committed) throw new Error(text);
       draft.markCommitted(); update();
-      alert("Published ✓ — the live site updates in about a minute.");
+      if (outcome.kind === "sync-failed") {
+        // The commit succeeded; only the push did not. Do NOT invite a retry — pressing
+        // Publish again would answer "Nothing to publish" and change nothing.
+        alert(
+          "Your changes are saved and committed on this computer, but they could not be sent " +
+          "to the live site:\n\n" + text +
+          "\n\nNothing is lost, and pressing Publish again will not help. Please tell the site admin."
+        );
+      } else if (outcome.kind === "nothing-to-publish") {
+        alert("Nothing left to publish — everything is already committed. Nothing was lost.");
+      } else {
+        alert("Published ✓ — the live site updates in about a minute.");
+      }
     } catch (err) {
       update(); // a partial save may have moved some ops from pending to uncommitted
-      // Say plainly where the work ended up. The realistic failures here (git identity
-      // unset, a stale index.lock, a push conflict) all leave the edits safely written,
-      // and the user's instinct — press Publish again — is now exactly the right move.
+      // Only genuine failures reach here now (a 500 from git, a rejected save, a dropped
+      // connection), and those really do leave the edits written but uncommitted — so the
+      // user's instinct, press Publish again, really is the right move.
       alert(
         "Publish failed:\n" + err.message +
         (draft.hasUncommitted()
           ? "\n\nYour changes ARE saved to disk — nothing was lost. Press Publish again to retry the commit; it will not duplicate or delete anything."
           : "")
       );
+    } finally {
+      publishing = false;
+      publishBtn.disabled = false;
     }
   };
   // beforeunload's own guard must not fire for a reload Discard itself triggers —

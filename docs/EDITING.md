@@ -38,7 +38,12 @@ no actual wording changes. After that first publish, later diffs go back to bein
 proportional to what was actually edited.
 
 ## If something goes wrong
-- "Publish failed … sync" — someone else edited at the same time. Ask the admin; nothing is lost.
+- **"could not be sent to the live site"** — your changes are saved and safe on your computer,
+  but they have not reached the live site. Usually someone else edited at the same time.
+  Pressing Publish again will not help — tell the admin. Nothing is lost.
+- **"Publish failed"** (anything else) — nothing reached the live site, but your work is saved.
+  Press Publish again; it is safe to retry and will not duplicate or delete anything. If it
+  keeps failing, tell the admin.
 - Made a mistake that's live? Tell the admin — every publish can be undone with one click on GitHub.
 - Videos currently upload to Cloudinary, the same as photos — a "Publish to YouTube" option does
   not exist yet. It's built but switched off on purpose until Google approves a compliance

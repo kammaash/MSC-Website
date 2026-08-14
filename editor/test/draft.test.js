@@ -1,7 +1,9 @@
 "use strict";
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { createDraft, rejectText, applyListOp } = require("../client/draft.js");
+const fs = require("node:fs");
+const path = require("node:path");
+const { createDraft, rejectText, applyListOp, classifyPublishResponse } = require("../client/draft.js");
 const { validateText } = require("../lib/patch.js");
 
 test("groups ops per file, stripping shared: prefix, preserving order", () => {
@@ -83,9 +85,13 @@ test("rejectText rejects non-strings, exactly as validateText does", () => {
 // editor-client.js's saveAll().
 function saveAll(draft, disk) {
   const tx = draft.beginSave();
-  for (const [file, patch] of Object.entries(tx.patches)) {
-    for (const op of patch.ops) applyListOp(disk[file], op);
-    tx.markSaved(file);
+  try {
+    for (const [file, patch] of Object.entries(tx.patches)) {
+      for (const op of patch.ops) applyListOp(disk[file], op);
+      tx.markSaved(file);
+    }
+  } finally {
+    tx.end();
   }
 }
 
@@ -233,9 +239,159 @@ test("C1: a storage that throws degrades to in-memory instead of breaking the ed
 test("C1: clear() drops pending ops but cannot un-write what the server already wrote", () => {
   const d = createDraft("index.html", memStore());
   d.set("hero.title", "A");
-  d.beginSave().markSaved("index.html");
+  const tx = d.beginSave();
+  tx.markSaved("index.html");
+  tx.end();
   d.set("hero.sub", "B");
   d.clear();
   assert.equal(d.count(), 0);
   assert.equal(d.hasUncommitted(), true, "nothing in the browser can undo a file the server has written");
+});
+
+// ---------------------------------------------------------------------------
+// Fix wave 2, item 1 — the transaction must have an exit for BOTH of the server's
+// 409s. /api/publish does not signal success with 2xx alone:
+//   409 "Nothing to publish (no changes)."        — the tree is already clean
+//   409 "Published locally, but sync failed: …"   — the COMMIT SUCCEEDED, the push did not
+// Treating either as a plain failure left `uncommitted` set with no way out: every further
+// click answered "Nothing to publish (no changes)" while still inviting a retry, and the
+// bar stayed "saved, not published" across reloads and editor restarts. The invitation was
+// also false by then — the changes were committed, not merely saved.
+// ---------------------------------------------------------------------------
+
+// The exact strings server.js sends. Pinned here on purpose: classifyPublishResponse tells
+// the two 409s apart by wording because the status cannot, so a change to server.js's
+// message must fail HERE rather than silently strand a user in the field.
+const NOTHING_409 = "Nothing to publish (no changes).";
+const SYNC_409 =
+  "Published locally, but sync failed: ! [rejected] main -> main (fetch first)\n" +
+  "Your changes are committed; ask the site admin to resolve.";
+
+test("item 1: the wording this classifier keys on still exists in server.js", () => {
+  // The coupling is real and deliberate — a 409 status alone cannot separate "nothing to
+  // commit" from "committed but not pushed". This test is what makes a server-side wording
+  // change a red suite here instead of a user stuck with an uncleartable bar in the field.
+  // (server.js is read, never written — it belongs to another change.)
+  const src = fs.readFileSync(path.join(__dirname, "..", "server.js"), "utf8");
+  assert.match(src, /409,\s*"Nothing to publish \(no changes\)\."/, "server.js no longer sends the string classifyPublishResponse matches");
+  assert.match(src, /409,\s*"Published locally, but sync failed: "/, "server.js no longer sends the string classifyPublishResponse matches");
+  assert.equal(classifyPublishResponse(409, NOTHING_409).kind, "nothing-to-publish");
+  assert.equal(classifyPublishResponse(409, SYNC_409).kind, "sync-failed");
+});
+
+test("item 1: a 200 ends the transaction", () => {
+  assert.deepEqual(classifyPublishResponse(200, '{"ok":true}'), { committed: true, kind: "published" });
+});
+
+test("item 1: both of the server's 409s end the transaction, and are told apart", () => {
+  assert.deepEqual(classifyPublishResponse(409, NOTHING_409), { committed: true, kind: "nothing-to-publish" });
+  assert.deepEqual(classifyPublishResponse(409, SYNC_409), { committed: true, kind: "sync-failed" });
+});
+
+test("item 1: genuine failures do NOT end the transaction", () => {
+  for (const [status, text] of [
+    [500, "Publish failed: Author identity unknown"],
+    [500, "Publish failed: Unable to create '.git/index.lock': File exists."],
+    [403, "Forbidden"],
+    [400, "Invalid publish request: body too large"],
+  ]) {
+    assert.deepEqual(classifyPublishResponse(status, text), { committed: false, kind: "failed" }, "status " + status);
+  }
+});
+
+test("item 1: an UNRECOGNISED 409 falls back to the recoverable failure, never to a silent clear", () => {
+  // If server.js's wording ever changes, the safe direction is the old stuck bar (which
+  // the stale-bit confirm now makes survivable), not "published ✓" over uncommitted work.
+  const r = classifyPublishResponse(409, "Some future 409 nobody has written yet");
+  assert.deepEqual(r, { committed: false, kind: "failed" });
+});
+
+test("item 1: a push-conflict publish clears the bit, so the next click is not a doomed retry", () => {
+  const disk = { "content.js": [] };
+  const d = createDraft("index.html", memStore());
+  d.listOp({ type: "add", path: "shared:news.acamp", item: { title: "A" } });
+  saveAll(d, disk);
+  assert.equal(d.hasUncommitted(), true);
+
+  // git commit succeeded, git push did not.
+  const outcome = classifyPublishResponse(409, SYNC_409);
+  assert.equal(outcome.kind, "sync-failed");
+  assert.equal(outcome.committed, true);
+  d.markCommitted();
+
+  assert.equal(d.hasUncommitted(), false, "the commit happened — the bit must not survive it");
+  assert.equal(d.hasWork(), false, "further clicks must not be offered as a retry that cannot help");
+  assert.equal(createDraft("index.html", memStore()).hasUncommitted(), false);
+});
+
+test("item 1: 'Nothing to publish' clears the bit too, so a stale one self-heals on the first click", () => {
+  const store = memStore();
+  store.setItem("msc-editor:uncommitted", "1"); // inherited from another checkout on the same port
+  const d = createDraft("index.html", store);
+  assert.equal(d.hasWork(), true, "precondition: the stale bit alone makes Publish available");
+
+  const outcome = classifyPublishResponse(409, NOTHING_409);
+  assert.equal(outcome.committed, true);
+  d.markCommitted();
+
+  assert.equal(d.hasWork(), false);
+  assert.equal(createDraft("index.html", store).hasUncommitted(), false, "and it stays cleared across a reload");
+});
+
+// ---------------------------------------------------------------------------
+// Fix wave 2, item 2 — retiring ops after a 200 makes the SEQUENTIAL retry safe but says
+// nothing about two OVERLAPPING runs. Double-click Publish and both runs snapshot the same
+// still-pending ops before either markSaved fires, both POST them, and the "add" lands
+// twice. beginSave() now refuses to open a second transaction while one is open.
+// ---------------------------------------------------------------------------
+
+test("item 2: a second overlapping beginSave() is refused, so two runs cannot send the same ops", () => {
+  const d = createDraft("index.html");
+  d.set("hero.title", "A");
+
+  const first = d.beginSave();
+  assert.equal(d.isSaving(), true);
+  assert.throws(() => d.beginSave(), /already in flight/, "the second click must not get its own snapshot");
+
+  first.end();
+  assert.equal(d.isSaving(), false);
+  const second = d.beginSave(); // sequential is still perfectly fine
+  assert.deepEqual(Object.keys(second.patches), ["index.html"]);
+  second.end();
+});
+
+test("item 2: double-clicking Publish cannot duplicate an added item", () => {
+  const disk = { "content.js": [{ title: "EXISTING" }] };
+  const d = createDraft("index.html");
+  d.listOp({ type: "add", path: "shared:news.acamp", item: { title: "ADDED" } });
+
+  // Click 1 opens its transaction and its first /api/save is still in flight…
+  const click1 = d.beginSave();
+  // …when click 2 arrives. Before the interlock, this handed out the very same op.
+  assert.throws(() => d.beginSave(), /already in flight/);
+
+  // Click 1 completes normally.
+  for (const [file, patch] of Object.entries(click1.patches)) {
+    for (const op of patch.ops) applyListOp(disk[file], op);
+    click1.markSaved(file);
+  }
+  click1.end();
+
+  assert.deepEqual(disk["content.js"].map((x) => x.title), ["EXISTING", "ADDED"], "exactly one copy");
+  assert.equal(d.count(), 0);
+});
+
+test("item 2: end() is idempotent and releases even when the run threw", () => {
+  const d = createDraft("index.html");
+  d.set("hero.title", "A");
+  const tx = d.beginSave();
+  try {
+    throw new Error("/api/save 400d");
+  } catch { /* the client's finally does this */ }
+  tx.end();
+  tx.end(); // a double release must not corrupt the interlock
+  assert.equal(d.isSaving(), false);
+  const next = d.beginSave();
+  assert.equal(next.patches["index.html"].ops.length, 1, "the failed run's ops are still pending, and sendable again");
+  next.end();
 });

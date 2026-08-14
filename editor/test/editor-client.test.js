@@ -161,22 +161,82 @@ test("C1: saveAll sends a beginSave() snapshot and retires each file's ops the m
 });
 
 test("C1: the Publish guard admits the saved-but-uncommitted case, so the retry is possible", () => {
-  const publishBlock = extractBlockAfter(SRC, '#ed-publish").onclick');
+  const publishBlock = extractBlockAfter(SRC, "publishBtn.onclick");
   // The trap this fix could easily have created: guarding on the pending count alone
   // now that a successful save empties the log would refuse the retry outright and
   // strand the saved edits until some unrelated later publish swept them up.
   assert.match(publishBlock, /if\s*\(!draft\.hasWork\(\)\)\s*return alert\(/);
-  assert.doesNotMatch(publishBlock, /draft\.count\(\)\s*===\s*0/, "must not gate Publish on the pending count alone");
+  // count() === 0 has exactly one legitimate use in this handler — half of the stale-bit
+  // confirm's condition (item 3). Anywhere else it is the over-correction coming back, so
+  // every occurrence must be paired with hasUncommitted() rather than simply absent.
+  const countUses = [...publishBlock.matchAll(/draft\.count\(\)\s*===\s*0(.{0,30})/g)];
+  assert.equal(countUses.length, 1, "expected exactly one draft.count() === 0 (the stale-bit confirm)");
+  for (const m of countUses) {
+    assert.match(m[1], /^ && draft\.hasUncommitted\(\)/, "draft.count() === 0 may only appear in the stale-bit confirm, never as the Publish gate");
+  }
 
-  // The transaction only ends on a confirmed 200 from /api/publish.
-  const okIdx = publishBlock.indexOf("if (!r.ok)");
+  // The transaction only ends on a response the classifier calls committed.
+  const outcomeIdx = publishBlock.indexOf("if (!outcome.committed) throw");
   const committedIdx = publishBlock.indexOf("draft.markCommitted()");
-  assert.ok(okIdx !== -1 && committedIdx !== -1, "expected the !r.ok throw and the markCommitted call");
-  assert.ok(okIdx < committedIdx, "markCommitted may only run after the publish response is confirmed 200");
+  assert.ok(outcomeIdx !== -1 && committedIdx !== -1, "expected the outcome throw and the markCommitted call");
+  assert.ok(outcomeIdx < committedIdx, "markCommitted may only run after the publish response is classified as committed");
 
   // And the failure path must tell the user where their work actually is.
   assert.match(publishBlock, /catch \(err\)[\s\S]*draft\.hasUncommitted\(\)/);
   assert.match(publishBlock, /Publish again/i);
+});
+
+test("item 1: both 409s end the transaction and neither invites a retry that cannot help", () => {
+  const publishBlock = extractBlockAfter(SRC, "publishBtn.onclick");
+  // The response must be classified, not judged by r.ok — a 2xx is not the only outcome
+  // that means "committed".
+  assert.match(publishBlock, /classifyPublishResponse\(r\.status, text\)/);
+  assert.doesNotMatch(publishBlock, /if \(!r\.ok\) throw/, "r.ok alone would send both 409s down the failure path");
+  assert.match(publishBlock, /if \(!outcome\.committed\) throw new Error\(text\)/);
+
+  // The body may only be read once, before classification.
+  assert.equal((publishBlock.match(/await r\.text\(\)/g) || []).length, 1, "the response body must be read exactly once");
+
+  // Each 409 gets its own honest message…
+  assert.match(publishBlock, /outcome\.kind === "sync-failed"/);
+  assert.match(publishBlock, /outcome\.kind === "nothing-to-publish"/);
+  // …and the sync-failed one must say the changes are COMMITTED and that retrying won't help.
+  const syncIdx = publishBlock.indexOf('outcome.kind === "sync-failed"');
+  const elseIdx = publishBlock.indexOf('outcome.kind === "nothing-to-publish"');
+  const syncBranch = publishBlock.slice(syncIdx, elseIdx);
+  assert.match(syncBranch, /committed/i);
+  assert.match(syncBranch, /will not help/i);
+  assert.doesNotMatch(syncBranch, /Press Publish again to retry/);
+
+  // The retry invitation survives, but only on the genuine-failure path.
+  const catchIdx = publishBlock.indexOf("catch (err)");
+  assert.ok(catchIdx > elseIdx, "the retry invitation must live in the catch, after the outcome branches");
+  assert.match(publishBlock.slice(catchIdx), /Press Publish again to retry/);
+});
+
+test("item 2: Publish cannot overlap itself — re-entry ignored, button disabled, released in a finally", () => {
+  const publishBlock = extractBlockAfter(SRC, "publishBtn.onclick");
+  assert.match(publishBlock, /^\s*publishBtn\.onclick = async \(\) => \{\s*\n\s*if \(publishing\) return;/, "re-entry must be refused first");
+  assert.match(publishBlock, /publishing = true;\s*\n\s*publishBtn\.disabled = true;/);
+  // Both must be released however the run ends — a throw must not leave the button dead.
+  assert.match(publishBlock, /finally \{\s*\n\s*publishing = false;\s*\n\s*publishBtn\.disabled = false;\s*\n\s*\}/);
+  const tryIdx = publishBlock.indexOf("try {");
+  assert.ok(publishBlock.indexOf("publishing = true") < tryIdx, "the flag must be set before the awaits begin");
+
+  // And saveAll must release the draft's own interlock however it ended, or one failed
+  // publish would wedge every later one.
+  const saveAllBlock = extractBlockAfter(SRC, "function saveAll(");
+  assert.match(saveAllBlock, /finally \{\s*\n\s*tx\.end\(\)/);
+});
+
+test("item 3: a bit-only hasWork() asks before publishing, so a stale persisted bit can't commit silently", () => {
+  const publishBlock = extractBlockAfter(SRC, "publishBtn.onclick");
+  assert.match(publishBlock, /STALE-BIT CONFIRM/);
+  assert.match(publishBlock, /if \(draft\.count\(\) === 0 && draft\.hasUncommitted\(\)\)/);
+  const confirmIdx = publishBlock.indexOf("if (!confirm(");
+  const publishingIdx = publishBlock.indexOf("publishing = true");
+  assert.ok(confirmIdx !== -1 && confirmIdx < publishingIdx, "the question must be asked before anything is sent");
+  assert.match(publishBlock.slice(confirmIdx), /different copy of the website/i, "the message must name the case a stale bit actually is");
 });
 
 test("C1: the change counter reports the uncommitted state, so a reloaded page can't claim '0 changes'", () => {
