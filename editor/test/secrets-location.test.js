@@ -32,8 +32,9 @@ const REPO_ROOT = path.dirname(EDITOR_DIR);
 // (This suite's own fixtures deliberately avoid the literal "editor/secrets.json" filename
 // — see the canary-naming note below — specifically so they cannot race with any other
 // test file that plants/removes that exact path; `node --test` runs test files in parallel
-// by default, and round 2's case-insensitive-bypass test in security.test.js does use that
-// literal filename.)
+// by default. Round 4's finding-9 fix moved security.test.js's own case-insensitive-bypass
+// test off that literal filename too, onto a per-run canary name, for the same reason — so
+// this is now belt-and-suspenders against a hypothetical future test, not an active race.)
 function assertNoRealSecretsPresent() {
   const newLocation = path.join(os.homedir(), ".msc-editor", "secrets.json");
   if (fs.existsSync(newLocation)) {
@@ -57,9 +58,12 @@ test("five leak vectors are all closed: root file symlink, root directory symlin
   // A uniquely-named canary under editor/ — NOT literally "secrets.json". The property
   // under test ("no symlink trick reaches an unlisted file inside editor/") is general, not
   // specific to that one filename, and a unique name means this test's own fixture can
-  // never race with round 2's case-insensitive-bypass test in security.test.js, which does
-  // use the literal "editor/secrets.json" path and runs concurrently in a separate process
-  // under `node --test`'s default parallel file execution.
+  // never race with any other test file that plants a same-named canary and runs
+  // concurrently in a separate process under `node --test`'s default parallel file
+  // execution (round 2's case-insensitive-bypass test in security.test.js used to be such a
+  // file — it planted the literal "editor/secrets.json" — but round 4's finding-9 fix moved
+  // it onto its own per-run canary name too, so this is now defence-in-depth, not a fix for
+  // an active race).
   const canaryName = "_round3_canary_" + crypto.randomUUID() + ".json";
   const canaryPath = path.join(EDITOR_DIR, canaryName);
   const canaryMarker = "SECRET-MARKER-" + crypto.randomUUID();

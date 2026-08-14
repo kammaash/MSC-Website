@@ -88,6 +88,41 @@ test("a real commit failure (not 'nothing staged') is reported as 500 with git's
   assert.doesNotMatch(text, /Nothing to publish/);
   assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
   assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
+  // Fix round 5, Fix C: the useful part of git's own message must still reach the client
+  // (round 1's finding 5), but the absolute local checkout path it's phrased in terms of
+  // ("hook failed in <root>") must not. This is a THROWAWAY tmp fixture root (from boot()
+  // above), never the real repo — asserting its absence here proves the redaction, not that
+  // any path was safe to leak in the first place.
+  assert.ok(!text.includes(root), `response must not contain the absolute fixture repo path, got: ${text}`);
+});
+
+// Fix round 5, Fix C: `git add` (server.js, just before the commit step) used to be unwrapped,
+// falling through to the outer catch — which only genericises errors carrying `.code` (fs/OS
+// errors), never execFileSync's own non-zero-exit errors (which carry `.status`, not `.code`).
+// A stale `.git/index.lock` — the realistic case: a prior editor process (or `git` itself)
+// crashed mid-write and never cleaned up its lock — makes `git add` fail with a message that
+// embeds the absolute checkout path: "fatal: Unable to create '<root>/.git/index.lock': File
+// exists." Prove that failure now redacts the path while still surfacing git's real reason.
+test("a stale .git/index.lock on `git add` is reported as 500 with git's message but no absolute path", async () => {
+  const { root, bare, publish } = await boot({ push: false });
+  fs.writeFileSync(path.join(root, "content.js"), '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"a": "7"};\n/* CONTENT:END */');
+  const lockPath = path.join(root, ".git", "index.lock");
+  fs.writeFileSync(lockPath, ""); // simulates the lock a crashed git/editor process left behind
+
+  try {
+    const r = await publish();
+    assert.equal(r.status, 500);
+    const text = await r.text();
+    // The real reason (git's own words) must still reach the collaborator...
+    assert.match(text, /index\.lock/);
+    assert.match(text, /File exists/);
+    // ...but not the absolute local path it's phrased in terms of.
+    assert.ok(!text.includes(root), `response must not contain the absolute fixture repo path, got: ${text}`);
+    assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
+    assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
+  } finally {
+    fs.rmSync(lockPath, { force: true });
+  }
 });
 
 // Fold-in B: `readJson(req).catch(() => ({}))` used to swallow EVERY body error, including

@@ -95,6 +95,37 @@ function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 }
 
+// Redacts the absolute local filesystem paths out of text PRODUCED BY GIT ITSELF (or by
+// execFileSync's own ".message", which embeds the failing command line) before it reaches an
+// unauthenticated-by-network-topology-alone client. git's stderr routinely names the exact
+// checkout path — e.g. "fatal: Unable to create '/private/var/.../site/.git/index.lock': File
+// exists." (a stale lock after a crash) or "hook failed in /private/var/.../site" (a pre-commit
+// hook) — and execFileSync errors from a non-zero exit carry `.status`, not `.code`, so the
+// outer catch's `e.code` genericisation (added for fs/OS errors) never applies to them; they
+// fall straight through with the raw path intact.
+//
+// This REDACTS, it does not suppress: round 1's finding 5 was precisely that swallowing git's
+// stderr told collaborators "Nothing to publish" when their commit had actually failed for an
+// unrelated reason — the message itself (WHY it failed) is genuinely useful and must keep
+// flowing to the client. Only the absolute local path is replaced with a neutral placeholder;
+// everything else in git's own words survives untouched.
+//
+// `root` is replaced before `os.homedir()` (not the reverse): on a checkout living under the
+// user's home directory (a common layout), replacing the longer, more specific `root` first
+// consumes it entirely, so the shorter `homedir` pass afterward only catches occurrences
+// elsewhere in the text — replacing homedir first would instead leave a dangling
+// "your home folder/MSC-Website/site/..." for any text that still contained the full root path.
+// split/join, not a regex: `root` and homedir are arbitrary user-controlled-by-installation
+// strings that may contain regex metacharacters (parentheses, dots — real on macOS temp paths
+// like ".../T/msc-pub-XXXX/site").
+function redactPaths(text, root) {
+  let out = String(text);
+  if (root) out = out.split(root).join("the site folder");
+  const home = os.homedir();
+  if (home && typeof home === "string" && home !== "") out = out.split(home).join("your home folder");
+  return out;
+}
+
 // Pure: where the Cloudinary secret file lives for a given homedir, or null if `homedir`
 // isn't usable as a base path at all. Exported so tests (and loadSecrets below) share one
 // definition of "where" instead of two that could drift.
@@ -240,18 +271,25 @@ function createServer({ root, config, templates, secrets, token }) {
         catch (e) { return send(res, 400, "Invalid publish request: " + (e.message || e)); }
         const msg = (body.message || "content: update via editor").slice(0, 200);
         const existing = CONTENT_FILES.filter((f) => fs.existsSync(path.join(root, f)));
-        git(root, ["add", "--", ...existing]);
+        // Was unwrapped until fix round 5: a failure here (e.g. a stale `.git/index.lock` left
+        // behind by a crashed prior run — realistic, not contrived) fell straight through to
+        // the outer catch. execFileSync's non-zero-exit errors carry `.status`, not `.code`, so
+        // that catch's `e.code` genericisation never caught them either — the raw absolute
+        // path in git's stderr reached the client unredacted. Same redacted-500 shape as the
+        // commit and push failures just below, for the same reason.
+        try { git(root, ["add", "--", ...existing]); }
+        catch (e) { return send(res, 500, "Publish failed: " + redactPaths(e.stderr || e.message, root)); }
         let hasStagedChanges = true;
         try { git(root, ["diff", "--cached", "--quiet"]); hasStagedChanges = false; } catch { /* exit !=0 => staged changes */ }
         if (!hasStagedChanges) return send(res, 409, "Nothing to publish (no changes).");
         try { git(root, ["commit", "-m", msg]); }
-        catch (e) { return send(res, 500, "Publish failed: " + (e.stderr || e.message)); }
+        catch (e) { return send(res, 500, "Publish failed: " + redactPaths(e.stderr || e.message, root)); }
         if (config.push === true && process.env.EDITOR_NO_PUSH !== "1") {
           try { git(root, ["pull", "--rebase"]); git(root, ["push"]); }
           catch (e) {
             try { git(root, ["rebase", "--abort"]); } catch {}
             return send(res, 409, "Published locally, but sync failed: " +
-              (e.stderr || e.message) + "\nYour changes are committed; ask the site admin to resolve.");
+              redactPaths(e.stderr || e.message, root) + "\nYour changes are committed; ask the site admin to resolve.");
           }
         }
         return send(res, 200, JSON.stringify({ ok: true }), "application/json");
@@ -436,7 +474,12 @@ if (require.main === module) {
   srv.listen(config.port, "127.0.0.1", () => {
     const url = "http://localhost:" + config.port + "/";
     console.log("Editor running at " + url);
-    if (!secrets) {
+    // Must use the SAME check /api/sign uses (hasValidCloudinarySecrets), not just `!secrets`.
+    // `!secrets` alone is true only for null/undefined, so a truthy-but-wrong-shaped secrets
+    // file (e.g. `42`, or `{"cloudinaryApiKey":"k"}` missing the secret) prints nothing here —
+    // implying uploads work — while /api/sign still 503s on every request. The two gates must
+    // agree, or boot output actively misleads the collaborator about upload readiness.
+    if (!hasValidCloudinarySecrets(secrets)) {
       console.log("(uploads disabled — no " + (secretsPath || "usable home directory") + "; run: npm run setup)");
     }
     if (process.env.EDITOR_NO_PUSH === "1") console.log("(EDITOR_NO_PUSH=1 — publish will commit but NOT push)");
