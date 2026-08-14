@@ -1,5 +1,27 @@
 (function () {
   "use strict";
+  // FC-1 — refuse to initialise anywhere but the top-level document. The Origin/token
+  // guard in server.js stops a foreign page from CALLING /api/*, but it cannot stop one
+  // from FRAMING http://localhost:8899 (the fixed default port) and steering the user's
+  // clicks into it: a click that lands inside the frame is same-origin and fully
+  // authorised, and "+ Add" (no dialog) followed by "Publish" (no dialog before the
+  // request) is two clicks that commit — and, with the shipped "push": true, push — a
+  // placeholder card to the live school site.
+  //
+  // The COMPLETE fix is response headers the framing page cannot opt out of:
+  // X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', and
+  // X-Content-Type-Options: nosniff. That work belongs in editor/server.js and is still
+  // PENDING — this client-side check is the half that can ship today, and it is not a
+  // substitute (a framed page could still be served if this script failed to load).
+  //
+  // It runs first, before any state, listener or UI exists, so a framed editor is
+  // absent rather than merely disabled. Reading window.top is a cross-origin property
+  // access when the framer is foreign and can throw; a throw proves we are NOT the top
+  // document, so it is treated as a positive detection, not as "probably fine".
+  let framed = true;
+  try { framed = window.top !== window.self; } catch { framed = true; }
+  if (framed) return;
+
   if (window.__EDITOR_BOOTED) return;
   window.__EDITOR_BOOTED = true;
   const P = window.EditorPaths;

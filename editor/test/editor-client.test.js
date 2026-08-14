@@ -190,6 +190,40 @@ test("C1: the draft is created with a persistent store, probed defensively", () 
   assert.match(SRC, /try \{ store = window\.localStorage; \} catch \{ store = null; \}/);
 });
 
+test("FC-1: the editor refuses to initialise inside a frame, before any state or UI exists", () => {
+  // A clickjacked click INSIDE the framed editor is same-origin and fully authorised,
+  // so the token/Origin guard cannot see it. The complete fix is response headers from
+  // server.js (X-Frame-Options / frame-ancestors); this is the client-side half.
+  assert.match(SRC, /window\.top !== window\.self/);
+  assert.match(SRC, /if \(framed\) return;/);
+
+  // A cross-origin read of window.top can throw. Throwing PROVES we are framed, so the
+  // catch must select the refusing branch, never fall through to "probably fine".
+  assert.match(SRC, /let framed = true;/, "the default must be the safe one");
+  assert.match(SRC, /catch \{ framed = true; \}/, "a throw means framed, not fine");
+
+  // And it must run before anything else: no listener, no draft, no bar.
+  const framedIdx = SRC.indexOf("if (framed) return;");
+  for (const later of [
+    "window.__EDITOR_BOOTED = true",
+    "EditorDraft.createDraft(",
+    "document.body.appendChild(bar)",
+    'addEventListener("click"',
+    "window.__edUpload =",
+  ]) {
+    const idx = SRC.indexOf(later);
+    assert.notEqual(idx, -1, "expected to find: " + later);
+    assert.ok(framedIdx < idx, "the frame guard must run before: " + later);
+  }
+
+  // The comment must record that the server-side headers are the real fix and pending,
+  // so this is never mistaken for complete protection.
+  const preamble = SRC.slice(0, framedIdx);
+  assert.match(preamble, /X-Frame-Options/);
+  assert.match(preamble, /frame-ancestors/);
+  assert.match(preamble, /PENDING/i);
+});
+
 test("M5: the Cloudinary response body is parsed defensively, so a proxy's HTML page can't become the error message", () => {
   const uploadBody = extractBlockAfter(SRC, "window.__edUpload = async function (listPath) {");
   const parseIdx = uploadBody.indexOf("upRes.json()");
