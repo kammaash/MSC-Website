@@ -50,6 +50,97 @@ test("GET /editor/lib/paths.js (allowlisted) still works", async () => {
   assert.equal(r.status, 200);
 });
 
+// ---- Critical 2, round 2: case-insensitive-filesystem bypass ----
+//
+// macOS APFS is case-INSENSITIVE. The old check was `rel.startsWith("editor/")`, which is
+// case-SENSITIVE — a request for "/EDITOR/secrets.json" fails it and falls into the `root`
+// branch. In PRODUCTION `root === path.dirname(editorDir)` (the repo root), so
+// `path.resolve(root, "EDITOR/secrets.json")` resolves ON DISK, via case-insensitive
+// lookup, to the exact same file as editor/secrets.json — and gets served.
+//
+// A tmp-dir-rooted fixture CANNOT reproduce this: fp would be tmpRoot/EDITOR/secrets.json,
+// which genuinely doesn't exist, so it 404s either way and masks the bug. This test must
+// use root === path.dirname(editorDir) — the real repo root — exactly like production.
+test("case-insensitive bypass: /EDITOR, /Editor, /eDiToR paths never leak real editor files (production-shaped root)", async () => {
+  const EDITOR_DIR = path.join(__dirname, "..");
+  const REPO_ROOT = path.dirname(EDITOR_DIR);
+  const secretsPath = path.join(EDITOR_DIR, "secrets.json");
+  const secretMarker = "SECRET-MARKER-" + crypto.randomUUID();
+  const existedBefore = fs.existsSync(secretsPath);
+  const backup = existedBefore ? fs.readFileSync(secretsPath) : null;
+  fs.writeFileSync(secretsPath, JSON.stringify({ cloudinaryApiSecret: secretMarker }));
+
+  const token = crypto.randomUUID();
+  const srv = createServer({ root: REPO_ROOT, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const base = "http://127.0.0.1:" + srv.address().port;
+    const variants = ["/EDITOR/secrets.json", "/Editor/secrets.json", "/EDITOR/config.json", "/eDiToR/check-paths.js"];
+    for (const p of variants) {
+      const r = await fetch(base + p);
+      assert.equal(r.status, 403, `expected 403 for ${p}, got ${r.status}`);
+      const text = await r.text();
+      assert.ok(!text.includes(secretMarker), `${p} response must not contain the secret marker`);
+    }
+    // Positive control through this same production-shaped server: the allowlisted file
+    // must still be reachable — the fix must not over-block.
+    const ok = await fetch(base + "/editor/lib/paths.js");
+    assert.equal(ok.status, 200);
+    // Same file, but requested with the SAME mixed casing as the attack paths above: the
+    // allowlist decision must be case-insensitive in both directions. (Real browser
+    // requests from the injected <script> tags are always exact-lowercase, so this is a
+    // defence-in-depth case, not a path any legitimate request takes.)
+    const okMixedCase = await fetch(base + "/EDITOR/lib/paths.js");
+    assert.equal(okMixedCase.status, 200);
+  } finally {
+    await new Promise((r) => srv.close(r));
+    if (existedBefore) fs.writeFileSync(secretsPath, backup);
+    else fs.rmSync(secretsPath, { force: true });
+  }
+});
+
+// ---- symlink escape (Critical 2 fold-in A) ----
+
+test("a symlink under the served root pointing outside it is never followed — 403 or 404, not 200", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "msc-sec-symlink-"));
+  const root = path.join(dir, "site");
+  fs.mkdirSync(root);
+  const outsideFile = path.join(dir, "outside-secret.txt");
+  fs.writeFileSync(outsideFile, "TOP-SECRET-OUTSIDE-CONTENT");
+  fs.symlinkSync(outsideFile, path.join(root, "linked.js"));
+
+  const token = crypto.randomUUID();
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, token });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  after(() => srv.close());
+  const r = await fetch("http://127.0.0.1:" + srv.address().port + "/linked.js");
+  assert.ok(r.status === 403 || r.status === 404, `expected 403 or 404, got ${r.status}`);
+  const text = await r.text();
+  assert.ok(!text.includes("TOP-SECRET-OUTSIDE-CONTENT"));
+});
+
+// ---- content-type strictness (fold-in C) ----
+
+test("api guard rejects a near-miss content-type like application/json-evil — 415", async () => {
+  const { base, token } = await boot();
+  const r = await fetch(base + "/api/publish", {
+    method: "POST",
+    headers: { "content-type": "application/json-evil", "x-editor-token": token },
+    body: JSON.stringify({ message: "x" }),
+  });
+  assert.equal(r.status, 415);
+});
+
+test("api guard accepts application/json; charset=utf-8 (what real browsers send)", async () => {
+  const { base, token } = await boot();
+  const r = await fetch(base + "/api/publish", {
+    method: "POST",
+    headers: { "content-type": "application/json; charset=utf-8", "x-editor-token": token },
+    body: JSON.stringify({ message: "x" }),
+  });
+  assert.notEqual(r.status, 415);
+});
+
 // ---- Critical 1: token / content-type / origin guard on every /api/* route ----
 
 test("api guard rejects missing token on /api/publish — 403", async () => {

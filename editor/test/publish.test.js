@@ -34,7 +34,7 @@ async function boot(config, env) {
     headers: { "content-type": "application/json", "x-editor-token": token },
     body: JSON.stringify({ message: "content: test" }),
   });
-  return { root, bare, publish };
+  return { root, bare, publish, token, port: () => srv.address().port };
 }
 
 test("publish commits and pushes when enabled", async () => {
@@ -86,6 +86,35 @@ test("a real commit failure (not 'nothing staged') is reported as 500 with git's
   const text = await r.text();
   assert.match(text, /blocked by test pre-commit hook/);
   assert.doesNotMatch(text, /Nothing to publish/);
+  assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
+  assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
+});
+
+// Fold-in B: `readJson(req).catch(() => ({}))` used to swallow EVERY body error, including
+// "body present but rejected" (oversized), and silently proceed with the default message.
+// An oversized body must 400 and create no commit, distinct from the genuinely-empty-body
+// case (which is fine and uses the default message — covered implicitly by every other test
+// here sending a real small JSON body).
+test("an oversized publish body is rejected — no commit created", async () => {
+  const { root, bare, token, port } = await boot({ push: false });
+  fs.writeFileSync(path.join(root, "content.js"), '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"a": "6"};\n/* CONTENT:END */');
+  const hugeMessage = "x".repeat(6 * 1024 * 1024); // over the 5MB readJson cap
+  let status;
+  try {
+    const r = await fetch("http://127.0.0.1:" + port() + "/api/publish", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-editor-token": token },
+      body: JSON.stringify({ message: hugeMessage }),
+    });
+    status = r.status;
+  } catch {
+    // readJson intentionally req.destroy()s once the 5MB guard trips, to stop a malicious
+    // client from continuing to stream. A client still mid-upload when that happens can
+    // observe a connection reset instead of a clean HTTP response — both are acceptable
+    // outcomes; what actually matters is that the oversized body never reaches a commit.
+    status = "connection-reset";
+  }
+  assert.ok(status === 400 || status === "connection-reset", `unexpected status ${status}`);
   assert.match(g(root, "log", "-1", "--format=%s"), /init/); // no commit was created
   assert.match(g(bare, "log", "-1", "--format=%s"), /init/); // remote untouched
 });
