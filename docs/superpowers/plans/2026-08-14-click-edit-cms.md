@@ -1584,11 +1584,11 @@ Update `editor/config.json` to `{ "port": 8899, "push": true, "youtube": { "enab
 
 - [ ] **Step 5: Manual test (no push; needs a free Cloudinary account)**
 
-Create/borrow a Cloudinary account, run `npm run setup` once it exists (Task 14) — or for now hand-write `editor/secrets.json` `{"cloudinaryApiKey": "...", "cloudinaryApiSecret": "..."}` and set `cloudName` in `content.js`. Then `EDITOR_NO_PUSH=1 npm run edit`:
+Create/borrow a Cloudinary account, run `npm run setup` once it exists (Task 14) — or for now hand-write `~/.msc-editor/secrets.json` `{"cloudinaryApiKey": "...", "cloudinaryApiSecret": "..."}` and set `cloudName` in `content.js`. Then `EDITOR_NO_PUSH=1 npm run edit`:
 1. Gallery "+ Add" → pick a photo → tile appears with the Cloudinary-optimised image; caption click-editable.
 2. Add a short phone video → tile renders `<video>` with poster; plays on click.
 3. Publish → `content.js` diff shows `{kind, id, caption}` items only. Revert: `git reset --hard HEAD~1`.
-4. Without secrets.json (rename it), gallery Add reports "Uploads not configured — run: npm run setup".
+4. Without `~/.msc-editor/secrets.json` (rename it), gallery Add reports "Uploads not configured — run: npm run setup".
 
 - [ ] **Step 6: Commit (local only)**
 
@@ -1605,13 +1605,23 @@ git commit -m "feat(editor): signed Cloudinary uploads; flag-gated YouTube stub"
 - Create: `editor/setup.js`, `docs/EDITING.md`
 
 **Interfaces:**
-- Consumes: `extractContent/replaceContent` (Task 1); `editor/secrets.json` shape `{ cloudinaryApiKey, cloudinaryApiSecret }` (Task 13); `cloudName` in `content.js` (Task 5).
+- Consumes: `extractContent/replaceContent` (Task 1); `~/.msc-editor/secrets.json` shape `{ cloudinaryApiKey, cloudinaryApiSecret }` (Task 13); `cloudName` in `content.js` (Task 5).
+
+> **PLAN CORRECTION (controller, fix round 3 of Tasks 7-9).** This task originally wrote the
+> credential to `editor/secrets.json` — i.e. INSIDE the served web root. Three security rounds
+> were spent proving that file readable over HTTP (case-varied URLs, four symlink variants, hard
+> links), and round 3's fix was to move it out of the tree entirely: `editor/server.js` now reads
+> only from `~/.msc-editor/secrets.json`, and warns at boot if a stale `editor/secrets.json` is
+> found. The Step 1 code below is corrected to match. Writing the old path would silently recreate
+> the vulnerability AND leave uploads broken (the server no longer reads there), producing a
+> warn → `npm run setup` → warn loop. See the ledger entry "Ruling: fix this architecturally".
 
 - [ ] **Step 1: Implement `editor/setup.js`**
 
 ```js
 "use strict";
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const readline = require("node:readline/promises");
 const { extractContent, replaceContent } = require("./lib/content-io.js");
@@ -1626,14 +1636,19 @@ const { signParams } = require("./lib/cloudinary.js");
   rl.close();
   if (!cloudName || !apiKey || !apiSecret) { console.error("All three values are required."); process.exit(1); }
   signParams({ timestamp: 1 }, apiSecret); // sanity: signing works
-  fs.writeFileSync(path.join(__dirname, "secrets.json"),
-    JSON.stringify({ cloudinaryApiKey: apiKey, cloudinaryApiSecret: apiSecret }, null, 2));
+  // OUTSIDE the repo — a credential inside the served web root is reachable by construction.
+  // This is the only location editor/server.js reads from. Mode 0600: owner-only.
+  const secretsDir = path.join(os.homedir(), ".msc-editor");
+  fs.mkdirSync(secretsDir, { recursive: true });
+  fs.writeFileSync(path.join(secretsDir, "secrets.json"),
+    JSON.stringify({ cloudinaryApiKey: apiKey, cloudinaryApiSecret: apiSecret }, null, 2),
+    { mode: 0o600 });
   const cPath = path.join(__dirname, "..", "content.js");
   const src = fs.readFileSync(cPath, "utf8");
   const { data } = extractContent(src);
   data.cloudName = cloudName;
   fs.writeFileSync(cPath, replaceContent(src, data));
-  console.log("✓ Wrote editor/secrets.json (gitignored) and set cloudName in content.js.");
+  console.log("✓ Wrote ~/.msc-editor/secrets.json (outside the repo) and set cloudName in content.js.");
   console.log("Next: npm run edit");
 })();
 ```
