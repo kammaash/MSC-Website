@@ -1,7 +1,6 @@
 .DS_Store
 node_modules/
 *.log
-node_modules
 # Old secrets location — the server now reads from ~/.msc-editor/secrets.json instead
 # (outside the repo entirely, since a credential inside the served web root is reachable
 # by construction). Keeping this ignored costs nothing and protects anyone upgrading from

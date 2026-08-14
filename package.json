@@ -1,6 +1,9 @@
 {
   "name": "msc-website-editor",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "edit": "node editor/server.js",
     "test": "node --test \"editor/test/*.test.js\" && node editor/check-paths.js",

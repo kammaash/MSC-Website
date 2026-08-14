@@ -16,6 +16,22 @@ No build step. Deployed via GitHub Pages from `main` (root), custom domain in `C
 `support.js` renders the pages client-side; `cursor.js` is the custom cursor.
 Both must ship alongside the HTML. `assets/` holds the logos (also used as favicons).
 
+## Editing content
+Page copy is no longer typed into the markup. Each page keeps its own copy as strict
+JSON inside `/* CONTENT:BEGIN */ … /* CONTENT:END */` markers in its `data-dc-script`
+block, and `content.js` holds the facts shared across pages (contact details, news and
+gallery collections). The markup reads those values through `{{ }}` holes, so hand-edits
+must keep everything between the markers valid JSON.
+
+`npm run edit` starts a local Node server that serves this repo and injects the
+click-to-edit tooling at serve time only — the deployed site carries no editor code.
+`npm run setup` stores the Cloudinary credentials once per machine, outside the repo.
+`npm test` runs the editor's test suite plus `editor/check-paths.js`, which verifies
+every `data-edit` / `data-list` path in the pages still resolves. Node 22 or newer.
+
+Collaborator instructions live in [`docs/EDITING.md`](docs/EDITING.md); this section is
+only the map.
+
 ## Design
 Both branch pages use the same layout/structure and the same red palette:
 `#a51915` primary · `#7f120f` dark · `#e8541b` orange accent · `#ffd9c4` peach ·

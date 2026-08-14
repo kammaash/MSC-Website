@@ -207,7 +207,37 @@ test("staleSecretsWarning names the stale path when a leftover secrets.json exis
 test("the real editor/secrets.json is absent (standing project constraint) — sanity check for every test above", () => {
   const realEditorDir = path.join(__dirname, "..");
   assert.equal(fs.existsSync(path.join(realEditorDir, "secrets.json")), false);
-  assert.equal(fs.existsSync(path.join(os.homedir(), ".msc-editor", "secrets.json")), false);
+});
+
+// $HOME/.msc-editor/secrets.json is a DIFFERENT matter from editor/secrets.json, and
+// asserting both absent conflated them. A credential inside the served tree is the
+// defect; a credential in the home directory is the normal, intended end state of
+// `npm run setup`. Requiring it absent made the suite green only on machines where
+// nobody had finished setup — so the day the admin configures Cloudinary, the suite
+// goes red for a reason unrelated to any regression, which is exactly how people learn
+// to ignore a failing suite.
+//
+// Nothing in this file writes to that path, so there is no fixture to protect either.
+// What is actually worth asserting is the textual property — the path resolves outside
+// the repo's served tree — and that holds whether or not the file exists.
+test("$HOME/.msc-editor/secrets.json resolves outside the served tree, whether or not setup has been run", (t) => {
+  const home = os.homedir();
+  const realHomeSecrets = secretsPathFor(home);
+  assert.equal(realHomeSecrets, path.join(home, ".msc-editor", "secrets.json"));
+
+  const repoRoot = path.join(__dirname, "..", "..");
+  assert.equal(
+    realHomeSecrets.startsWith(repoRoot + path.sep),
+    false,
+    "the secrets path must never fall inside the repo the editor serves"
+  );
+
+  if (fs.existsSync(realHomeSecrets)) {
+    t.skip("`npm run setup` has been completed on this machine, so the real secrets file exists — the intended end state, not a regression");
+    return;
+  }
+  // Not yet set up: the file's absence is worth recording, but only as information.
+  assert.equal(fs.existsSync(realHomeSecrets), false);
 });
 
 // ---- hasValidCloudinarySecrets (used by Fix 3 at /api/sign; unit-level here) ----

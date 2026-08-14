@@ -68,6 +68,31 @@ test("an unresolved path is reported", () => {
   assert.deepEqual(errors, ["a.html: unresolved hero.title"]);
 });
 
+// "Resolves to something" was too weak. lib/patch.js's validateText rejects a non-string
+// server-side, so a data-edit pointing at an object or an array is a field the editor
+// offers for editing and then refuses to save — and the refusal surfaces at Publish,
+// against a file the user has gone on editing, not at the click that caused it.
+test("a data-edit path that resolves to a non-string is reported, even though it resolves", () => {
+  const content = 'const CONTENT = {"hero":{"title":{"nested":"x"},"tags":["a"],"n":3}};';
+  for (const [path, described] of [["hero.title", "an object"], ["hero.tags", "an array"], ["hero.n", "a number"]]) {
+    const { errors } = checkPaths(
+      fixture({ "a.html": page(content, `<h1 data-edit="${path}">x</h1>`) }),
+      ["a.html"]
+    );
+    assert.equal(errors.length, 1, "expected exactly one error for " + path);
+    assert.match(errors[0], new RegExp("^a\\.html: " + path.replace(".", "\\.") + " resolves to " + described + ", but data-edit must name a text value$"));
+  }
+});
+
+test("data-list is exempt from the string rule — those paths resolve to arrays by definition", () => {
+  const { errors, checked } = checkPaths(
+    fixture({ "a.html": page('const CONTENT = {"news":[{"title":"x"}]};', '<div data-list="news"></div>') }),
+    ["a.html"]
+  );
+  assert.deepEqual(errors, []);
+  assert.equal(checked, 1);
+});
+
 test("a missing page is a reported failure, not a raw ENOENT throw", () => {
   const { errors } = checkPaths(fixture({ "a.html": GOOD }), ["a.html", "gone.html"]);
   assert.equal(errors.length, 1);

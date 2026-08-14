@@ -24,6 +24,15 @@ function stripComments(src) {
     .replace(/^[ \t]*\/\/[^\n]*$/gm, "");
 }
 
+// Names the shape of a value for an error message, so a failure reads as English
+// ("resolves to an array") rather than as a typeof result ("resolves to object").
+function describe(value) {
+  if (Array.isArray(value)) return "an array";
+  if (value === null) return "null";
+  const t = typeof value;
+  return (["a", "e", "i", "o", "u"].includes(t[0]) ? "an " : "a ") + t;
+}
+
 // Returns { errors, checked }: `errors` is the list of human-readable failures
 // (empty means the page set is clean) and `checked` counts the literal paths
 // that were actually resolved, so a run that silently validated nothing is
@@ -61,14 +70,25 @@ function checkPaths(root, pages = PAGES) {
       continue;
     }
 
-    for (const m of stripComments(src).matchAll(/data-(?:edit|list)="([^"{]+)"/g)) {
-      const raw = m[1];
+    for (const m of stripComments(src).matchAll(/data-(edit|list)="([^"{]+)"/g)) {
+      const attr = m[1];
+      const raw = m[2];
       const isShared = raw.startsWith("shared:");
       const scope = isShared ? shared : data;
       const p = isShared ? raw.slice(7) : raw;
       checked++;
       if (scope === null) { errors.push(`${page}: ${raw} — ${sharedReason}`); continue; }
-      if (getPath(scope, p) === undefined) errors.push(`${page}: unresolved ${raw}`);
+      const value = getPath(scope, p);
+      if (value === undefined) { errors.push(`${page}: unresolved ${raw}`); continue; }
+      // A data-edit path names an editable TEXT value, and lib/patch.js's validateText
+      // rejects a non-string server-side — so a path that resolves to an object or an
+      // array is one the editor will happily offer for editing and then refuse to save,
+      // with the failure surfacing at Publish rather than at the click. "Resolves to
+      // something" was too weak a check to catch that. data-list is deliberately left
+      // alone: those paths resolve to arrays by definition.
+      if (attr === "edit" && typeof value !== "string") {
+        errors.push(`${page}: ${raw} resolves to ${describe(value)}, but data-edit must name a text value`);
+      }
     }
   }
 
