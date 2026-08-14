@@ -625,8 +625,6 @@
   facilityChips  plain strings, one per facility with no detail page of its
           own. Kept as strings rather than objects so the chips stay simple;
           renderVals() pairs each with its path for data-edit.
-  news    the three news cards. Illustrative sample copy, not real
-          announcements.
   steps   the four numbered admission steps; `n` is the step number in the
           circle. Kept in sync by hand with the "procedure" entry in the
           subpage's content map.
@@ -942,7 +940,7 @@ class Component extends DCLogic {
       // that way, so each is paired with its own path here instead: the
       // template reads c.t for the text and c.p for the path.
       hero: CONTENT.hero,
-      contact: window.SHARED_CONTENT.contact,
+      contact: S.contact,
       academics: withPaths(CONTENT.academics, "academics"),
       life: withPaths(CONTENT.life, "life"),
       facilities: withPaths(CONTENT.facilities, "facilities"),
