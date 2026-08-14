@@ -16,7 +16,7 @@ function tmpSite() {
 async function boot(opts = {}) {
   const root = tmpSite();
   const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, ...opts });
-  await new Promise((r) => srv.listen(0, r));
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
   const base = "http://127.0.0.1:" + srv.address().port;
   return { root, srv, base };
 }
@@ -27,6 +27,8 @@ test("serves html with editor scripts injected before </body>", async () => {
   const text = await (await fetch(base + "/")).text();
   assert.match(text, /editor-client\.js"><\/script><\/body>/);
   assert.match(text, /<h1>Hi<\/h1>/);
+  // The per-boot token must be injected before the editor scripts so the client can read it.
+  assert.match(text, /window\.__EDITOR_TOKEN=".+?";<\/script><script src="\/editor\/lib\/paths\.js">/);
 });
 
 test("serves non-html files byte-identical", async () => {
