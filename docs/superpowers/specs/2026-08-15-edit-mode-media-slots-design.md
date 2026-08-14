@@ -2,6 +2,13 @@
 
 **Approved:** 2026-08-15 (in chat), after the media library drawer shipped.
 
+> **Amended 2026-08-15 by `2026-08-15-youtube-video-hosting-design.md`:** videos are
+> now YouTube-hosted (paste-link, unlisted), not Cloudinary. Everything here about
+> *video* delivery URLs, `posterUrl`, `data-media-poster` on video slots, and the
+> `<video>`/`load()` handling is superseded; image and slot-mechanics decisions
+> stand. The implementation plan for the remaining work is
+> `docs/superpowers/plans/2026-08-15-youtube-videos-and-media-slots.md`.
+
 ## Goal
 
 When the site is in edit mode: (1) the custom pen/dot cursor gets out of the way,

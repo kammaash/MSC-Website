@@ -1,5 +1,11 @@
 # Edit-Mode Media Slots Implementation Plan
 
+> **SUPERSEDED (2026-08-15):** Tasks 1–5 shipped (`aecda7d`, `c7fd222`, `743bf68`,
+> `001d0b1`, `5b08da0`). The remaining tasks (6–9, the page migrations) are replaced by
+> `2026-08-15-youtube-videos-and-media-slots.md`, which also converts the shipped video
+> machinery to YouTube-hosted videos (spec: `2026-08-15-youtube-video-hosting-design.md`).
+> Do not execute tasks from this file.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** In edit mode, disable the site's custom cursor and make designated media components selectable — click or drag-and-drop from the media drawer to replace a photo/video, with media only ever landing in designated slots.
