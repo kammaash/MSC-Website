@@ -48,6 +48,21 @@
     return fetch(url, Object.assign({}, opts, { headers }));
   }
 
+  // A 403 from any /api/* call practically always means window.__EDITOR_TOKEN no longer
+  // matches what the server currently expects — the server mints one random token per boot
+  // (see server.js's TOKEN_SCRIPT) and forgets the old one the instant it restarts, but a
+  // tab left open across that restart keeps holding the dead token in memory. The server's
+  // own body for that case is the bare word "Forbidden", which read literally in an
+  // alert() ("Publish failed:\nForbidden") tells the user nothing they can act on. Reload
+  // re-fetches the page and its current token, which is the actual fix — say that instead.
+  function describeApiError(status, text) {
+    if (status === 403) {
+      return "The editor server appears to have restarted, so this browser tab's session " +
+        "is no longer valid.\n\nReload the page and try again.";
+    }
+    return text;
+  }
+
   // ---- helpers shared with collections chrome (Task 12) ----
   function targetFor(path) {
     return path.startsWith("shared:") ? [window.SHARED_CONTENT, path.slice(7)] : [window.__CONTENT, path];
@@ -182,7 +197,7 @@
     try {
       for (const [file, patch] of Object.entries(tx.patches)) {
         const r = await apiFetch("/api/save", { method: "POST", body: JSON.stringify({ file, patch }) });
-        if (!r.ok) throw new Error(await r.text());
+        if (!r.ok) throw new Error(describeApiError(r.status, await r.text()));
         tx.markSaved(file);
         update(); // the count drops file by file, and the bar starts saying "saved, not published"
       }
@@ -232,7 +247,7 @@
       // still inviting a retry that could not help.
       const text = await r.text();
       const outcome = window.EditorDraft.classifyPublishResponse(r.status, text);
-      if (!outcome.committed) throw new Error(text);
+      if (!outcome.committed) throw new Error(describeApiError(r.status, text));
       draft.markCommitted(); update();
       if (outcome.kind === "sync-failed") {
         // The commit succeeded; only the push did not. Do NOT invite a retry — pressing
@@ -428,7 +443,7 @@
       const signRes = await apiFetch("/api/sign", {
         method: "POST", body: JSON.stringify({ paramsToSign: { timestamp } }),
       });
-      if (!signRes.ok) throw new Error(await signRes.text());
+      if (!signRes.ok) throw new Error(describeApiError(signRes.status, await signRes.text()));
       const s = await signRes.json();
       const fd = new FormData();
       fd.append("file", file);

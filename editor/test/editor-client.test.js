@@ -192,7 +192,11 @@ test("item 1: both 409s end the transaction and neither invites a retry that can
   // that means "committed".
   assert.match(publishBlock, /classifyPublishResponse\(r\.status, text\)/);
   assert.doesNotMatch(publishBlock, /if \(!r\.ok\) throw/, "r.ok alone would send both 409s down the failure path");
-  assert.match(publishBlock, /if \(!outcome\.committed\) throw new Error\(text\)/);
+  // Pre-merge fix round, should-fix B: wrapped in describeApiError so a 403 (the editor
+  // server having restarted under a still-open tab) gets a message the user can act on,
+  // instead of the bare word "Forbidden". It still receives the SAME `text` read below —
+  // no second body read, no change to which statuses end the transaction.
+  assert.match(publishBlock, /if \(!outcome\.committed\) throw new Error\(describeApiError\(r\.status, text\)\)/);
 
   // The body may only be read once, before classification.
   assert.equal((publishBlock.match(/await r\.text\(\)/g) || []).length, 1, "the response body must be read exactly once");
