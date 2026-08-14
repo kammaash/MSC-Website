@@ -69,13 +69,14 @@
 
   // ---- rendering ----
   function thumbUrl(rec) {
-    // Cloudinary derives everything from cloudName + public_id; a video's poster frame
-    // is just the same URL under /video/upload with a .jpg extension.
-    var base = "https://res.cloudinary.com/" + encodeURIComponent(cloudName) + "/" +
-      rec.kind + "/upload/c_fill,w_300,h_220,q_auto/" + rec.id;
-    return rec.kind === "video" ? base + ".jpg" : base;
+    // Videos are YouTube-hosted: thumbs come straight from YouTube's image CDN
+    // (works for Unlisted). Images are Cloudinary, cropped for the tile.
+    if (rec.kind === "video") return "https://i.ytimg.com/vi/" + encodeURIComponent(rec.id) + "/mqdefault.jpg";
+    return "https://res.cloudinary.com/" + encodeURIComponent(cloudName) +
+      "/image/upload/c_fill,w_300,h_220,q_auto/" + rec.id;
   }
   function render() {
+    uploadBtn.textContent = tab === "image" ? "⬆ Upload" : "🔗 Add YouTube link";
     segPhotos.classList.toggle("ed-on", tab === "image");
     segVideos.classList.toggle("ed-on", tab === "video");
     grid.textContent = "";
@@ -86,7 +87,7 @@
       empty.className = "ed-empty";
       empty.textContent = tab === "image"
         ? "No photos yet. Upload some — they'll be available to place on any page."
-        : "No videos yet. Upload some — they'll be available to place on any page.";
+        : "No videos yet. Upload to the school's YouTube channel (set to Unlisted) in YouTube Studio, then Add YouTube link here.";
       grid.appendChild(empty);
       return;
     }
@@ -229,10 +230,52 @@
       });
     });
   }
+  // Videos never travel through this machine: the human uploads in YouTube Studio
+  // (Unlisted), pastes the link, and the server verifies it via oEmbed. A null title
+  // in the response means YouTube was unreachable (offline) — ask for a name rather
+  // than fail; the id itself was already validated.
+  function addYouTubeLink() {
+    var input = prompt("Paste the YouTube link.\n\n(Upload the video in YouTube Studio first and set its visibility to Unlisted.)");
+    if (!input) return Promise.resolve(null);
+    return apiFetch("/api/youtube/resolve", { method: "POST", body: JSON.stringify({ url: input }) }).then(function (r) {
+      if (!r.ok) return r.text().then(function (t) { throw new Error(describeApiError(r.status, t)); });
+      return r.json();
+    }).then(function (v) {
+      var name = v.title;
+      if (name === null) {
+        name = prompt("Couldn't reach YouTube to fetch the title (offline?). Name this video:", "");
+        if (name === null) return null; // cancelled
+      }
+      var rec = { id: v.id, kind: "video", name: name || v.id, createdAt: new Date().toISOString() };
+      return apiFetch("/api/media", { method: "POST", body: JSON.stringify({ record: rec }) }).then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(describeApiError(r.status, t)); });
+        return rec;
+      });
+    });
+  }
   var uploading = false; // one batch at a time — same reasoning as the Publish interlock
   uploadBtn.onclick = async function () {
     if (uploading) return;
-    var files = await pickFiles(tab === "image" ? "image/*" : "video/*");
+    if (tab === "video") {
+      uploading = true;
+      uploadBtn.disabled = true;
+      try {
+        var vrec = await addYouTubeLink();
+        if (vrec) {
+          if (records) records.unshift(vrec); // mirror the server's newest-first order
+          UI.draft.markSavedToDisk(); // media.json changed on disk — Publish must know
+          UI.update();
+          render();
+        }
+      } catch (err) {
+        alert("Couldn't add the video:\n" + err.message);
+      } finally {
+        uploading = false;
+        uploadBtn.disabled = false;
+      }
+      return;
+    }
+    var files = await pickFiles("image/*");
     if (files.length === 0) return;
     uploading = true;
     uploadBtn.disabled = true;

@@ -46,8 +46,10 @@ test("editor-client.js shares apiFetch and describeApiError through EditorUI for
 
 test("every /api/ call in media.js is tokenised via the shared apiFetch", () => {
   const apiCalls = SRC.match(/apiFetch\(\s*["'`](\/api\/[^"'`]+)["'`]/g) || [];
-  // list (GET /api/media), sign, add record (POST /api/media), delete — 4 call sites.
-  assert.equal(apiCalls.length, 4, "expected exactly 4 apiFetch(...) call sites targeting /api/");
+  // list (GET /api/media), sign, add record (POST /api/media in uploadOne), youtube/resolve,
+  // add record (POST /api/media in addYouTubeLink — a distinct call site from uploadOne's),
+  // delete — 6 call sites.
+  assert.equal(apiCalls.length, 6, "expected exactly 6 apiFetch(...) call sites targeting /api/");
   // No /api/ URL may appear anywhere except immediately inside an apiFetch call.
   const bareApi = SRC.replace(/apiFetch\(\s*["'`]\/api\//g, "").match(/["'`]\/api\//g) || [];
   assert.deepEqual(bareApi, [], "found /api/ URLs not routed through apiFetch");
@@ -97,4 +99,21 @@ test("tiles are draggable and the dataTransfer payload carries record + cloudNam
   // matching slots from CSS alone; dragend must always clean it up.
   assert.match(SRC, /body\.classList\.add\("ed-dragging-" \+ rec\.kind\)/);
   assert.match(SRC, /body\.classList\.remove\("ed-dragging-image", "ed-dragging-video"\)/);
+});
+
+test("Videos tab adds by YouTube link through /api/youtube/resolve — never a file upload", () => {
+  assert.match(SRC, /apiFetch\("\/api\/youtube\/resolve"/);
+  const add = extractBlockAfter(SRC, "function addYouTubeLink(");
+  assert.match(add, /prompt\(/);
+  assert.match(add, /kind: "video"/);
+  // No video file picker anywhere: videos are links, not uploads.
+  assert.ok(!/video\/\*/.test(SRC), "found a video/* file-picker accept string");
+  // The button label flips with the tab so the affordance is honest.
+  assert.match(SRC, /uploadBtn\.textContent = tab === "image" \? "⬆ Upload" : "🔗 Add YouTube link"/);
+});
+
+test("video tiles thumbnail from YouTube's image CDN; images stay on Cloudinary", () => {
+  const t = extractBlockAfter(SRC, "function thumbUrl(");
+  assert.match(t, /i\.ytimg\.com\/vi\//);
+  assert.match(t, /res\.cloudinary\.com/);
 });
