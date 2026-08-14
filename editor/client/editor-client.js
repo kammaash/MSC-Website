@@ -257,6 +257,55 @@
       listEl.parentElement.insertBefore(add, listEl.nextSibling); // sibling, not child: React owns the list's children
     });
   }
+
+  // ---- media upload (Cloudinary; signed by the local server) ----
+  function pickFile(accept) {
+    return new Promise((resolve) => {
+      const i = document.createElement("input");
+      i.type = "file"; i.accept = accept;
+      i.onchange = () => resolve(i.files[0] || null);
+      i.click();
+    });
+  }
+  window.__edUpload = async function (listPath) {
+    const file = await pickFile("image/*,video/*");
+    if (!file) return;
+    const busy = document.createElement("div");
+    busy.textContent = "Uploading " + file.name + "…";
+    busy.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:2147483000;background:#26201d;color:#fff;padding:10px 16px;border-radius:8px;font:13px sans-serif";
+    document.body.appendChild(busy);
+    try {
+      const timestamp = Math.floor(Date.now() / 1000);
+      // /api/sign is OUR server, asked to sign an upload on our behalf — like every other
+      // /api/* call it goes through apiFetch, which carries the editor token and 403s
+      // without it.
+      const signRes = await apiFetch("/api/sign", {
+        method: "POST", body: JSON.stringify({ paramsToSign: { timestamp } }),
+      });
+      if (!signRes.ok) throw new Error(await signRes.text());
+      const s = await signRes.json();
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("api_key", s.apiKey);
+      fd.append("timestamp", String(timestamp));
+      fd.append("signature", s.signature);
+      // api.cloudinary.com is a THIRD PARTY, not this server — this must be a plain,
+      // un-wrapped call to the global fetch, never routed through apiFetch. apiFetch
+      // would attach x-editor-token (this machine's local editor API secret) to a
+      // request leaving the machine entirely, for a host that has no business seeing
+      // it; it would also force application/json, but Cloudinary's upload endpoint
+      // requires multipart FormData.
+      const up = await (await fetch("https://api.cloudinary.com/v1_1/" + s.cloudName + "/auto/upload", { method: "POST", body: fd })).json();
+      if (up.error) throw new Error(up.error.message);
+      const item = { kind: up.resource_type === "video" ? "video" : "image", id: up.public_id, caption: "" };
+      doOp({ type: "add", path: listPath, item }, (l) => l.push({ ...item }));
+    } catch (err) {
+      alert("Upload failed:\n" + err.message);
+    } finally {
+      busy.remove();
+    }
+  };
+
   // Debounced so a burst of dc-runtime DOM churn (e.g. a whole section re-rendering)
   // collapses into one rebuild instead of one per mutation record. The disconnect-then-
   // decorate-then-reconnect order is what stops this from driving itself in a loop:

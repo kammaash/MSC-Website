@@ -44,19 +44,34 @@ test("every /api/ fetch in editor-client.js is tokenised via apiFetch", () => {
   // apiFetch is the one place the x-editor-token header gets attached (from
   // window.__EDITOR_TOKEN, which the server injects per boot — see server.js's
   // TOKEN_SCRIPT). Every call that hits /api/ must go through it.
+  //
+  // 3 call sites as of Task 13: save, publish, and sign (the last one added for
+  // Cloudinary upload signing — /api/sign is OUR server, so it's tokenised like
+  // everything else that hits /api/).
   const apiFetchCalls = SRC.match(/apiFetch\(\s*["'`](\/api\/[^"'`]+)["'`]/g) || [];
-  assert.equal(apiFetchCalls.length, 2, "expected exactly 2 apiFetch(...) call sites targeting /api/ (save, publish)");
+  assert.equal(apiFetchCalls.length, 3, "expected exactly 3 apiFetch(...) call sites targeting /api/ (save, publish, sign)");
 
   // Because the wrapper is named with a capital F ("apiFetch"), a case-sensitive search
   // for the literal substring "fetch(" (lowercase f) can never match "apiFetch(" —
-  // it only matches genuine bare fetch() calls. There must be exactly one: apiFetch's
-  // own body, which is where the real, global fetch() gets invoked. If this count ever
-  // rises above 1, a new call site has bypassed apiFetch and skipped the token header.
+  // it only matches genuine bare fetch() calls. There must be exactly two: apiFetch's
+  // own body (where the real, global fetch() gets invoked), and the direct-to-Cloudinary
+  // upload POST in window.__edUpload, which must NEVER go through apiFetch — Cloudinary
+  // is a third party, and apiFetch would hand it this machine's local editor token. If
+  // this count ever rises above 2, a new call site has bypassed apiFetch for a call that
+  // should have carried the token, or duplicated the Cloudinary escape hatch.
   const bareFetchCount = (SRC.match(/fetch\(/g) || []).length;
-  assert.equal(bareFetchCount, 1, "found a bare fetch( call outside apiFetch's own body — it would skip the x-editor-token header");
+  assert.equal(bareFetchCount, 2, "expected exactly 2 bare fetch( calls: apiFetch's own body, and the direct-to-Cloudinary upload (intentionally untokenised)");
 
   const apiFetchBody = extractBlockAfter(SRC, "function apiFetch(");
   assert.match(apiFetchBody, /"x-editor-token":\s*window\.__EDITOR_TOKEN/);
+
+  // The Cloudinary call itself must be the one bare fetch that does NOT target /api/ —
+  // pinning this down keeps the count-based checks above from being satisfiable by some
+  // other, wrong rearrangement (e.g. tokenising the Cloudinary call while leaving /api/sign
+  // as a bare fetch would still pass the two counts above with the numbers swapped).
+  const uploadBody = extractBlockAfter(SRC, "window.__edUpload = async function (listPath) {");
+  assert.match(uploadBody, /apiFetch\(\s*["'`]\/api\/sign["'`]/, "/api/sign must be requested through apiFetch");
+  assert.match(uploadBody, /fetch\(\s*["'`]https:\/\/api\.cloudinary\.com\//, "the Cloudinary upload must be a plain fetch(), not apiFetch()");
 });
 
 test("M2: apiFetch defaults content-type to application/json but a caller can still override it", () => {
