@@ -31,3 +31,10 @@ test("list ops add, remove, move with bounds checks", () => {
   assert.throws(() => P.removeItem(o, "list", 99), /Bad index/);
   assert.throws(() => P.addItem(o, "hero", {}), /Not a list/);
 });
+
+test("rejects prototype-chain segments", () => {
+  const o = { hero: { title: "T" } };
+  assert.equal(P.getPath(o, "__proto__"), undefined);
+  assert.equal(P.getPath(o, "hero.constructor"), undefined);
+  assert.throws(() => P.setPath(o, "hero.__proto__", "x"), /Path not found/);
+});

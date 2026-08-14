@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "edit": "node editor/server.js",
-    "test": "node --test editor/test/",
+    "test": "node --test \"editor/test/*.test.js\"",
     "setup": "node editor/setup.js"
   }
 }

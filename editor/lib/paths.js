@@ -7,7 +7,7 @@
   function getPath(obj, path) {
     let cur = obj;
     for (const p of parts(path)) {
-      if (cur === null || typeof cur !== "object" || !(p in cur)) return undefined;
+      if (cur === null || typeof cur !== "object" || !Object.prototype.hasOwnProperty.call(cur, p)) return undefined;
       cur = cur[p];
     }
     return cur;
@@ -16,7 +16,7 @@
     const ps = parts(path);
     const last = ps.pop();
     const parent = ps.length ? getPath(obj, ps.join(".")) : obj;
-    if (parent === undefined || parent === null || typeof parent !== "object" || !(last in parent))
+    if (parent === undefined || parent === null || typeof parent !== "object" || !Object.prototype.hasOwnProperty.call(parent, last))
       throw new Error("Path not found: " + path);
     parent[last] = value;
   }
