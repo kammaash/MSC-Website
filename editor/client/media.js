@@ -13,6 +13,7 @@
   var records = null; // null = never loaded; [] = loaded, empty
   var tab = "image"; // segmented control: "image" (Photos) | "video" (Videos)
   var open = false;
+  var pick = null; // { kind, onPick } while choosing media for a slot; null otherwise
 
   // ---- chrome ----
   // Static markup only — record data NEVER goes through innerHTML (a filename is
@@ -44,11 +45,13 @@
     '#ed-media .ed-tile .ed-badge{position:absolute;top:5px;left:5px;padding:2px 6px;border-radius:6px;' +
     'background:rgba(38,32,29,.85);font-size:10px}' +
     '#ed-media .ed-empty{grid-column:1/-1;color:#cfc7c0;text-align:center;padding:28px 8px}' +
+    '#ed-media .ed-pickbar{margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#e8541b;font-weight:600}' +
     '#ed-media-btn{background:#4a423c}' +
     '</style>' +
     '<header><strong>Media library</strong><button id="ed-media-close" title="Close">✕</button></header>' +
     '<div class="ed-seg"><button id="ed-seg-photos">Photos</button><button id="ed-seg-videos">Videos</button></div>' +
     '<div class="ed-tools"><button id="ed-media-upload">⬆ Upload</button></div>' +
+    '<div class="ed-pickbar" hidden>Click a tile to place it in the selected spot — or close to cancel.</div>' +
     '<div class="ed-grid"></div>';
   document.body.appendChild(drawer);
 
@@ -112,6 +115,23 @@
       cap.textContent = rec.name || rec.id; // textContent, never innerHTML — filenames are user-supplied
       cap.title = rec.name || rec.id;
       tile.appendChild(cap);
+      tile.draggable = true;
+      tile.style.cursor = "grab";
+      tile.ondragstart = function (e) {
+        e.dataTransfer.setData("application/x-msc-media-" + rec.kind, JSON.stringify({ record: rec, cloudName: cloudName }));
+        e.dataTransfer.effectAllowed = "copy";
+        document.body.classList.add("ed-dragging-" + rec.kind);
+      };
+      tile.ondragend = function () {
+        document.body.classList.remove("ed-dragging-image", "ed-dragging-video");
+      };
+      tile.onclick = function () {
+        if (!pick) return;
+        if (rec.kind !== pick.kind) return; // wrong tab clicked mid-pick; tabs already filter
+        var cb = pick.onPick;
+        setOpen(false); // clears pick + hides banner
+        cb(rec, cloudName);
+      };
       grid.appendChild(tile);
     });
   }
@@ -132,7 +152,7 @@
   }
 
   // ---- open/close ----
-  function setOpen(v) {
+  function setOpenInner(v) {
     open = v;
     if (v) {
       drawer.style.display = "flex";
@@ -144,6 +164,18 @@
       setTimeout(function () { if (!open) drawer.style.display = "none"; }, 200); // after the slide-out
     }
   }
+  function setOpen(v) {
+    pick = null; // opening normally or closing always cancels pick mode
+    drawer.querySelector(".ed-pickbar").hidden = true;
+    setOpenInner(v);
+  }
+  function openPicker(kind, onPick) {
+    pick = { kind: kind, onPick: onPick };
+    tab = kind;
+    drawer.querySelector(".ed-pickbar").hidden = false;
+    if (!open) setOpenInner(true); else { render(); refresh(); }
+  }
+  window.EditorMedia = { openPicker: openPicker };
   mediaBtn.onclick = function () { setOpen(!open); };
   drawer.querySelector("#ed-media-close").onclick = function () { setOpen(false); };
   segPhotos.onclick = function () { tab = "image"; render(); };

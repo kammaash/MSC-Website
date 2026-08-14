@@ -70,3 +70,31 @@ test("library records reach the DOM as text, never as markup", () => {
       "innerHTML assignment appears to interpolate data: " + m);
   }
 });
+
+function extractBlockAfter(src, marker) {
+  const markerIdx = src.indexOf(marker);
+  assert.notEqual(markerIdx, -1, "marker not found: " + marker);
+  const braceOpen = src.indexOf("{", markerIdx);
+  let depth = 0;
+  for (let i = braceOpen; i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}") { depth--; if (depth === 0) return src.slice(markerIdx, i + 1); }
+  }
+  throw new Error("unbalanced braces scanning from marker: " + marker);
+}
+
+test("media.js exposes EditorMedia.openPicker and exits pick mode on close", () => {
+  assert.match(SRC, /window\.EditorMedia = \{ openPicker: openPicker \}/);
+  const close = extractBlockAfter(SRC, "function setOpen(");
+  assert.match(close, /pick = null/); // closing the drawer always cancels pick mode
+});
+
+test("tiles are draggable and the dataTransfer payload carries record + cloudName under a kind-scoped type", () => {
+  assert.match(SRC, /tile\.draggable = true/);
+  assert.match(SRC, /"application\/x-msc-media-" \+ rec\.kind/);
+  assert.match(SRC, /JSON\.stringify\(\{ record: rec, cloudName: cloudName \}\)/);
+  // dragstart advertises the drag kind on <body> so media-slots.js can light up
+  // matching slots from CSS alone; dragend must always clean it up.
+  assert.match(SRC, /body\.classList\.add\("ed-dragging-" \+ rec\.kind\)/);
+  assert.match(SRC, /body\.classList\.remove\("ed-dragging-image", "ed-dragging-video"\)/);
+});
