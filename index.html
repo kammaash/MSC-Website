@@ -14,18 +14,35 @@
     1. <helmet>   Google Fonts, the page stylesheet and cursor.js. Its children
                   are lifted into <head> when the runtime boots.
 
-    2. <x-dc>     the markup template. Ordinary HTML plus four extras:
+    2. <x-dc>     the markup template. Ordinary HTML plus five extras:
                     {{ expr }}    a hole, filled from renderVals() in part 3
                     <sc-for>      repeat the children once per array element
                     <sc-if>       render the children only if value is truthy
                     style-hover   a genuine :hover rule (inline style cannot
                                   express one, so the runtime compiles this
                                   attribute into a real generated CSS class)
+                    data-edit     where this element's text came from: its
+                                  path into CONTENT, e.g. hero.title. Inside
+                                  an <sc-for> the item's own path is
+                                  precomputed as `p`, so the attribute is
+                                  written as a hole and reads .p first. The
+                                  runtime ignores the attribute; the local
+                                  editor uses it to map a clicked element back
+                                  to the value behind it.
 
     3. <script type="text/x-dc" data-dc-script>
-                  the page logic: a single `class Component extends DCLogic`
-                  whose renderVals() returns the flat object that every
-                  {{ hole }} above is resolved against.
+                  the page content and the page logic:
+                    CONTENT       every piece of editable copy on the page, as
+                                  strict JSON between the CONTENT:BEGIN and
+                                  CONTENT:END marker comments. The editor
+                                  tooling rewrites exactly that span, so it
+                                  stays JSON: double-quoted keys and values,
+                                  no comments and no trailing commas inside
+                                  the markers. Explanations go above them.
+                    Component     a single `class Component extends DCLogic`
+                                  whose renderVals() reads from CONTENT and
+                                  returns the flat object that every
+                                  {{ hole }} above is resolved against.
 
   The {{ }} language is deliberately tiny: property paths, string / number /
   boolean literals, `!`, and the equality operators. No function calls, no
