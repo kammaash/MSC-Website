@@ -213,9 +213,15 @@
         if (!up || typeof up !== "object") up = {};
         if (!upRes.ok || up.error) throw new Error((up.error && up.error.message) || ("Cloudinary upload failed (HTTP " + upRes.status + ")"));
         if (typeof up.public_id !== "string" || up.public_id === "") throw new Error("Cloudinary response is missing public_id");
+        // accept="image/*" is only a picker hint — a determined pick can still hand us a
+        // video. Videos live on YouTube now (drawer → Videos → Add YouTube link), so a
+        // non-image response is refused here rather than stored as a bogus record.
+        if (up.resource_type !== "image") {
+          throw new Error("Only photos can be uploaded here. Videos go on YouTube — switch to the Videos tab and use 🔗 Add YouTube link.");
+        }
         var rec = {
           id: up.public_id,
-          kind: up.resource_type === "video" ? "video" : "image",
+          kind: "image",
           name: file.name,
           createdAt: new Date().toISOString(),
         };

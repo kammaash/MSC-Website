@@ -231,8 +231,10 @@
 <!-- ============ HERO ============
      Headline and portrait side by side (.g-hero), followed by a four-up strip
      of statistics driven by the `stats` array in CONTENT.
-     The portrait <img> is a 1x1 transparent GIF standing in for real
-     photography; the peach box around it is what you actually see today.
+     The portrait <img> is a media slot (hero.photo), placed through the
+     editor's media drawer. "" means no photo chosen yet — renderVals falls
+     back to the 1x1 transparent GIF, so the peach box around it is what you
+     see in that empty state today.
      The stat tiles carry data-reveal, so they fade in when scrolled into view
      rather than on load like the headline above them. -->
 <section id="top" class="wrap" style="position:relative;padding-top:74px;padding-bottom:56px">
@@ -481,6 +483,9 @@
           line, `title2` the second, and `titleEm` the italic red word that
           closes it. A {{ }} hole renders as text, so the <br> and the <em>
           have to stay in the markup and each fragment gets its own key.
+          `photo` is a media slot, placed through the editor's media drawer;
+          "" renders the 1x1 transparent GIF placeholder (see the HERO
+          section comment above).
   stats   hero stat strip. Deliberately non-numeric placeholders: no verified
           enrolment or founding figures exist for these schools yet, so
           nothing is invented here. Replace with real numbers when confirmed.

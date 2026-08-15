@@ -117,3 +117,19 @@ test("video tiles thumbnail from YouTube's image CDN; images stay on Cloudinary"
   assert.match(t, /i\.ytimg\.com\/vi\//);
   assert.match(t, /res\.cloudinary\.com/);
 });
+
+test("the drawer's own upload (Photos tab) is photos-only — a non-image Cloudinary response is refused, not stored", () => {
+  // Mirrors editor-client.test.js's "inline gallery upload is photos-only": accept="image/*"
+  // is only a picker hint, so the Cloudinary response's resource_type is the real gate. Without
+  // it, a .mp4 picked from the Photos tab would upload to Cloudinary and get stored as a bogus
+  // record, exactly what videos-are-YouTube-only forbids.
+  const up = extractBlockAfter(SRC, "function uploadOne(");
+  assert.match(up, /resource_type !== "image"/);
+  assert.ok(!/resource_type === "video" \? "video" : "image"/.test(SRC), "the video-kind ternary must be gone");
+
+  // The guard must run before the record is ever posted to /api/media, not after.
+  const guardIdx = up.indexOf('resource_type !== "image"');
+  const postIdx = up.indexOf('apiFetch("/api/media"');
+  assert.ok(guardIdx !== -1 && postIdx !== -1 && guardIdx < postIdx,
+    "the photos-only guard must run before uploadOne's POST /api/media");
+});

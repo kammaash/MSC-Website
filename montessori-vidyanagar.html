@@ -11,9 +11,9 @@
   =========
   montessori-acamp.html is the same page for the other branch, and the two
   are kept deliberately identical in structure: the only differences are the
-  school name, the hero copy, the localStorage key, and which subpage file and
-  sibling branch they link to. A change to the layout or logic here almost
-  certainly needs the same change there.
+  school name, the hero copy, and which subpage file and sibling branch they
+  link to. A change to the layout or logic here almost certainly needs the
+  same change there.
 
   PAGE STRUCTURE
   ==============
@@ -625,6 +625,13 @@
   hero    the welcome line, the school name headline, the two introductory
           paragraphs and the quotation banner over the hero photo. This is the
           branch-specific copy: the A-Camp twin says something different.
+          `photo` is a media slot, placed through the editor's media drawer;
+          "" renders the 1x1 transparent GIF placeholder.
+  showcase  one key, `video`: a full youtube-nocookie embed URL written by the
+          editor when a video is placed on the showcase's media slot. ""
+          means the slot is empty — renderVals maps it to about:blank. A bare
+          video ID or a youtube.com/watch?v= URL is not a valid value here
+          and will render a broken frame.
   academics  the six academics cards. `tag` is the card's ordinal badge.
           Deliberately generic: no examination board, affiliation or grade
           range is claimed, as none has been confirmed.

@@ -10,9 +10,9 @@
   =========
   montessori-vidyanagar.html is the same page for the other branch, and the two
   are kept deliberately identical in structure: the only differences are the
-  school name, the hero copy, the localStorage key, and which subpage file and
-  sibling branch they link to. A change to the layout or logic here almost
-  certainly needs the same change there.
+  school name, the hero copy, and which subpage file and sibling branch they
+  link to. A change to the layout or logic here almost certainly needs the
+  same change there.
 
   PAGE STRUCTURE
   ==============
@@ -495,11 +495,12 @@
      Real campus photography grouped by category, each photo a flip card:
      the front shows the photo, the back reveals the caption and category
      tag on hover/focus. `galleryGroups` in CONTENT is the single source of
-     truth. Group labels and photo captions are editable; the image files
-     themselves are not — a photo's src is a path into assets/gallery or an
-     external URL, so adding or removing a photo means editing CONTENT by
-     hand, not clicking in the editor. That is why this grid carries no
-     data-list: the editor's add/remove buttons could not supply a src.
+     truth. Group labels and photo captions are editable, and each photo's
+     src is a media slot (`data-media-slot="{{ ph.p }}.src"`) — open the
+     drawer and drop a photo onto the tile to swap it. Adding or removing a
+     photo entry from the array is still a hand edit of CONTENT, not a click
+     in the editor. That is why this grid carries no data-list: the editor's
+     add/remove buttons could not supply a src.
      The category tag on each card back deliberately renders {{ grp.label }}
      WITHOUT data-edit — the heading above is the one editable copy of that
      value, so a collaborator cannot edit the same string from two places
@@ -681,9 +682,18 @@
   hero    the welcome line, the school name headline, the two introductory
           paragraphs and the quotation banner over the hero photo. This is the
           branch-specific copy: the Vidyanagar twin says something different.
+          `photo` is a media slot, placed through the editor's media drawer;
+          "" renders the 1x1 transparent GIF placeholder.
   founder the five text fields of the Founder panel — eyebrow, name, title,
-          two body paragraphs and the closing quotation. The portrait's src
-          stays in the markup: images are not editable text.
+          two body paragraphs and the closing quotation — plus `photo`, the
+          portrait, which is a media slot placed through the editor's media
+          drawer like any other image slot; "" renders the 1x1 transparent
+          GIF placeholder.
+  showcase  one key, `video`: a full youtube-nocookie embed URL written by the
+          editor when a video is placed on the showcase's media slot. ""
+          means the slot is empty — renderVals maps it to about:blank. A bare
+          video ID or a youtube.com/watch?v= URL is not a valid value here
+          and will render a broken frame.
   academics  the six academics cards. `tag` is the card's ordinal badge.
           Deliberately generic: no examination board, affiliation or grade
           range is claimed, as none has been confirmed.
@@ -700,11 +710,12 @@
           subpage's content map.
   galleryGroups  the gallery, one entry per category, each with a `label` and
           a `photos` array of { src, caption }. Labels and captions are
-          editable; `src` is a file path or an external URL and is not, so
-          adding or removing a photo is a hand edit here. The news cards and
-          the branch galleries in content.js are a different mechanism —
-          this page's photography is fixed markup data, not a shared
-          collection, because these images predate the editor.
+          editable, and each `src` is a media slot placed through the editor's
+          media drawer — but adding or removing a photo entry from the array
+          is still a hand edit of CONTENT, not a click in the editor. The news
+          cards and the branch galleries in content.js are a different
+          mechanism — this page's photography is fixed markup data, not a
+          shared collection, because these images predate the editor.
 */
 /* CONTENT:BEGIN */
 const CONTENT = {
