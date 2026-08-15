@@ -683,12 +683,15 @@
           paragraphs and the quotation banner over the hero photo. This is the
           branch-specific copy: the Vidyanagar twin says something different.
           `photo` is a media slot, placed through the editor's media drawer;
-          "" renders the 1x1 transparent GIF placeholder.
+          it holds a real image path today and this page binds it directly
+          ({{ hero.photo }}) with no empty-state fallback, so it should not
+          be emptied by hand.
   founder the five text fields of the Founder panel — eyebrow, name, title,
           two body paragraphs and the closing quotation — plus `photo`, the
           portrait, which is a media slot placed through the editor's media
-          drawer like any other image slot; "" renders the 1x1 transparent
-          GIF placeholder.
+          drawer like any other image slot; it holds a real image path today
+          and this page binds it directly ({{ founder.photo }}) with no
+          empty-state fallback, so it should not be emptied by hand.
   showcase  one key, `video`: a full youtube-nocookie embed URL written by the
           editor when a video is placed on the showcase's media slot. ""
           means the slot is empty — renderVals maps it to about:blank. A bare
