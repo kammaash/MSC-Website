@@ -1,12 +1,10 @@
 (function () {
   "use strict";
   // Selection + drag-and-drop for media slots. A slot is an element carrying
-  // data-media-slot="<content path>" (+ data-media-kind). Video slots are <iframe>
-  // YouTube embeds: a src change reloads the frame on its own, and YouTube brings
-  // its own poster frame — so there is no per-kind plumbing here at all.
-  // Placing media ONLY writes URL strings at those paths through the same draft
-  // pipeline as text edits — it can never create or move elements, which is the
-  // whole "structure and styling stay intact" guarantee.
+  // data-media-slot="<content path>" (+ data-media-kind). Most slots store a
+  // delivery URL; shared Cloudinary galleries opt into data-media-value="id" so
+  // they keep their established public-ID shape. Both still use the same draft
+  // pipeline as text edits and never create or move page elements.
   if (!window.EditorUI || !window.EditorMedia || !window.EditorMediaUrls) return;
   var UI = window.EditorUI;
   var URLS = window.EditorMediaUrls;
@@ -16,22 +14,26 @@
     ".ed-slot-hover{outline:2px dashed #e8541b!important;outline-offset:2px;cursor:pointer!important}" +
     ".ed-slot-selected{outline:3px solid #e8541b!important;outline-offset:2px}" +
     ".ed-media-empty{outline:2px dashed #c2410f!important;outline-offset:-2px}" +
-    // Contextual video actions exist only in local edit mode. The whole slot becomes
+    // Contextual media actions exist only in local edit mode. The whole slot becomes
     // a hover/focus surface; each action keeps its icon circular with its label below.
-    ".ed-video-slot{position:relative!important}" +
-    ".ed-video-actions{display:none}" +
-    "body.ed-editing .ed-video-actions{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:22px;" +
+    ".ed-context-slot{position:relative!important}" +
+    ".ed-slot-actions{display:none}" +
+    "body.ed-editing .ed-slot-actions{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:22px;" +
     "background:rgba(24,17,14,.68);opacity:0;pointer-events:none;transition:opacity .16s ease}" +
-    "body.ed-editing .ed-video-slot:hover>.ed-video-actions,body.ed-editing .ed-video-slot:focus-within>.ed-video-actions{" +
+    "body.ed-editing .ed-context-slot:hover>.ed-slot-actions,body.ed-editing .ed-context-slot:focus-within>.ed-slot-actions{" +
     "opacity:1;pointer-events:auto}" +
-    ".ed-video-action{display:flex;min-width:66px;flex-direction:column;align-items:center;gap:7px;padding:0;border:0;" +
+    // Flip-card captions remain visible/editable: their media controls sit in a
+    // compact corner panel instead of covering the whole card back.
+    "body.ed-editing .flip.ed-context-slot>.ed-slot-actions{inset:8px 8px auto auto;padding:9px 10px;border-radius:12px}" +
+    "body.ed-editing .ed-hero-photo-slot>.ed-slot-actions{inset:80px 0 0}" +
+    ".ed-slot-action{display:flex;min-width:66px;flex-direction:column;align-items:center;gap:7px;padding:0;border:0;" +
     "background:transparent;color:#fff;font:600 12px/1.15 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;cursor:pointer!important}" +
-    ".ed-video-action-icon{display:grid;width:48px;height:48px;place-items:center;border-radius:999px;border:2px solid rgba(255,255,255,.82);" +
+    ".ed-slot-action-icon{display:grid;width:48px;height:48px;place-items:center;border-radius:999px;border:2px solid rgba(255,255,255,.82);" +
     "background:#fff;color:#a51915;font-size:24px;line-height:1;box-shadow:0 5px 16px rgba(0,0,0,.3);transition:transform .15s ease,background .15s ease}" +
-    ".ed-video-action:hover .ed-video-action-icon,.ed-video-action:focus-visible .ed-video-action-icon{transform:scale(1.08);background:#ffd9c4}" +
-    ".ed-video-action:focus-visible{outline:3px solid #ffb28d;outline-offset:5px;border-radius:8px}" +
-    ".ed-video-action[data-video-action=remove] .ed-video-action-icon{background:#a51915;color:#fff}" +
-    "@media(prefers-reduced-motion:reduce){.ed-video-actions,.ed-video-action-icon{transition:none!important}}" +
+    ".ed-slot-action:hover .ed-slot-action-icon,.ed-slot-action:focus-visible .ed-slot-action-icon{transform:scale(1.08);background:#ffd9c4}" +
+    ".ed-slot-action:focus-visible{outline:3px solid #ffb28d;outline-offset:5px;border-radius:8px}" +
+    ".ed-slot-action[data-media-action=remove] .ed-slot-action-icon{background:#a51915;color:#fff}" +
+    "@media(prefers-reduced-motion:reduce){.ed-slot-actions,.ed-slot-action-icon{transition:none!important}}" +
     // The slot wrapper, rather than its nested browsing context, owns editor
     // pointer/drag events. Exit removes ed-editing and restores normal playback.
     "body.ed-editing [data-media-kind=video] iframe{pointer-events:none!important}" +
@@ -70,18 +72,24 @@
       alert("That spot takes a " + kind + ", not a " + record.kind + ".");
       return;
     }
-    var url = URLS.deliveryUrl(cloudName, record);
+    var value = slotEl.getAttribute("data-media-value") === "id"
+      ? record.id
+      : URLS.deliveryUrl(cloudName, record);
+    if (typeof value !== "string" || value === "") {
+      alert("That media item has no usable " + (slotEl.getAttribute("data-media-value") === "id" ? "public ID" : "URL") + ".");
+      return;
+    }
     try {
       // Apply first, record only on success — the same invariant as every other
       // editor mutation (see editor-client.js's doOp): a failed apply must never
       // leave an op in the draft log. One path, one write: a throw means nothing
       // was applied, so there is nothing to roll back.
-      UI.applyLocal(path, url);
+      UI.applyLocal(path, value);
     } catch (err) {
       alert("Can't place media here:\n" + err.message);
       return;
     }
-    UI.draft.set(path, url);
+    UI.draft.set(path, value);
     clearSelection();
     UI.rerender(); UI.update();
     // rAF lands after the rerender's commit, so the empty-state marking sees the
@@ -102,17 +110,19 @@
     }, path);
   }
 
-  function removeVideoFromSlot(slotEl) {
+  function removeFromSlot(slotEl) {
     if (!UI.isEditing()) return;
     var path = slotEl.getAttribute("data-media-slot");
-    if (slotEl.getAttribute("data-media-kind") !== "video" || slotValue(slotEl) === "") return;
-    if (!confirm("Remove this video from the page?\n\nIt will stay in the Media library so you can add it again later.")) return;
+    var kind = slotEl.getAttribute("data-media-kind");
+    if ((kind !== "image" && kind !== "video") || slotValue(slotEl) === "") return;
+    var noun = kind === "image" ? "photo" : "video";
+    if (!confirm("Remove this " + noun + " from the page?\n\nIt will stay in the Media library so you can add it again later.")) return;
     try {
       // Same apply-before-record transaction rule as placement: a broken/stale path
       // must never leave a draft operation claiming the removal succeeded.
       UI.applyLocal(path, "");
     } catch (err) {
-      alert("Can't remove this video:\n" + err.message);
+      alert("Can't remove this " + noun + ":\n" + err.message);
       return;
     }
     UI.draft.set(path, "");
@@ -121,14 +131,14 @@
     requestAnimationFrame(markEmpties);
   }
 
-  function videoAction(action, icon, label, slotEl) {
+  function mediaAction(action, icon, label, slotEl) {
     var button = document.createElement("button");
     button.type = "button";
-    button.className = "ed-video-action";
-    button.setAttribute("data-video-action", action);
-    button.setAttribute("aria-label", label + " for this video area");
+    button.className = "ed-slot-action";
+    button.setAttribute("data-media-action", action);
+    button.setAttribute("aria-label", label + " for this " + slotEl.getAttribute("data-media-kind") + " area");
     var iconEl = document.createElement("span");
-    iconEl.className = "ed-video-action-icon";
+    iconEl.className = "ed-slot-action-icon";
     iconEl.setAttribute("aria-hidden", "true");
     iconEl.textContent = icon;
     var labelEl = document.createElement("span");
@@ -137,32 +147,34 @@
     button.appendChild(labelEl);
     button.onclick = function (e) {
       e.preventDefault(); e.stopPropagation();
-      if (action === "remove") removeVideoFromSlot(slotEl);
+      if (action === "remove") removeFromSlot(slotEl);
       else openPickerForSlot(slotEl);
     };
     return button;
   }
 
-  function decorateVideoActions() {
-    document.querySelectorAll('[data-media-kind="video"][data-media-slot]').forEach(function (slotEl) {
-      slotEl.classList.add("ed-video-slot");
+  function decorateSlotActions() {
+    document.querySelectorAll('[data-media-slot][data-media-kind="image"],[data-media-slot][data-media-kind="video"]').forEach(function (slotEl) {
+      slotEl.classList.add("ed-context-slot");
+      // Actions must be children of a container, never a void media element.
+      if (/^(IMG|IFRAME|VIDEO)$/.test(slotEl.tagName)) return;
       var value = slotValue(slotEl);
       if (typeof value !== "string") return;
       var state = value === "" ? "empty" : "filled";
       var actions = Array.prototype.find.call(slotEl.children, function (child) {
-        return child.classList && child.classList.contains("ed-video-actions");
+        return child.classList && child.classList.contains("ed-slot-actions");
       });
-      if (actions && actions.getAttribute("data-video-state") === state) return;
+      if (actions && actions.getAttribute("data-media-state") === state) return;
       if (actions) actions.remove();
       actions = document.createElement("div");
-      actions.className = "ed-video-actions";
-      actions.setAttribute("data-video-state", state);
-      actions.setAttribute("aria-label", "Video options");
+      actions.className = "ed-slot-actions";
+      actions.setAttribute("data-media-state", state);
+      actions.setAttribute("aria-label", (slotEl.getAttribute("data-media-kind") === "image" ? "Photo" : "Video") + " options");
       if (state === "empty") {
-        actions.appendChild(videoAction("add", "+", "Add video", slotEl));
+        actions.appendChild(mediaAction("add", "+", slotEl.getAttribute("data-media-kind") === "image" ? "Add photo" : "Add video", slotEl));
       } else {
-        actions.appendChild(videoAction("replace", "↻", "Replace", slotEl));
-        actions.appendChild(videoAction("remove", "×", "Remove", slotEl));
+        actions.appendChild(mediaAction("replace", "↻", "Replace", slotEl));
+        actions.appendChild(mediaAction("remove", "×", "Remove", slotEl));
       }
       slotEl.appendChild(actions);
     });
@@ -177,7 +189,7 @@
       try { v = UI.getLocal(el.getAttribute("data-media-slot")); } catch (e) { v = null; }
       el.classList.toggle("ed-media-empty", UI.isEditing() && v === "");
     });
-    decorateVideoActions();
+    decorateSlotActions();
   }
 
   // ---- hover + click select (delegated, editing-gated) ----
@@ -204,7 +216,7 @@
     // its own click instead. Media slots may wrap elements with their own
     // interactive chrome, so only claim the click if it's on the slot itself or
     // a non-interactive descendant.
-    var interactive = e.target.closest && e.target.closest("button, a, input, textarea, select, .ed-menu");
+    var interactive = e.target.closest && e.target.closest("button, a, input, textarea, select, [data-edit], .ed-menu");
     if (interactive && el.contains(interactive)) return;
     e.preventDefault(); e.stopPropagation();
     openPickerForSlot(el);

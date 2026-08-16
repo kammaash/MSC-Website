@@ -50,6 +50,14 @@ test("kind mismatch is refused before any mutation", () => {
   assert.match(apply, /record\.kind !== kind/);
 });
 
+test("shared gallery image slots preserve their public-ID storage shape", () => {
+  const apply = extractBlockAfter(SRC, "function applyToSlot");
+  assert.match(apply, /getAttribute\("data-media-value"\) === "id"/);
+  assert.match(apply, /\? record\.id\s*:\s*URLS\.deliveryUrl/);
+  assert.match(apply, /typeof value !== "string" \|\| value === ""/,
+    "missing IDs and URLs must be rejected before the slot is mutated");
+});
+
 test("media uploads count as publishable disk state via markSavedToDisk — never here; placement is a draft op", () => {
   // Placement goes through draft.set (a pending op), NOT markSavedToDisk (which is
   // for server-side writes like the upload itself). Guard against confusing the two.
@@ -83,26 +91,26 @@ test("video iframe pointer events belong to the slot wrapper only while editing"
   assert.match(SRC, /body\.ed-editing \[data-media-kind=video\] iframe\{pointer-events:none!important\}/);
 });
 
-test("video slots expose rounded, labelled hover and keyboard-focus actions only in edit mode", () => {
-  assert.match(SRC, /body\.ed-editing \.ed-video-actions/);
-  assert.match(SRC, /\.ed-video-slot:hover>\.ed-video-actions/);
-  assert.match(SRC, /\.ed-video-slot:focus-within>\.ed-video-actions/);
+test("image and video slots expose rounded, labelled hover and keyboard-focus actions only in edit mode", () => {
+  assert.match(SRC, /body\.ed-editing \.ed-slot-actions/);
+  assert.match(SRC, /\.ed-context-slot:hover>\.ed-slot-actions/);
+  assert.match(SRC, /\.ed-context-slot:focus-within>\.ed-slot-actions/);
   assert.match(SRC, /border-radius:999px/);
-  assert.match(SRC, /className = "ed-video-action-icon"/);
-  assert.match(SRC, /setAttribute\("aria-label", label \+ " for this video area"\)/);
+  assert.match(SRC, /className = "ed-slot-action-icon"/);
+  assert.match(SRC, /label \+ " for this " \+ slotEl\.getAttribute\("data-media-kind"\) \+ " area"/);
   assert.match(SRC, /prefers-reduced-motion:reduce/);
 });
 
-test("empty video slots show Add; populated slots show Replace and Remove", () => {
-  const decorate = extractBlockAfter(SRC, "function decorateVideoActions(");
+test("empty media slots show kind-specific Add; populated slots show Replace and Remove", () => {
+  const decorate = extractBlockAfter(SRC, "function decorateSlotActions(");
   assert.match(decorate, /value === "" \? "empty" : "filled"/);
-  assert.match(decorate, /videoAction\("add", "\+", "Add video"/);
-  assert.match(decorate, /videoAction\("replace", "↻", "Replace"/);
-  assert.match(decorate, /videoAction\("remove", "×", "Remove"/);
+  assert.match(decorate, /"Add photo" : "Add video"/);
+  assert.match(decorate, /mediaAction\("replace", "↻", "Replace"/);
+  assert.match(decorate, /mediaAction\("remove", "×", "Remove"/);
 });
 
-test("video action buttons stop slot-click bubbling and Add/Replace reuse the verified picker", () => {
-  const action = extractBlockAfter(SRC, "function videoAction(");
+test("media action buttons stop slot-click bubbling and Add/Replace reuse the verified picker", () => {
+  const action = extractBlockAfter(SRC, "function mediaAction(");
   assert.match(action, /e\.preventDefault\(\); e\.stopPropagation\(\)/);
   assert.match(action, /action === "remove"/);
   assert.match(action, /openPickerForSlot\(slotEl\)/);
@@ -112,8 +120,9 @@ test("video action buttons stop slot-click bubbling and Add/Replace reuse the ve
 });
 
 test("Remove clears only the page slot, confirms first, and records after apply succeeds", () => {
-  const remove = extractBlockAfter(SRC, "function removeVideoFromSlot(");
+  const remove = extractBlockAfter(SRC, "function removeFromSlot(");
   assert.match(remove, /UI\.isEditing\(\)/);
+  assert.match(remove, /kind === "image" \? "photo" : "video"/);
   assert.match(remove, /stay in the Media library/);
   assert.doesNotMatch(remove, /apiFetch|media\/delete|removeRecord/);
   const applyIdx = remove.indexOf('UI.applyLocal(path, "")');
@@ -144,7 +153,7 @@ test("click handler guards against swallowing interactive controls inside slots"
   // Media slots may wrap list items whose own interactive chrome (buttons, etc.)
   // lives inside them. The capture-phase click listener must not claim clicks
   // targeting those controls, or stopPropagation() will prevent them from firing.
-  assert.match(SRC, /e\.target\.closest.*button.*a.*input.*textarea.*select.*\.ed-menu/);
+  assert.match(SRC, /e\.target\.closest.*button.*a.*input.*textarea.*select.*\[data-edit\].*\.ed-menu/);
   assert.match(SRC, /if \(interactive && el\.contains\(interactive\)\) return;/);
 });
 

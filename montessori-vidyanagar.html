@@ -269,7 +269,9 @@
     <div style="position:absolute;top:0;left:0;right:0;background:#c2410f;color:#fff;padding:20px 30px;z-index:2">
       <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
-    <img src="{{ heroPhotoSrc }}" data-media-slot="hero.photo" data-media-kind="image" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+    <div class="ed-hero-photo-slot" data-media-slot="hero.photo" data-media-kind="image" style="position:absolute;inset:0">
+      <img src="{{ heroPhotoSrc }}" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+    </div>
   </div>
 </section>
 
@@ -473,7 +475,7 @@
     <div class="g g-3" data-list="shared:galleries.vidyanagar">
       <sc-for list="{{ gallery }}" as="ga" hint-placeholder-count="6">
         <figure data-item="" style="position:relative;margin:0;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0e0dc">
-          <sc-if value="{{ ga.isImage }}"><img src="{{ ga.url }}" alt="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"></sc-if>
+          <sc-if value="{{ ga.isImage }}"><div data-media-slot="{{ ga.p }}.id" data-media-kind="image" data-media-value="id" style="position:relative"><img src="{{ ga.url }}" alt="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"></div></sc-if>
           <sc-if value="{{ ga.isVideo }}"><iframe src="{{ ga.url }}" title="{{ ga.videoTitle }}" loading="lazy" style="width:100%;aspect-ratio:4/3;border:0;display:block;background:#26201d" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></sc-if>
           <figcaption data-edit="{{ ga.p }}.caption" style="padding:10px 12px;font-size:13px;color:#6b615b">{{ ga.caption }}</figcaption>
         </figure>
@@ -809,6 +811,7 @@ class Component extends DCLogic {
     const S = window.SHARED_CONTENT;
     const cdn = "https://res.cloudinary.com/" + S.cloudName;
     const news = S.news.vidyanagar.map((it, i) => ({ ...it, p: "shared:news.vidyanagar." + i }));
+    const EMPTY_IMAGE = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     const gallery = S.galleries.vidyanagar.map((it, i) => ({
       ...it,
       p: "shared:galleries.vidyanagar." + i,
@@ -818,7 +821,7 @@ class Component extends DCLogic {
       // Photos are Cloudinary public IDs; videos are YouTube video IDs — embedded
       // via the privacy-enhanced host, end-screen suggestions kept to this channel.
       url: it.kind === "image"
-        ? cdn + "/image/upload/f_auto,q_auto,w_800/" + it.id
+        ? (it.id ? cdn + "/image/upload/f_auto,q_auto,w_800/" + it.id : EMPTY_IMAGE)
         : "https://www.youtube-nocookie.com/embed/" + it.id + "?rel=0",
     }));
     const open = this.state.openMenu;
