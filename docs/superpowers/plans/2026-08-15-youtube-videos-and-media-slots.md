@@ -1,5 +1,11 @@
 # YouTube Videos + Edit-Mode Media Slots Implementation Plan
 
+> **Reliability amendment (2026-08-16):** the implemented flow now uses one atomic
+> `POST /api/youtube/add` request that verifies and inserts the server-built record.
+> It fails closed on network or malformed-oEmbed responses, and generic
+> `POST /api/media` rejects video records. Older `/api/youtube/resolve`, offline
+> fallback, and two-request snippets below are retained only as historical plan text.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 > **Execution model:** dispatch each task to a fresh **Sonnet** subagent. Every task is

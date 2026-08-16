@@ -28,14 +28,14 @@ already documents this. Uploading through **YouTube Studio** has no such restric
   `kind:"image"` → `id` is a Cloudinary public_id; `kind:"video"` → `id` is the
   11-character YouTube video ID (`/^[A-Za-z0-9_-]{11}$/`, enforced by
   `validateRecord`). `media.json` is empty today — no migration.
-- **Link validation:** new endpoint `POST /api/youtube/resolve { url }`. The server
+- **Link validation and insertion:** `POST /api/youtube/add { url }`. The server
   parses the ID out of any common URL form (`watch?v=`, `youtu.be/`, `shorts/`,
   `embed/`, `live/`, bare ID, schemeless), then calls YouTube's keyless **oEmbed**
-  endpoint server-side (global `fetch`, 5s timeout, injectable for tests).
-  Success → `{ id, title }` (title auto-fills the record name). oEmbed 4xx (private /
-  deleted / embedding disabled) → **422** with a plain-language fix ("set it to
-  Unlisted"). Network unreachable → `{ id, title: null, unverified: true }` and the
-  client asks for a name — offline must not block the editor.
+  endpoint server-side (global `fetch`, 5s timeout, injectable for tests). On success
+  the server constructs and persists the video record in the same request. oEmbed 4xx
+  (private / deleted / embedding disabled) → **422** with a plain-language fix. A
+  network failure or malformed oEmbed response fails closed with no library write;
+  this prevents an unverified/broken player from reaching the public site.
 - **URL authority:** `editor/lib/media-urls.js` (UMD) derives every delivery URL from
   a record: images Cloudinary (`f_auto,q_auto,w_1600`), videos
   `https://www.youtube-nocookie.com/embed/<id>?rel=0` (privacy-enhanced host; `rel=0`
@@ -64,7 +64,7 @@ already documents this. Uploading through **YouTube Studio** has no such restric
 
 ## Security / privacy notes
 
-- `/api/youtube/resolve` sits behind the uniform `/api/*` guard (origin, token,
+- `/api/youtube/add` sits behind the uniform `/api/*` guard (origin, token,
   content-type). Its outbound fetch goes only to `www.youtube.com/oembed` with a
   regex-validated ID — no SSRF surface, and the editor token never leaves the machine.
 - Unlisted ≠ access control: anyone with the link can watch, and the IDs are visible
@@ -74,7 +74,7 @@ already documents this. Uploading through **YouTube Studio** has no such restric
 ## Testing
 
 House style: `node --test`, zero dependencies. Unit tests for `youtube.js` parsing
-(every URL form + rejects) and `media-db` video-ID validation; `/api/youtube/resolve`
+(every URL form + rejects) and `media-db` video-ID validation; `/api/youtube/add`
 via real HTTP against `createServer` with a stubbed `oembedFetch` (success / 4xx /
 network-fail / bad body); source-level tests for the drawer link flow and `__edUpload`
 image-only restriction; the media-slots plan's own tests continue to cover slot

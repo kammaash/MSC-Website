@@ -25,7 +25,9 @@ must keep everything between the markers valid JSON.
 
 `npm run edit` starts a local Node server that serves this repo and injects the
 click-to-edit tooling at serve time only — the deployed site carries no editor code.
-`npm run setup` stores the Cloudinary credentials once per machine, outside the repo.
+The Media drawer can connect Cloudinary the first time photos are used; credentials are
+stored once per machine outside the repo. `npm run setup` provides the same setup through
+Terminal when preferred.
 `npm test` runs the editor's test suite plus `editor/check-paths.js`, which verifies
 every `data-edit` / `data-list` path in the pages still resolves. Node 22 or newer.
 

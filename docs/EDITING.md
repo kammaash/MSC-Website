@@ -11,7 +11,7 @@
 ## Editing
 1. In Terminal, from the MSC-Website folder: `npm run edit` — your browser opens the site in editing mode.
 2. Click any outlined text to change it. Enter finishes, Escape cancels.
-3. **News:** open a school page, use "+ Add" under News. **Photos:** "+ Add" under Gallery, pick the file — it uploads and appears. **Videos** also go through "+ Add" under Gallery for now — see the note below.
+3. **News:** open a school page and use "+ Add" under News. **Photos:** open Media → Photos, upload once, then click or drag the photo onto an outlined photo area. **Videos:** upload in YouTube Studio as **Unlisted**, then open Media → Videos → Add YouTube video and paste its Share link. The editor verifies the video before adding it.
 4. ↑ ↓ reorder items; ✕ deletes (asks first).
 5. Press **Publish**. The live site updates in about a minute. **Discard** throws away unsaved changes.
 
@@ -51,6 +51,6 @@ proportional to what was actually edited.
   Press Publish again; it is safe to retry and will not duplicate or delete anything. If it
   keeps failing, tell the admin.
 - Made a mistake that's live? Tell the admin — every publish can be undone with one click on GitHub.
-- Videos currently upload to Cloudinary, the same as photos — a "Publish to YouTube" option does
-  not exist yet. It's built but switched off on purpose until Google approves a compliance
-  review of the school's YouTube integration; nothing you do in the editor is affected either way.
+- **“YouTube could not be reached”** — the editor deliberately added nothing because it could
+  not verify that the public page would get a working player. Check the internet connection and
+  try again. Never paste a video file into Photos; videos stay on YouTube.
