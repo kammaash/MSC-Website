@@ -83,13 +83,54 @@ test("video iframe pointer events belong to the slot wrapper only while editing"
   assert.match(SRC, /body\.ed-editing \[data-media-kind=video\] iframe\{pointer-events:none!important\}/);
 });
 
+test("video slots expose rounded, labelled hover and keyboard-focus actions only in edit mode", () => {
+  assert.match(SRC, /body\.ed-editing \.ed-video-actions/);
+  assert.match(SRC, /\.ed-video-slot:hover>\.ed-video-actions/);
+  assert.match(SRC, /\.ed-video-slot:focus-within>\.ed-video-actions/);
+  assert.match(SRC, /border-radius:999px/);
+  assert.match(SRC, /className = "ed-video-action-icon"/);
+  assert.match(SRC, /setAttribute\("aria-label", label \+ " for this video area"\)/);
+  assert.match(SRC, /prefers-reduced-motion:reduce/);
+});
+
+test("empty video slots show Add; populated slots show Replace and Remove", () => {
+  const decorate = extractBlockAfter(SRC, "function decorateVideoActions(");
+  assert.match(decorate, /value === "" \? "empty" : "filled"/);
+  assert.match(decorate, /videoAction\("add", "\+", "Add video"/);
+  assert.match(decorate, /videoAction\("replace", "↻", "Replace"/);
+  assert.match(decorate, /videoAction\("remove", "×", "Remove"/);
+});
+
+test("video action buttons stop slot-click bubbling and Add/Replace reuse the verified picker", () => {
+  const action = extractBlockAfter(SRC, "function videoAction(");
+  assert.match(action, /e\.preventDefault\(\); e\.stopPropagation\(\)/);
+  assert.match(action, /action === "remove"/);
+  assert.match(action, /openPickerForSlot\(slotEl\)/);
+  const picker = extractBlockAfter(SRC, "function openPickerForSlot(");
+  assert.match(picker, /EditorMedia\.openPicker/);
+  assert.match(picker, /applyToSlot\(liveSlot\(path, slotEl\), record, cloudName\)/);
+});
+
+test("Remove clears only the page slot, confirms first, and records after apply succeeds", () => {
+  const remove = extractBlockAfter(SRC, "function removeVideoFromSlot(");
+  assert.match(remove, /UI\.isEditing\(\)/);
+  assert.match(remove, /stay in the Media library/);
+  assert.doesNotMatch(remove, /apiFetch|media\/delete|removeRecord/);
+  const applyIdx = remove.indexOf('UI.applyLocal(path, "")');
+  const draftIdx = remove.indexOf('UI.draft.set(path, "")');
+  assert.ok(applyIdx !== -1 && draftIdx !== -1 && applyIdx < draftIdx,
+    "Remove must apply successfully before recording the empty value");
+  assert.match(remove, /UI\.rerender\(\); UI\.update\(\)/);
+});
+
 test("selection cancellation disarms picker mode, while drawer interactions remain usable", () => {
   const clear = extractBlockAfter(SRC, "function clearSelection(");
   assert.match(clear, /EditorMedia\.cancelPick\(\)/);
   const click = extractBlockAfter(SRC, 'addEventListener("click"');
   assert.match(click, /closest\("#ed-media"\)/,
     "drawer tile/control clicks must not be mistaken for off-slot page clicks");
-  assert.match(click, /clearSelection\(false\)/,
+  const picker = extractBlockAfter(SRC, "function openPickerForSlot(");
+  assert.match(picker, /clearSelection\(false\)/,
     "picker cancellation callback must clear the selected outline without recursion");
 });
 
