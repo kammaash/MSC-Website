@@ -16,6 +16,9 @@
     ".ed-slot-hover{outline:2px dashed #e8541b!important;outline-offset:2px;cursor:pointer!important}" +
     ".ed-slot-selected{outline:3px solid #e8541b!important;outline-offset:2px}" +
     ".ed-media-empty{outline:2px dashed #c2410f!important;outline-offset:-2px}" +
+    // The slot wrapper, rather than its nested browsing context, owns editor
+    // pointer/drag events. Exit removes ed-editing and restores normal playback.
+    "body.ed-editing [data-media-kind=video] iframe{pointer-events:none!important}" +
     // While a tile of a given kind is dragged, every matching slot lights up: this
     // highlight IS the contract of where media may land.
     "body.ed-dragging-image [data-media-kind=image],body.ed-dragging-video [data-media-kind=video]" +
@@ -24,12 +27,16 @@
   document.head.appendChild(style);
 
   var selected = null;
-  function clearSelection() {
+  function clearSelection(cancelPicker) {
     if (selected) selected.classList.remove("ed-slot-selected");
     selected = null;
+    if (cancelPicker !== false) window.EditorMedia.cancelPick();
   }
 
   function applyToSlot(slotEl, record, cloudName) {
+    // Defence in depth: a callback already captured by the picker must not mutate
+    // content after Exit, even if another cancellation path regresses later.
+    if (!UI.isEditing()) { clearSelection(); return; }
     var path = slotEl.getAttribute("data-media-slot");
     var kind = slotEl.getAttribute("data-media-kind");
     if (record.kind !== kind) {
@@ -79,7 +86,12 @@
   document.body.addEventListener("click", function (e) {
     if (!UI.isEditing()) return;
     var el = e.target.closest && e.target.closest("[data-media-slot]");
-    if (!el) { clearSelection(); return; }
+    if (!el) {
+      // Drawer controls are part of the active picker interaction. Page/background
+      // clicks cancel it; drawer tabs, tiles and its close button handle themselves.
+      if (!(e.target.closest && e.target.closest("#ed-media"))) clearSelection();
+      return;
+    }
     // If the actual click target is on an interactive control inside the slot
     // (e.g. a list item menu button, or a text input), let that control handle
     // its own click instead. Media slots may wrap elements with their own
@@ -96,9 +108,13 @@
       // The rerender inside applyToSlot may replace the element; re-find it by path
       // so the write targets the slot as it exists NOW.
       var path = el.getAttribute("data-media-slot");
-      var live = document.querySelector('[data-media-slot="' + path.replace(/"/g, '\\"') + '"]') || el;
+      var live = Array.prototype.find.call(document.querySelectorAll("[data-media-slot]"), function (candidate) {
+        return candidate.getAttribute("data-media-slot") === path;
+      }) || el;
       applyToSlot(live, record, cloudName);
-    });
+    }, function () {
+      clearSelection(false);
+    }, el.getAttribute("data-media-slot"));
   }, true);
 
   // ---- drag and drop ----

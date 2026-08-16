@@ -116,6 +116,14 @@
     'background:#26201d;color:#fff;font:13px/1.4 -apple-system,sans-serif;padding:8px 14px;box-shadow:0 1px 6px rgba(0,0,0,.3)}' +
     '#ed-bar button{font:inherit;padding:4px 12px;border-radius:6px;border:0;cursor:pointer;background:#4a423c;color:#fff}' +
     '#ed-bar #ed-publish{background:#e8541b;font-weight:600}' +
+    // Cursor.js may re-apply itself after a page rerender. Edit mode therefore
+    // enforces native cursors in CSS as well as calling MonteCursor.apply("Native").
+    'body.ed-editing [data-monte-cursor]{display:none!important}' +
+    'body.ed-editing,body.ed-editing *{cursor:auto!important}' +
+    'body.ed-editing [data-edit]{cursor:text!important}' +
+    'body.ed-editing button,body.ed-editing a,body.ed-editing [data-media-slot]{cursor:pointer!important}' +
+    'body.ed-editing .ed-tile{cursor:grab!important}' +
+    'body.ed-editing .ed-tile:active{cursor:grabbing!important}' +
     '.ed-hover{outline:2px dashed #e8541b !important;outline-offset:2px;cursor:text}' +
     '.ed-add{font:600 13px sans-serif;margin:10px 0;padding:8px 16px;border:2px dashed #e8541b;border-radius:8px;' +
     'background:#fff;color:#e8541b;cursor:pointer}' +
@@ -128,6 +136,10 @@
   document.body.appendChild(bar);
 
   const countEl = bar.querySelector("#ed-count");
+  // Shared state hook for editor-only interaction CSS (notably video-slot iframe
+  // pointer handling). The editor scripts are injected only by the local server,
+  // and Exit must restore the public page's normal interactions immediately.
+  document.body.classList.add("ed-editing");
   // Reports both halves of the transaction (see draft.js's createDraft), because they
   // are separately true: edits can be pending in this browser, already saved to disk
   // and awaiting a commit, or both at once. Showing only the pending count is what let
@@ -325,6 +337,7 @@
   };
   bar.querySelector("#ed-exit").onclick = () => {
     editing = !editing;
+    document.body.classList.toggle("ed-editing", editing);
     bar.querySelector("#ed-exit").textContent = editing ? "Exit" : "Resume";
     setEditingCursor(editing); // Resume brings Native back; Exit restores the visitor's cursor
     if (!editing) {
@@ -392,7 +405,21 @@
     requestAnimationFrame(decorate);
   }
   function onAdd(listPath) {
-    if (listPath.includes("galleries.")) return window.__edUpload(listPath);
+    const isSharedGallery = listPath.includes("galleries.");
+    const isGroupedGallery = /^galleryGroups\.\d+\.photos$/.test(listPath);
+    if (isSharedGallery || isGroupedGallery) {
+      if (!window.EditorMedia || !window.EditorMediaUrls) {
+        alert("The media library isn't ready yet. Close and reopen the editor, then try again.");
+        return;
+      }
+      window.EditorMedia.openPicker("image", (record, selectedCloudName) => {
+        const item = isSharedGallery
+          ? { kind: "image", id: record.id, caption: "" }
+          : { src: window.EditorMediaUrls.deliveryUrl(selectedCloudName, record), caption: "" };
+        doOp({ type: "add", path: listPath, item });
+      }, null, listPath);
+      return;
+    }
     const item = { date: new Date().toISOString().slice(0, 10), title: "New post", body: "Write the announcement here." };
     doOp({ type: "add", path: listPath, item });
   }
@@ -433,7 +460,9 @@
       const items = listEl.querySelectorAll(":scope [data-item]");
       items.forEach((it, i) => it.appendChild(menuFor(listPath, i, items.length))); // position:relative is already on this element in the page's own markup
       const add = document.createElement("button");
-      add.className = "ed-add"; add.textContent = "+ Add";
+      add.className = "ed-add";
+      add.textContent = (listPath.includes("galleries.") || /^galleryGroups\.\d+\.photos$/.test(listPath))
+        ? "+ Add photo" : "+ Add";
       add.onclick = () => onAdd(listPath);
       listEl.parentElement.insertBefore(add, listEl.nextSibling); // sibling, not child: React owns the list's children
     });

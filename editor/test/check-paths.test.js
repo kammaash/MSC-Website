@@ -157,3 +157,13 @@ test("an interpolated data-media-slot (gallery items) is skipped, like data-edit
   const root = fixture({ "index.html": page('const CONTENT = { "hero": { "photo": "" } };', '<img data-media-slot="{{ ph.p }}.src">') });
   assert.deepEqual(checkPaths(root, ["index.html"]).errors, []);
 });
+
+test("retired data-media-poster attributes are not part of the path contract", () => {
+  const root = fixture({
+    "index.html": page('const CONTENT = { "hero": { "title": "x" } };',
+      '<div data-edit="hero.title" data-media-poster="retired.missing"></div>'),
+  });
+  const { errors, checked } = checkPaths(root, ["index.html"]);
+  assert.deepEqual(errors, []);
+  assert.equal(checked, 1);
+});

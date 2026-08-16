@@ -358,8 +358,18 @@ test("edit mode hands back the native cursor; Exit/Resume toggles it (Task: medi
   // order), so the editor registers its own DOMContentLoaded listener — which then
   // fires after the pen has booted, and the Native override lands last.
   assert.match(SRC, /addEventListener\("DOMContentLoaded", function \(\) \{ setEditingCursor\(/);
+  assert.match(SRC, /document\.body\.classList\.add\("ed-editing"\)/,
+    "initial edit mode must expose a CSS state hook");
+  assert.match(SRC, /body\.ed-editing \[data-monte-cursor\]\{display:none!important\}/,
+    "edit mode must hide any custom-cursor overlay even if page code reapplies it");
+  assert.match(SRC, /body\.ed-editing,body\.ed-editing \*\{cursor:auto!important\}/,
+    "edit mode must force a visible native cursor across the page");
+  assert.match(SRC, /body\.ed-editing \.ed-tile\{cursor:grab!important\}/,
+    "media tiles must expose a visible drag affordance");
   const exit = extractBlockAfter(SRC, '#ed-exit").onclick');
   assert.match(exit, /setEditingCursor\(editing\)/);
+  assert.match(exit, /document\.body\.classList\.toggle\("ed-editing", editing\)/,
+    "Exit/Resume must toggle editor-only interaction CSS");
 });
 
 test("inline gallery upload is photos-only — videos are YouTube links added in the drawer (Task: youtube videos)", () => {
@@ -370,4 +380,12 @@ test("inline gallery upload is photos-only — videos are YouTube links added in
   // so the Cloudinary response's resource_type is the real gate.
   assert.match(up, /resource_type !== "image"/);
   assert.ok(!/resource_type === "video" \? "video" : "image"/.test(SRC), "the video-kind branch must be gone");
+});
+
+test("gallery Add controls open the photo library and build the correct item shape", () => {
+  const onAdd = extractBlockAfter(SRC, "function onAdd(");
+  assert.match(onAdd, /EditorMedia\.openPicker\("image"/);
+  assert.match(onAdd, /\{ kind: "image", id: record\.id, caption: "" \}/);
+  assert.match(onAdd, /\{ src: window\.EditorMediaUrls\.deliveryUrl\(selectedCloudName, record\), caption: "" \}/);
+  assert.match(SRC, /"\+ Add photo"/);
 });

@@ -30,10 +30,10 @@ test("server injects media.js, after editor-client.js (media.js needs window.Edi
   assert.ok(media > client, "media.js must load after editor-client.js");
 });
 
-test("media.js refuses to run when editor-client.js has not booted (framed page, double load)", () => {
+test("media.js refuses to run without its injected editor dependencies", () => {
   // editor-client.js declines to boot when framed (FC-1) or already booted; media.js
   // must inherit that decision rather than re-derive it — no EditorUI, no media drawer.
-  assert.match(SRC, /if \(!window\.EditorUI\) return;/);
+  assert.match(SRC, /if \(!window\.EditorUI \|\| !window\.EditorMediaUrls\) return;/);
 });
 
 test("editor-client.js shares apiFetch and describeApiError through EditorUI for media.js to use", () => {
@@ -42,13 +42,12 @@ test("editor-client.js shares apiFetch and describeApiError through EditorUI for
   assert.ok(exportLine, "EditorUI export not found");
   assert.match(exportLine[0], /apiFetch/);
   assert.match(exportLine[0], /describeApiError/);
+  assert.match(exportLine[0], /getLocal/);
 });
 
 test("every /api/ call in media.js is tokenised via the shared apiFetch", () => {
   const apiCalls = SRC.match(/apiFetch\(\s*["'`](\/api\/[^"'`]+)["'`]/g) || [];
-  // list (GET /api/media), sign, add record (POST /api/media in uploadOne), youtube/resolve,
-  // add record (POST /api/media in addYouTubeLink — a distinct call site from uploadOne's),
-  // delete — 6 call sites.
+  // list, sign, add photo record, atomic YouTube verify+add, photo setup, delete.
   assert.equal(apiCalls.length, 6, "expected exactly 6 apiFetch(...) call sites targeting /api/");
   // No /api/ URL may appear anywhere except immediately inside an apiFetch call.
   const bareApi = SRC.replace(/apiFetch\(\s*["'`]\/api\//g, "").match(/["'`]\/api\//g) || [];
@@ -85,10 +84,21 @@ function extractBlockAfter(src, marker) {
   throw new Error("unbalanced braces scanning from marker: " + marker);
 }
 
-test("media.js exposes EditorMedia.openPicker and exits pick mode on close", () => {
-  assert.match(SRC, /window\.EditorMedia = \{ openPicker: openPicker \}/);
+test("media.js exposes picker open/cancel and exits pick mode on close", () => {
+  assert.match(SRC, /window\.EditorMedia = \{ openPicker: openPicker, cancelPick: cancelPick \}/);
   const close = extractBlockAfter(SRC, "function setOpen(");
-  assert.match(close, /pick = null/); // closing the drawer always cancels pick mode
+  assert.match(close, /cancelPick\(\)/); // closing the drawer always cancels pick mode
+  const cancel = extractBlockAfter(SRC, "function cancelPick(");
+  assert.match(cancel, /pick = null/);
+  assert.match(cancel, /onCancel\(\)/);
+});
+
+test("tile delete controls never bubble into the pick-to-place tile handler", () => {
+  const handler = extractBlockAfter(SRC, "del.onclick = function");
+  const stopIdx = handler.indexOf("e.stopPropagation()");
+  const removeIdx = handler.indexOf("removeRec(rec)");
+  assert.ok(stopIdx !== -1 && removeIdx !== -1 && stopIdx < removeIdx,
+    "delete must stop propagation before starting removal");
 });
 
 test("tiles are draggable and the dataTransfer payload carries record + cloudName under a kind-scoped type", () => {
@@ -101,21 +111,56 @@ test("tiles are draggable and the dataTransfer payload carries record + cloudNam
   assert.match(SRC, /body\.classList\.remove\("ed-dragging-image", "ed-dragging-video"\)/);
 });
 
-test("Videos tab adds by YouTube link through /api/youtube/resolve — never a file upload", () => {
-  assert.match(SRC, /apiFetch\("\/api\/youtube\/resolve"/);
+test("Videos tab uses one atomic /api/youtube/add call — never a file upload or generic media POST", () => {
+  assert.match(SRC, /apiFetch\("\/api\/youtube\/add"/);
   const add = extractBlockAfter(SRC, "function addYouTubeLink(");
   assert.match(add, /prompt\(/);
-  assert.match(add, /kind: "video"/);
+  assert.doesNotMatch(add, /apiFetch\("\/api\/media"/);
+  assert.match(add, /data\.record\.kind !== "video"/);
   // No video file picker anywhere: videos are links, not uploads.
   assert.ok(!/video\/\*/.test(SRC), "found a video/* file-picker accept string");
   // The button label flips with the tab so the affordance is honest.
-  assert.match(SRC, /uploadBtn\.textContent = tab === "image" \? "⬆ Upload" : "🔗 Add YouTube link"/);
+  assert.match(SRC, /"🔗 Add YouTube video"/);
 });
 
-test("video tiles thumbnail from YouTube's image CDN; images stay on Cloudinary", () => {
+test("drawer presents explicit tabs, setup state, picker guidance and cancellation", () => {
+  assert.match(SRC, /role="tablist" aria-label="Media type"/);
+  assert.match(SRC, /Photos<\/strong><small>Upload images/);
+  assert.match(SRC, /Videos<\/strong><small>YouTube links/);
+  assert.match(SRC, /photoUploadsEnabled = data\.photoUploadsEnabled === true/);
+  assert.match(SRC, /data\.mediaUncommitted === true/);
+  assert.match(SRC, /Set up photo uploads/);
+  assert.match(SRC, /type="password"/);
+  assert.match(SRC, /apiFetch\("\/api\/photo-setup"/);
+  assert.match(SRC, /function describeSlot\(/);
+  assert.match(SRC, /id="ed-media-cancel-pick"/);
+  assert.match(SRC, /Use this video/);
+  assert.match(SRC, /Use this photo/);
+});
+
+test("photo uploads validate type and size before signing, and use a dedicated Cloudinary folder", () => {
+  const up = extractBlockAfter(SRC, "function uploadOne(");
+  assert.match(SRC, /function photoFileProblem\(/);
+  assert.match(SRC, /image\/jpeg/);
+  assert.match(SRC, /image\/png/);
+  assert.match(SRC, /image\/webp/);
+  assert.match(SRC, /15 \* 1024 \* 1024/);
+  assert.ok(up.indexOf("photoFileProblem(file)") < up.indexOf('apiFetch("/api/sign"'),
+    "local validation must run before requesting an upload signature");
+  assert.match(up, /folder: "msc-website"/);
+  assert.match(up, /fd\.append\("folder", "msc-website"\)/);
+});
+
+test("drawer forces visible native interaction cursors and respects reduced motion", () => {
+  assert.match(SRC, /#ed-media,#ed-media \*\{[^}]*cursor:auto!important/);
+  assert.match(SRC, /#ed-media button\{cursor:pointer!important\}/);
+  assert.match(SRC, /ed-tile\{[^}]*cursor:grab!important/);
+  assert.match(SRC, /prefers-reduced-motion:reduce/);
+});
+
+test("drawer thumbnails come from the shared media URL authority", () => {
   const t = extractBlockAfter(SRC, "function thumbUrl(");
-  assert.match(t, /i\.ytimg\.com\/vi\//);
-  assert.match(t, /res\.cloudinary\.com/);
+  assert.match(t, /URLS\.thumbnailUrl\(cloudName, rec\)/);
 });
 
 test("the drawer's own upload (Photos tab) is photos-only — a non-image Cloudinary response is refused, not stored", () => {

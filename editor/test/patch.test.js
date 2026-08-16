@@ -9,6 +9,17 @@ const fix = () => ({
   stats: [{ n: "2", label: "Branches" }],
   news: { acamp: [], vidyanagar: [] },
   galleries: { acamp: [], vidyanagar: [] },
+  galleryGroups: [{ photos: [] }],
+});
+
+test("wildcard collection templates validate nested gallery photo lists", () => {
+  const d = applyPatch(fix(), {
+    ops: [{ type: "add", path: "galleryGroups.0.photos", item: { src: "https://example.test/photo.jpg", caption: "" } }],
+  }, templates);
+  assert.equal(d.galleryGroups[0].photos.length, 1);
+  assert.throws(() => applyPatch(fix(), {
+    ops: [{ type: "add", path: "galleryGroups.0.photos", item: { id: "wrong-shape" } }],
+  }, templates), /exactly/);
 });
 
 test("set writes an existing string path", () => {

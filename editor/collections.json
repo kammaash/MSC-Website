@@ -2,5 +2,6 @@
   "news.acamp": { "date": "", "title": "", "body": "" },
   "news.vidyanagar": { "date": "", "title": "", "body": "" },
   "galleries.acamp": { "kind": "image", "id": "", "caption": "" },
-  "galleries.vidyanagar": { "kind": "image", "id": "", "caption": "" }
+  "galleries.vidyanagar": { "kind": "image", "id": "", "caption": "" },
+  "galleryGroups.*.photos": { "src": "", "caption": "" }
 }

@@ -124,3 +124,18 @@ test("kind is the provider: a video id must be an 11-char YouTube id, images sta
   assert.throws(() => validateRecord({ id: "short", kind: "video" }), /YouTube/);
   validateRecord({ id: "msc/photo-1", kind: "image" }); // Cloudinary ids unaffected
 });
+
+test("readLibrary rejects a valid-JSON library containing an invalid record", () => {
+  const root = tmpRoot();
+  fs.writeFileSync(path.join(root, "media.json"), JSON.stringify([
+    { id: "too-short", kind: "video", name: "Broken" },
+  ]));
+  assert.throws(() => readLibrary(root), /record 0.*YouTube/i);
+});
+
+test("record metadata is bounded and structurally valid", () => {
+  assert.throws(() => validateRecord({ id: "photo", kind: "image", name: " " }), /name/);
+  assert.throws(() => validateRecord({ id: "photo", kind: "image", createdAt: "not-a-date" }), /createdAt/);
+  assert.throws(() => validateRecord({ id: "photo", kind: "image", bytes: Infinity }), /finite/);
+  assert.throws(() => validateRecord({ id: "x".repeat(501), kind: "image" }), /too long/);
+});

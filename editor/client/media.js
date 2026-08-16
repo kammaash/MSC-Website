@@ -2,18 +2,22 @@
   "use strict";
   // Loaded after editor-client.js by construction (server.js's INJECT order). If the
   // editor client declined to boot — framed page (FC-1), double load — EditorUI is
-  // absent and the media drawer must decline with it, not re-derive those checks.
-  if (!window.EditorUI) return;
+  // absent and the media drawer must decline with it. MediaUrls is the shared URL
+  // authority injected immediately before the client modules.
+  if (!window.EditorUI || !window.EditorMediaUrls) return;
   var UI = window.EditorUI;
+  var URLS = window.EditorMediaUrls;
   var apiFetch = UI.apiFetch;
   var describeApiError = UI.describeApiError;
 
   // ---- state ----
   var cloudName = null;
   var records = null; // null = never loaded; [] = loaded, empty
+  var photoUploadsEnabled = null; // null while loading; boolean from /api/media
   var tab = "image"; // segmented control: "image" (Photos) | "video" (Videos)
   var open = false;
   var pick = null; // { kind, onPick } while choosing media for a slot; null otherwise
+  var setupOpen = false;
 
   // ---- chrome ----
   // Static markup only — record data NEVER goes through innerHTML (a filename is
@@ -22,36 +26,90 @@
   drawer.id = "ed-media";
   drawer.innerHTML =
     '<style>' +
-    '#ed-media{position:fixed;top:0;right:0;bottom:0;width:340px;max-width:90vw;z-index:2147482999;' +
-    'background:#26201d;color:#fff;font:13px/1.4 -apple-system,sans-serif;box-shadow:-4px 0 18px rgba(0,0,0,.35);' +
-    'display:none;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}' +
-    '#ed-media.ed-open{transform:translateX(0)}' +
-    '#ed-media header{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #4a423c}' +
-    '#ed-media header strong{flex:1}' +
-    '#ed-media .ed-seg{display:flex;margin:10px 12px 0;border:1px solid #4a423c;border-radius:8px;overflow:hidden}' +
-    '#ed-media .ed-seg button{flex:1;font:inherit;padding:6px 0;border:0;cursor:pointer;background:transparent;color:#cfc7c0}' +
-    '#ed-media .ed-seg button.ed-on{background:#e8541b;color:#fff;font-weight:600}' +
-    '#ed-media .ed-tools{display:flex;gap:8px;padding:10px 12px}' +
-    '#ed-media .ed-tools button{font:inherit;padding:6px 12px;border-radius:6px;border:0;cursor:pointer;background:#4a423c;color:#fff}' +
-    '#ed-media .ed-tools #ed-media-upload{background:#e8541b;font-weight:600}' +
-    '#ed-media .ed-grid{flex:1;overflow-y:auto;padding:0 12px 12px;display:grid;' +
-    'grid-template-columns:1fr 1fr;gap:10px;align-content:start}' +
-    '#ed-media .ed-tile{position:relative;background:#332c28;border-radius:8px;overflow:hidden}' +
-    '#ed-media .ed-tile img{display:block;width:100%;height:110px;object-fit:cover;background:#1c1714}' +
-    '#ed-media .ed-tile figcaption{padding:5px 7px;font-size:11px;color:#cfc7c0;' +
+    '#ed-media,#ed-media *{box-sizing:border-box;cursor:auto!important}' +
+    '#ed-media{position:fixed;top:0;right:0;bottom:0;width:390px;max-width:94vw;z-index:2147482999;' +
+    'background:linear-gradient(180deg,#2c2521 0%,#211c19 100%);color:#fff;font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;' +
+    'box-shadow:-12px 0 36px rgba(20,12,8,.32);border-left:1px solid rgba(255,255,255,.08);' +
+    'display:none;flex-direction:column;transform:translateX(104%);opacity:.6;transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .2s ease}' +
+    '#ed-media.ed-open{transform:translateX(0);opacity:1}' +
+    '#ed-media header{display:flex;gap:12px;align-items:center;padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1)}' +
+    '#ed-media .ed-heading{display:flex;min-width:0;flex:1;flex-direction:column;gap:2px}' +
+    '#ed-media .ed-heading strong{font-size:16px;letter-spacing:.01em}' +
+    '#ed-media .ed-heading span{color:#bfb5ae;font-size:11px}' +
+    '#ed-media button{cursor:pointer!important}' +
+    '#ed-media button:focus-visible,#ed-media .ed-tile:focus-visible{outline:3px solid #ffb28d;outline-offset:2px}' +
+    '#ed-media #ed-media-close{display:flex;align-items:center;gap:6px;border:1px solid #5a504a;border-radius:8px;background:#39312d;color:#f7f2ef;padding:7px 9px;font:inherit;font-size:12px;font-weight:600}' +
+    '#ed-media #ed-media-close:hover{background:#4a403a;border-color:#71645c}' +
+    '#ed-media .ed-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 16px 0;padding:4px;background:#1e1917;border:1px solid #4a423c;border-radius:12px}' +
+    '#ed-media .ed-seg button{display:flex;align-items:center;gap:9px;min-width:0;border:0;border-radius:8px;padding:9px 10px;background:transparent;color:#cfc7c0;text-align:left;font:inherit;transition:background .16s ease,color .16s ease,transform .16s ease}' +
+    '#ed-media .ed-seg button:hover:not(:disabled){background:#39312d;color:#fff}' +
+    '#ed-media .ed-seg button.ed-on{background:#e8541b;color:#fff;box-shadow:0 4px 14px rgba(232,84,27,.25)}' +
+    '#ed-media .ed-seg button:active:not(:disabled){transform:scale(.98)}' +
+    '#ed-media .ed-seg button:disabled{opacity:.32;cursor:not-allowed!important}' +
+    '#ed-media .ed-seg b{font-size:17px;line-height:1}' +
+    '#ed-media .ed-seg span{display:flex;min-width:0;flex-direction:column}' +
+    '#ed-media .ed-seg strong{font-size:12px}' +
+    '#ed-media .ed-seg small{font-size:10px;color:inherit;opacity:.76}' +
+    '#ed-media .ed-help{margin:10px 16px 0;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.055);color:#cfc7c0;font-size:11px;line-height:1.45}' +
+    '#ed-media.ed-picking .ed-help{display:none}' +
+    '#ed-media .ed-pickbar{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:10px 16px 0;padding:11px 12px;border-radius:10px;background:#fff3ec;color:#73230b;border:1px solid #ffb28d}' +
+    '#ed-media .ed-pickbar[hidden]{display:none}' +
+    '#ed-media .ed-pickbar strong{font-size:12px}' +
+    '#ed-media .ed-pickbar span{font-size:10.5px;line-height:1.35}' +
+    '#ed-media .ed-pickbar button{grid-column:2;grid-row:1/3;border:0;border-radius:7px;background:#73230b;color:#fff;padding:7px 9px;font:inherit;font-size:11px;font-weight:600}' +
+    '#ed-media .ed-tools{display:grid;grid-template-columns:1fr;gap:5px;padding:12px 16px 10px}' +
+    '#ed-media .ed-tools button{width:100%;min-height:38px;padding:8px 12px;border-radius:9px;border:0;background:#e8541b;color:#fff;font:inherit;font-size:12px;font-weight:700;transition:transform .16s ease,filter .16s ease}' +
+    '#ed-media .ed-tools button:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}' +
+    '#ed-media .ed-tools button:active:not(:disabled){transform:translateY(0) scale(.99)}' +
+    '#ed-media .ed-tools button:disabled{background:#4a423c;color:#a89f99;cursor:not-allowed!important}' +
+    '#ed-media .ed-action-note{min-height:16px;color:#bfb5ae;font-size:10.5px;text-align:center}' +
+    '#ed-media .ed-photo-setup{margin:0 16px 12px;padding:12px;border:1px solid #6c5c53;border-radius:11px;background:#332c28}' +
+    '#ed-media .ed-photo-setup[hidden]{display:none}' +
+    '#ed-media .ed-photo-setup strong{display:block;margin-bottom:3px;font-size:12px}' +
+    '#ed-media .ed-photo-setup p{margin:0 0 10px;color:#cfc7c0;font-size:10.5px;line-height:1.4}' +
+    '#ed-media .ed-photo-setup label{display:block;margin-top:8px;color:#d8d0ca;font-size:10.5px}' +
+    '#ed-media .ed-photo-setup input{display:block;width:100%;margin-top:4px;padding:8px 9px;border:1px solid #655950;border-radius:7px;background:#211c19;color:#fff;font:12px inherit}' +
+    '#ed-media .ed-photo-setup input:focus{border-color:#ff9c70;outline:2px solid rgba(232,84,27,.25)}' +
+    '#ed-media .ed-setup-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}' +
+    '#ed-media .ed-setup-actions button{min-height:34px;border:0;border-radius:7px;background:#e8541b;color:#fff;font:inherit;font-size:11px;font-weight:700}' +
+    '#ed-media .ed-setup-actions .ed-setup-cancel{background:#514740}' +
+    '#ed-media .ed-library-meta{display:flex;justify-content:space-between;align-items:center;padding:0 16px 8px;color:#bfb5ae;font-size:10.5px}' +
+    '#ed-media .ed-grid{flex:1;overflow-y:auto;padding:0 16px 18px;display:grid;' +
+    'grid-template-columns:1fr 1fr;gap:12px;align-content:start;scrollbar-color:#5a504a transparent}' +
+    '#ed-media .ed-tile{position:relative;background:#332c28;border:1px solid rgba(255,255,255,.08);border-radius:11px;overflow:hidden;cursor:grab!important;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}' +
+    '#ed-media.ed-picking .ed-tile{cursor:pointer!important}' +
+    '#ed-media .ed-tile:hover{transform:translateY(-2px);border-color:#826b5f;box-shadow:0 8px 20px rgba(0,0,0,.24)}' +
+    '#ed-media.ed-picking .ed-tile:hover{border-color:#ff8b55;box-shadow:0 0 0 2px rgba(232,84,27,.25),0 10px 22px rgba(0,0,0,.28)}' +
+    '#ed-media .ed-tile img{display:block;width:100%;height:116px;object-fit:cover;background:#1c1714}' +
+    '#ed-media .ed-tile figcaption{padding:7px 8px;font-size:11px;color:#e4dcd7;' +
     'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
-    '#ed-media .ed-tile .ed-del{position:absolute;top:5px;right:5px;width:24px;height:24px;border:0;border-radius:6px;' +
-    'cursor:pointer;background:rgba(38,32,29,.85);color:#fff;font:12px sans-serif}' +
-    '#ed-media .ed-tile .ed-badge{position:absolute;top:5px;left:5px;padding:2px 6px;border-radius:6px;' +
-    'background:rgba(38,32,29,.85);font-size:10px}' +
-    '#ed-media .ed-empty{grid-column:1/-1;color:#cfc7c0;text-align:center;padding:28px 8px}' +
-    '#ed-media .ed-pickbar{margin:0 12px 10px;padding:8px 10px;border-radius:8px;background:#e8541b;font-weight:600}' +
+    '#ed-media .ed-tile .ed-del{position:absolute;top:7px;right:7px;width:28px;height:28px;border:1px solid rgba(255,255,255,.2);border-radius:8px;' +
+    'background:rgba(32,25,22,.9);color:#fff;font:14px sans-serif;transition:background .15s ease,transform .15s ease}' +
+    '#ed-media .ed-tile .ed-del:hover{background:#a51915;transform:scale(1.05)}' +
+    '#ed-media .ed-tile .ed-badge{position:absolute;top:8px;left:8px;padding:3px 7px;border-radius:7px;' +
+    'background:rgba(38,32,29,.9);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}' +
+    '#ed-media .ed-use{display:none;position:absolute;left:8px;right:8px;bottom:35px;padding:7px;border-radius:7px;background:#e8541b;color:#fff;text-align:center;font-size:10.5px;font-weight:700;box-shadow:0 5px 12px rgba(0,0,0,.25)}' +
+    '#ed-media.ed-picking .ed-use{display:block}' +
+    '#ed-media .ed-empty{grid-column:1/-1;border:1px dashed #5a504a;border-radius:12px;background:rgba(255,255,255,.03);color:#cfc7c0;text-align:center;padding:34px 18px;line-height:1.55}' +
     '#ed-media-btn{background:#4a423c}' +
+    '@media (prefers-reduced-motion:reduce){#ed-media,#ed-media *{transition:none!important}}' +
     '</style>' +
-    '<header><strong>Media library</strong><button id="ed-media-close" title="Close">✕</button></header>' +
-    '<div class="ed-seg"><button id="ed-seg-photos">Photos</button><button id="ed-seg-videos">Videos</button></div>' +
-    '<div class="ed-tools"><button id="ed-media-upload">⬆ Upload</button></div>' +
-    '<div class="ed-pickbar" hidden>Click a tile to place it in the selected spot — or close to cancel.</div>' +
+    '<header><div class="ed-heading"><strong>Media library</strong><span>Choose what appears on this page</span></div>' +
+    '<button id="ed-media-close" type="button" title="Close media library" aria-label="Close media library"><span>Close</span> ✕</button></header>' +
+    '<div class="ed-seg" role="tablist" aria-label="Media type">' +
+    '<button id="ed-seg-photos" type="button" role="tab"><b>▧</b><span><strong>Photos</strong><small>Upload images</small></span></button>' +
+    '<button id="ed-seg-videos" type="button" role="tab"><b>▶</b><span><strong>Videos</strong><small>YouTube links</small></span></button></div>' +
+    '<div class="ed-help">Select a Photos or Videos tab. Add media here, then click a page media area or drag a tile onto its matching outline.</div>' +
+    '<div class="ed-pickbar" hidden><div><strong class="ed-pick-title">Choose media</strong><br><span class="ed-pick-copy"></span></div>' +
+    '<button id="ed-media-cancel-pick" type="button">Cancel</button></div>' +
+    '<div class="ed-tools"><button id="ed-media-upload" type="button">Upload photos</button><div class="ed-action-note"></div></div>' +
+    '<form class="ed-photo-setup" hidden><strong>Connect Cloudinary</strong>' +
+    '<p>Enter the three values from Cloudinary Dashboard → API Keys. The secret stays on this computer and is never published.</p>' +
+    '<label>Cloud name<input name="cloudName" autocomplete="off" required></label>' +
+    '<label>API key<input name="apiKey" autocomplete="off" required></label>' +
+    '<label>API secret<input name="apiSecret" type="password" autocomplete="new-password" required></label>' +
+    '<div class="ed-setup-actions"><button type="submit">Save &amp; enable</button><button class="ed-setup-cancel" type="button">Cancel</button></div></form>' +
+    '<div class="ed-library-meta"><strong class="ed-library-count">Media</strong><span>Click to use · drag to place</span></div>' +
     '<div class="ed-grid"></div>';
   document.body.appendChild(drawer);
 
@@ -59,6 +117,12 @@
   var segPhotos = drawer.querySelector("#ed-seg-photos");
   var segVideos = drawer.querySelector("#ed-seg-videos");
   var uploadBtn = drawer.querySelector("#ed-media-upload");
+  var actionNote = drawer.querySelector(".ed-action-note");
+  var setupForm = drawer.querySelector(".ed-photo-setup");
+  var libraryCount = drawer.querySelector(".ed-library-count");
+  var pickBar = drawer.querySelector(".ed-pickbar");
+  var pickTitle = drawer.querySelector(".ed-pick-title");
+  var pickCopy = drawer.querySelector(".ed-pick-copy");
 
   // The Media button lives in the editor bar, right before Publish.
   var bar = document.getElementById("ed-bar");
@@ -69,24 +133,58 @@
 
   // ---- rendering ----
   function thumbUrl(rec) {
-    // Videos are YouTube-hosted: thumbs come straight from YouTube's image CDN
-    // (works for Unlisted). Images are Cloudinary, cropped for the tile.
-    if (rec.kind === "video") return "https://i.ytimg.com/vi/" + encodeURIComponent(rec.id) + "/mqdefault.jpg";
-    return "https://res.cloudinary.com/" + encodeURIComponent(cloudName) +
-      "/image/upload/c_fill,w_300,h_220,q_auto/" + rec.id;
+    return URLS.thumbnailUrl(cloudName, rec);
+  }
+  function describeSlot(path, kind) {
+    if (/hero\.photo$/.test(path)) return "hero photo";
+    if (/founder\.photo$/.test(path)) return "founder photo";
+    if (/showcase\.video$/.test(path)) return "showcase video";
+    if (/gallery/i.test(path)) return "gallery photo";
+    return kind === "video" ? "selected video area" : "selected photo area";
   }
   function render() {
-    uploadBtn.textContent = tab === "image" ? "⬆ Upload" : "🔗 Add YouTube link";
+    var isPhoto = tab === "image";
+    drawer.classList.toggle("ed-picking", !!pick);
+    uploadBtn.textContent = isPhoto
+      ? (photoUploadsEnabled === false ? "⚙ Set up photo uploads" : "⬆ Upload photos")
+      : "🔗 Add YouTube video";
+    uploadBtn.disabled = !!uploading || (isPhoto && photoUploadsEnabled === null);
+    actionNote.textContent = isPhoto
+      ? (photoUploadsEnabled === true ? "JPG, PNG or WebP · stored securely in Cloudinary"
+        : photoUploadsEnabled === null ? "Checking photo upload setup…"
+        : "One-time setup · credentials stay outside the website")
+      : "Paste an Unlisted YouTube video link";
+    setupForm.hidden = !setupOpen || !isPhoto || photoUploadsEnabled !== false;
     segPhotos.classList.toggle("ed-on", tab === "image");
     segVideos.classList.toggle("ed-on", tab === "video");
+    segPhotos.setAttribute("aria-selected", String(tab === "image"));
+    segVideos.setAttribute("aria-selected", String(tab === "video"));
+    segPhotos.disabled = !!pick && pick.kind !== "image";
+    segVideos.disabled = !!pick && pick.kind !== "video";
+    pickBar.hidden = !pick;
+    if (pick) {
+      var noun = pick.kind === "video" ? "video" : "photo";
+      pickTitle.textContent = "Choose a " + noun;
+      pickCopy.textContent = "For the " + describeSlot(pick.path, pick.kind) + " — click a tile or drag it onto the highlighted area.";
+    }
     grid.textContent = "";
-    if (records === null) return; // still loading — refresh() will re-render
+    if (records === null) {
+      libraryCount.textContent = "Loading…";
+      var loading = document.createElement("div");
+      loading.className = "ed-empty";
+      loading.textContent = "Loading your media library…";
+      grid.appendChild(loading);
+      return;
+    }
     var shown = records.filter(function (r) { return r && r.kind === tab; });
+    libraryCount.textContent = shown.length + " " + (isPhoto ? "photo" : "video") + (shown.length === 1 ? "" : "s");
     if (shown.length === 0) {
       var empty = document.createElement("div");
       empty.className = "ed-empty";
       empty.textContent = tab === "image"
-        ? "No photos yet. Upload some — they'll be available to place on any page."
+        ? (photoUploadsEnabled === true
+          ? "No photos yet. Use Upload photos to add images you can place on any page."
+          : "No photos yet. Run npm run setup in Terminal to enable photo uploads.")
         : "No videos yet. Upload to the school's YouTube channel (set to Unlisted) in YouTube Studio, then Add YouTube link here.";
       grid.appendChild(empty);
       return;
@@ -110,14 +208,24 @@
       del.className = "ed-del";
       del.title = "Remove from library";
       del.textContent = "✕";
-      del.onclick = function () { removeRec(rec); };
+      del.onclick = function (e) {
+        // A tile click places media while pick mode is armed. Never let the nested
+        // delete control bubble into that handler — Cancel and OK must both mean
+        // exactly what their confirmation dialog says.
+        e.stopPropagation();
+        removeRec(rec);
+      };
       tile.appendChild(del);
       var cap = document.createElement("figcaption");
       cap.textContent = rec.name || rec.id; // textContent, never innerHTML — filenames are user-supplied
       cap.title = rec.name || rec.id;
       tile.appendChild(cap);
       tile.draggable = true;
-      tile.style.cursor = "grab";
+      if (pick) {
+        tile.tabIndex = 0;
+        tile.setAttribute("role", "button");
+        tile.setAttribute("aria-label", "Use " + (rec.name || rec.id));
+      }
       tile.ondragstart = function (e) {
         e.dataTransfer.setData("application/x-msc-media-" + rec.kind, JSON.stringify({ record: rec, cloudName: cloudName }));
         e.dataTransfer.effectAllowed = "copy";
@@ -133,6 +241,16 @@
         setOpen(false); // clears pick + hides banner
         cb(rec, cloudName);
       };
+      tile.onkeydown = function (e) {
+        if (pick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          tile.onclick();
+        }
+      };
+      var use = document.createElement("span");
+      use.className = "ed-use";
+      use.textContent = rec.kind === "video" ? "Use this video" : "Use this photo";
+      tile.appendChild(use);
       grid.appendChild(tile);
     });
   }
@@ -144,6 +262,13 @@
     }).then(function (data) {
       cloudName = data.cloudName;
       records = data.records;
+      photoUploadsEnabled = data.photoUploadsEnabled === true;
+      if (data.mediaUncommitted === true) {
+        // Recover the transaction bit after reload or a lost add/delete response.
+        // The server reports the real git state; Publish must never overlook it.
+        UI.draft.markSavedToDisk();
+        UI.update();
+      }
       render();
     }).catch(function (err) {
       records = records || [];
@@ -165,20 +290,27 @@
       setTimeout(function () { if (!open) drawer.style.display = "none"; }, 200); // after the slide-out
     }
   }
+  function cancelPick() {
+    var onCancel = pick && pick.onCancel;
+    pick = null;
+    if (onCancel) onCancel();
+    render();
+  }
   function setOpen(v) {
-    pick = null; // opening normally or closing always cancels pick mode
-    drawer.querySelector(".ed-pickbar").hidden = true;
+    cancelPick(); // opening normally or closing always cancels pick mode
     setOpenInner(v);
   }
-  function openPicker(kind, onPick) {
-    pick = { kind: kind, onPick: onPick };
+  function openPicker(kind, onPick, onCancel, path) {
+    cancelPick();
+    pick = { kind: kind, onPick: onPick, onCancel: onCancel, path: path };
     tab = kind;
-    drawer.querySelector(".ed-pickbar").hidden = false;
+    render();
     if (!open) setOpenInner(true); else { render(); refresh(); }
   }
-  window.EditorMedia = { openPicker: openPicker };
+  window.EditorMedia = { openPicker: openPicker, cancelPick: cancelPick };
   mediaBtn.onclick = function () { setOpen(!open); };
   drawer.querySelector("#ed-media-close").onclick = function () { setOpen(false); };
+  drawer.querySelector("#ed-media-cancel-pick").onclick = function () { cancelPick(); };
   segPhotos.onclick = function () { tab = "image"; render(); };
   segVideos.onclick = function () { tab = "video"; render(); };
 
@@ -192,10 +324,19 @@
       i.click();
     });
   }
+  function photoFileProblem(file) {
+    var allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!file || allowed.indexOf(file.type) === -1) return "Choose a JPG, PNG or WebP photo.";
+    if (!Number.isFinite(file.size) || file.size <= 0) return "That photo is empty.";
+    if (file.size > 15 * 1024 * 1024) return "That photo is larger than 15 MB. Resize it and try again.";
+    return null;
+  }
   function uploadOne(file) {
+    var problem = photoFileProblem(file);
+    if (problem) return Promise.reject(new Error(problem));
     var timestamp = Math.floor(Date.now() / 1000);
     return apiFetch("/api/sign", {
-      method: "POST", body: JSON.stringify({ paramsToSign: { timestamp: timestamp } }),
+      method: "POST", body: JSON.stringify({ paramsToSign: { timestamp: timestamp, folder: "msc-website" } }),
     }).then(function (signRes) {
       if (!signRes.ok) return signRes.text().then(function (t) { throw new Error(describeApiError(signRes.status, t)); });
       return signRes.json();
@@ -204,6 +345,7 @@
       fd.append("file", file);
       fd.append("api_key", s.apiKey);
       fd.append("timestamp", String(timestamp));
+      fd.append("folder", "msc-website");
       fd.append("signature", s.signature);
       // Cloudinary is a third party — a bare fetch, NEVER apiFetch, which would leak
       // this machine's local editor token off-machine (same rule as editor-client.js).
@@ -237,31 +379,69 @@
     });
   }
   // Videos never travel through this machine: the human uploads in YouTube Studio
-  // (Unlisted), pastes the link, and the server verifies it via oEmbed. A null title
-  // in the response means YouTube was unreachable (offline) — ask for a name rather
-  // than fail; the id itself was already validated.
+  // (Unlisted), pastes the link, and the server verifies and stores it atomically.
+  // Network or malformed-metadata failures fail closed: no unverified player enters
+  // the library and the collaborator can retry without cleaning up partial state.
   function addYouTubeLink() {
     var input = prompt("Paste the YouTube link.\n\n(Upload the video in YouTube Studio first and set its visibility to Unlisted.)");
     if (!input) return Promise.resolve(null);
-    return apiFetch("/api/youtube/resolve", { method: "POST", body: JSON.stringify({ url: input }) }).then(function (r) {
+    return apiFetch("/api/youtube/add", { method: "POST", body: JSON.stringify({ url: input }) }).then(function (r) {
       if (!r.ok) return r.text().then(function (t) { throw new Error(describeApiError(r.status, t)); });
       return r.json();
-    }).then(function (v) {
-      var name = v.title;
-      if (name === null) {
-        name = prompt("Couldn't reach YouTube to fetch the title (offline?). Name this video:", "");
-        if (name === null) return null; // cancelled
+    }).then(function (data) {
+      if (!data || !data.record || data.record.kind !== "video") {
+        throw new Error("The editor received an invalid video record. Nothing was placed.");
       }
-      var rec = { id: v.id, kind: "video", name: name || v.id, createdAt: new Date().toISOString() };
-      return apiFetch("/api/media", { method: "POST", body: JSON.stringify({ record: rec }) }).then(function (r) {
-        if (!r.ok) return r.text().then(function (t) { throw new Error(describeApiError(r.status, t)); });
-        return rec;
-      });
+      return data.record;
     });
   }
   var uploading = false; // one batch at a time — same reasoning as the Publish interlock
+  setupForm.querySelector(".ed-setup-cancel").onclick = function () {
+    setupOpen = false;
+    setupForm.reset();
+    render();
+  };
+  setupForm.onsubmit = async function (e) {
+    e.preventDefault();
+    if (uploading) return;
+    var fields = new FormData(setupForm);
+    uploading = true;
+    render();
+    try {
+      var response = await apiFetch("/api/photo-setup", {
+        method: "POST",
+        body: JSON.stringify({
+          cloudName: fields.get("cloudName"),
+          apiKey: fields.get("apiKey"),
+          apiSecret: fields.get("apiSecret"),
+        }),
+      });
+      if (!response.ok) throw new Error(describeApiError(response.status, await response.text()));
+      var configured = await response.json();
+      cloudName = configured.cloudName;
+      photoUploadsEnabled = true;
+      setupOpen = false;
+      setupForm.reset(); // especially clear the secret from the DOM
+      if (window.SHARED_CONTENT) window.SHARED_CONTENT.cloudName = cloudName;
+      UI.draft.markSavedToDisk(); // setup updated content.js's published cloud name
+      UI.rerender();
+      UI.update();
+      render();
+    } catch (err) {
+      alert("Couldn't enable photo uploads:\n" + err.message);
+    } finally {
+      uploading = false;
+      render();
+    }
+  };
   uploadBtn.onclick = async function () {
     if (uploading) return;
+    if (tab === "image" && photoUploadsEnabled === false) {
+      setupOpen = true;
+      render();
+      setupForm.querySelector('input[name="cloudName"]').focus();
+      return;
+    }
     if (tab === "video") {
       uploading = true;
       uploadBtn.disabled = true;

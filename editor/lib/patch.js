@@ -17,7 +17,13 @@ function validateItem(item, template) {
 }
 
 function requireCollection(templates, path) {
-  const t = templates[path];
+  let t = templates[path];
+  if (!t) {
+    // Nested page-authored collections use numeric indices at runtime, while their
+    // safe item shape is declared once with `*` in collections.json.
+    const wildcard = path.split(".").map((part) => /^\d+$/.test(part) ? "*" : part).join(".");
+    t = templates[wildcard];
+  }
   if (!t) throw new Error("Unknown collection: " + path);
   return t;
 }

@@ -21,11 +21,11 @@ const RECORD = {
   createdAt: "2026-08-14T10:00:00.000Z",
 };
 
-async function boot() {
+async function boot(secrets = null, options = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "msc-media-api-"));
   fs.writeFileSync(path.join(root, "content.js"), SHARED);
   const token = crypto.randomUUID();
-  const srv = createServer({ root, config: { push: false }, templates: {}, secrets: null, token });
+  const srv = createServer({ root, config: { push: false }, templates: {}, secrets, token, ...options });
   await new Promise((r) => srv.listen(0, "127.0.0.1", r));
   after(() => srv.close());
   const base = "http://127.0.0.1:" + srv.address().port;
@@ -42,7 +42,42 @@ test("GET /api/media on a fresh site returns an empty library and the cloudName"
   const { get } = await boot();
   const r = await get("/api/media");
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { cloudName: "demo-cloud", records: [] });
+  assert.deepEqual(await r.json(), {
+    cloudName: "demo-cloud", records: [], photoUploadsEnabled: false, mediaUncommitted: false,
+  });
+});
+
+test("GET /api/media reports when photo uploads are configured", async () => {
+  const { get } = await boot({ cloudinaryApiKey: "key", cloudinaryApiSecret: "secret" });
+  const data = await (await get("/api/media")).json();
+  assert.equal(data.photoUploadsEnabled, true);
+});
+
+test("POST /api/photo-setup stores credentials, updates cloudName and enables signing immediately", async () => {
+  const credentialsHome = fs.mkdtempSync(path.join(os.tmpdir(), "msc-photo-setup-"));
+  const { root, get, post } = await boot(null, { credentialsHome });
+  const setup = await post("/api/photo-setup", {
+    cloudName: "school-cloud",
+    apiKey: "photo-key",
+    apiSecret: "photo-secret",
+  });
+  assert.equal(setup.status, 200);
+  assert.deepEqual(await setup.json(), { ok: true, cloudName: "school-cloud" });
+  assert.deepEqual(
+    JSON.parse(fs.readFileSync(path.join(credentialsHome, ".msc-editor", "secrets.json"), "utf8")),
+    { cloudinaryApiKey: "photo-key", cloudinaryApiSecret: "photo-secret" },
+  );
+  assert.match(fs.readFileSync(path.join(root, "content.js"), "utf8"), /"cloudName": "school-cloud"/);
+  assert.equal((await (await get("/api/media")).json()).photoUploadsEnabled, true);
+  const signed = await post("/api/sign", { paramsToSign: { timestamp: Math.floor(Date.now() / 1000) } });
+  assert.equal(signed.status, 200, "new credentials must work without restarting the editor");
+});
+
+test("POST /api/photo-setup rejects missing credentials without writing", async () => {
+  const credentialsHome = fs.mkdtempSync(path.join(os.tmpdir(), "msc-photo-setup-bad-"));
+  const { post } = await boot(null, { credentialsHome });
+  assert.equal((await post("/api/photo-setup", { cloudName: "x", apiKey: "y" })).status, 400);
+  assert.equal(fs.existsSync(path.join(credentialsHome, ".msc-editor")), false);
 });
 
 test("GET /api/media requires the editor token", async () => {
@@ -80,6 +115,16 @@ test("POST /api/media rejects a duplicate id with a 409", async () => {
   assert.equal((await post("/api/media", { record: RECORD })).status, 200);
   const r = await post("/api/media", { record: RECORD });
   assert.equal(r.status, 409);
+});
+
+test("POST /api/media cannot bypass YouTube verification with a valid-shaped video id", async () => {
+  const { root, post } = await boot();
+  const r = await post("/api/media", {
+    record: { id: "dQw4w9WgXcQ", kind: "video", name: "Unverified" },
+  });
+  assert.equal(r.status, 422);
+  assert.match(await r.text(), /youtube\/add/);
+  assert.equal(fs.existsSync(path.join(root, "media.json")), false);
 });
 
 test("POST /api/media/delete removes the record from media.json", async () => {
@@ -131,7 +176,12 @@ test("publish sweeps media.json into the commit alongside content files", async 
   });
   // The only change on disk is a new media record — publish must see and commit it.
   assert.equal((await post("/api/media", { record: RECORD })).status, 200);
+  const mediaBeforePublish = await fetch(base + "/api/media", { headers: { "x-editor-token": token } });
+  assert.equal((await mediaBeforePublish.json()).mediaUncommitted, true,
+    "a reload or lost write response must recover the unpublished-media state from git");
   assert.equal((await post("/api/publish", { message: "content: media" })).status, 200);
+  const mediaAfterPublish = await fetch(base + "/api/media", { headers: { "x-editor-token": token } });
+  assert.equal((await mediaAfterPublish.json()).mediaUncommitted, false);
   assert.match(g(root, "log", "-1", "--format=%s"), /content: media/);
   assert.match(g(root, "show", "--name-only", "--format=", "HEAD"), /media\.json/);
 });

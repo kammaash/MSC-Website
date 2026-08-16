@@ -403,8 +403,8 @@
       <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">Creativity at the Grand Art Exhibition</h2>
       <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
     </div>
-    <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
-      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" data-media-slot="showcase.video" data-media-kind="video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+    <div data-media-slot="showcase.video" data-media-kind="video" style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
+      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -497,10 +497,9 @@
      tag on hover/focus. `galleryGroups` in CONTENT is the single source of
      truth. Group labels and photo captions are editable, and each photo's
      src is a media slot (`data-media-slot="{{ ph.p }}.src"`) — open the
-     drawer and drop a photo onto the tile to swap it. Adding or removing a
-     photo entry from the array is still a hand edit of CONTENT, not a click
-     in the editor. That is why this grid carries no data-list: the editor's
-     add/remove buttons could not supply a src.
+     drawer and drop a photo onto the tile to swap it. Photos can also be
+     added, reordered or removed with the editor controls; “Add photo” opens
+     the same media library and writes a complete src value.
      The category tag on each card back deliberately renders {{ grp.label }}
      WITHOUT data-edit — the heading above is the one editable copy of that
      value, so a collaborator cannot edit the same string from two places
@@ -520,7 +519,7 @@
           <span style="width:8px;height:8px;border-radius:50%;background:#e8541b;flex:none"></span>
           <h3 data-edit="{{ grp.p }}.label" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:0">{{ grp.label }}</h3>
         </div>
-        <div class="g g-4">
+        <div class="g g-4" data-list="{{ grp.p }}.photos">
           <sc-for list="{{ grp.photos }}" as="ph" hint-placeholder-count="4">
             <div tabindex="0" class="flip" style="aspect-ratio:1;border-radius:12px">
               <div class="flip-in">
@@ -683,15 +682,13 @@
           paragraphs and the quotation banner over the hero photo. This is the
           branch-specific copy: the Vidyanagar twin says something different.
           `photo` is a media slot, placed through the editor's media drawer;
-          it holds a real image path today and this page binds it directly
-          ({{ hero.photo }}) with no empty-state fallback, so it should not
-          be emptied by hand.
+          the editor can only write a non-empty delivery URL, and this page binds
+          it directly ({{ hero.photo }}) with no empty-state fallback.
   founder the five text fields of the Founder panel — eyebrow, name, title,
           two body paragraphs and the closing quotation — plus `photo`, the
           portrait, which is a media slot placed through the editor's media
-          drawer like any other image slot; it holds a real image path today
-          and this page binds it directly ({{ founder.photo }}) with no
-          empty-state fallback, so it should not be emptied by hand.
+          drawer like any other image slot; the editor can only write a non-empty
+          delivery URL, and this page binds it directly ({{ founder.photo }}).
   showcase  one key, `video`: a full youtube-nocookie embed URL written by the
           editor when a video is placed on the showcase's media slot. ""
           means the slot is empty — renderVals maps it to about:blank. A bare
@@ -714,11 +711,10 @@
   galleryGroups  the gallery, one entry per category, each with a `label` and
           a `photos` array of { src, caption }. Labels and captions are
           editable, and each `src` is a media slot placed through the editor's
-          media drawer — but adding or removing a photo entry from the array
-          is still a hand edit of CONTENT, not a click in the editor. The news
-          cards and the branch galleries in content.js are a different
-          mechanism — this page's photography is fixed markup data, not a
-          shared collection, because these images predate the editor.
+          media drawer. Each group is an editor collection, so photos can be
+          added, reordered and removed without hand-editing this JSON. The
+          stored src remains a full delivery URL because this grouped gallery
+          is page content rather than a shared media-id collection.
 */
 /* CONTENT:BEGIN */
 const CONTENT = {

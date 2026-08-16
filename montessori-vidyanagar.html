@@ -248,9 +248,10 @@
 
 <!-- HERO
      Full-bleed two-column band: introduction on the left, photo on the right
-     with a quotation banner across its top. The <img> is a 1x1 transparent GIF
-     placeholder, so today the right half shows the quote over a flat peach
-     panel. The hero copy is the `hero` object in CONTENT: the one substantial
+     with a quotation banner across its top. The <img> is an image media slot;
+     while its CONTENT value is empty it uses a 1x1 transparent GIF, so the right
+     half shows the quote over a flat peach panel. The hero copy is the `hero`
+     object in CONTENT: the one substantial
      piece of branch-specific text on the page, genuinely different in the
      A-Camp twin. -->
 <section id="top" class="g g-hero">
@@ -370,8 +371,8 @@
       <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">Creativity at the Grand Art Exhibition</h2>
       <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
     </div>
-    <div style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
-      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" data-media-slot="showcase.video" data-media-kind="video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+    <div data-media-slot="showcase.video" data-media-kind="video" style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
+      <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
     </div>
   </div>
 </section>
@@ -473,7 +474,7 @@
       <sc-for list="{{ gallery }}" as="ga" hint-placeholder-count="6">
         <figure data-item="" style="position:relative;margin:0;border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0e0dc">
           <sc-if value="{{ ga.isImage }}"><img src="{{ ga.url }}" alt="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block"></sc-if>
-          <sc-if value="{{ ga.isVideo }}"><iframe src="{{ ga.url }}" title="{{ ga.caption }}" loading="lazy" style="width:100%;aspect-ratio:4/3;border:0;display:block;background:#26201d" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></sc-if>
+          <sc-if value="{{ ga.isVideo }}"><iframe src="{{ ga.url }}" title="{{ ga.videoTitle }}" loading="lazy" style="width:100%;aspect-ratio:4/3;border:0;display:block;background:#26201d" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></sc-if>
           <figcaption data-edit="{{ ga.p }}.caption" style="padding:10px 12px;font-size:13px;color:#6b615b">{{ ga.caption }}</figcaption>
         </figure>
       </sc-for>
@@ -813,6 +814,7 @@ class Component extends DCLogic {
       p: "shared:galleries.vidyanagar." + i,
       isImage: it.kind === "image",
       isVideo: it.kind === "video",
+      videoTitle: it.caption || "School gallery video",
       // Photos are Cloudinary public IDs; videos are YouTube video IDs — embedded
       // via the privacy-enhanced host, end-screen suggestions kept to this channel.
       url: it.kind === "image"

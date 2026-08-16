@@ -32,6 +32,9 @@ test("parseVideoId rejects everything that is not a YouTube video link", () => {
     "https://example.com/watch?v=dQw4w9WgXcQ", // right shape, wrong site
     "https://www.youtube.com/@somechannel",
     "https://www.youtube.com/playlist?list=PL123",
+    "https://www.youtube.com/playlist?v=dQw4w9WgXcQ",
+    "https://youtu.be/dQw4w9WgXcQ/extra",
+    "https://www.youtube.com/embed/dQw4w9WgXcQ/extra",
     "not a url at all",
     "https://youtu.be/tooshort",
     "javascript:alert(1)",

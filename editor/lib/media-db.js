@@ -51,6 +51,10 @@ function readLibrary(root) {
   if (!Array.isArray(data)) {
     throw new Error("media.json must contain a JSON array of media records");
   }
+  for (let i = 0; i < data.length; i++) {
+    try { validateRecord(data[i]); }
+    catch (e) { throw new Error("media.json record " + i + " is invalid: " + e.message); }
+  }
   return data;
 }
 
@@ -70,9 +74,21 @@ function validateRecord(record) {
     if (typeof v !== spec.type) throw new Error("Media record key " + key + " must be a " + spec.type);
   }
   if (record.id === "") throw new Error("Media record id must be a non-empty string");
+  if (record.id.length > 500) throw new Error("Media record id is too long");
   if (!KINDS.includes(record.kind)) throw new Error("Media record kind must be one of: " + KINDS.join(", "));
   if (record.kind === "video" && !isVideoId(record.id)) {
     throw new Error("A video record's id must be an 11-character YouTube video ID (got: " + record.id + ")");
+  }
+  if (record.name !== undefined && (record.name.trim() === "" || record.name.length > 300)) {
+    throw new Error("Media record name must be non-blank and at most 300 characters");
+  }
+  if (record.createdAt !== undefined && Number.isNaN(Date.parse(record.createdAt))) {
+    throw new Error("Media record createdAt must be a valid date");
+  }
+  for (const key of ["width", "height", "bytes"]) {
+    if (record[key] !== undefined && (!Number.isFinite(record[key]) || record[key] < 0)) {
+      throw new Error("Media record key " + key + " must be a non-negative finite number");
+    }
   }
 }
 

@@ -126,6 +126,17 @@ function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 }
 
+// Media writes happen before Publish. Report their real git state to the browser so
+// a lost HTTP response or a page reload cannot make an already-written media.json look
+// clean. Non-git test fixtures and fresh directories simply report false.
+function pathHasWork(root, file) {
+  try {
+    return git(root, ["status", "--porcelain=v1", "--untracked-files=all", "--", file]).trim() !== "";
+  } catch {
+    return false;
+  }
+}
+
 // Redacts the absolute local filesystem paths out of text PRODUCED BY GIT ITSELF (or by
 // execFileSync's own ".message", which embeds the failing command line) before it reaches an
 // unauthenticated-by-network-topology-alone client. git's stderr routinely names the exact
@@ -222,7 +233,7 @@ function staleSecretsWarning(editorDir) {
     "tree and was never safe. Delete it and run: npm run setup";
 }
 
-function createServer({ root, config, templates, secrets, token, oembedFetch }) {
+function createServer({ root, config, templates, secrets, token, oembedFetch, credentialsHome }) {
   // paths.js lives in the repo's editor/ dir, not the (possibly tmp) site root under test.
   const editorDir = __dirname;
   const editorParent = path.dirname(editorDir);
@@ -243,6 +254,9 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
   // body of a cross-origin request), so it cannot drive the API even though the port
   // is reachable. Generated even if the caller forgets to pass one.
   const AUTH_TOKEN = token || crypto.randomUUID();
+  // Mutable only through the authenticated, same-origin /api/photo-setup endpoint.
+  // This lets a first-time setup take effect immediately without restarting the editor.
+  let activeSecrets = secrets;
   // The one outbound call this server ever makes: YouTube's keyless oEmbed lookup,
   // used to verify a pasted video link and fetch its title. Injectable so tests
   // never touch the network.
@@ -357,7 +371,8 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
       }
 
       if (req.method === "POST" && url.pathname === "/api/sign") {
-        if (!hasValidCloudinarySecrets(secrets)) return send(res, 503, "Uploads not configured — run: npm run setup");
+        if (!hasValidCloudinarySecrets(activeSecrets)) return send(res, 503,
+          "Uploads not configured — use Set up photo uploads in the Media library, or run: npm run setup");
         const body = await readJson(req);
         // A JSON body of literal `null` (or a non-object) makes `body.paramsToSign` throw
         // before the `|| {}` fallback ever runs — guard the body's own shape first, then
@@ -381,27 +396,55 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
         }
         const shared = extractContent(fs.readFileSync(path.join(root, "content.js"), "utf8")).data;
         return send(res, 200, JSON.stringify({
-          signature: signParams(params, secrets.cloudinaryApiSecret),
-          apiKey: secrets.cloudinaryApiKey,
+          signature: signParams(params, activeSecrets.cloudinaryApiSecret),
+          apiKey: activeSecrets.cloudinaryApiKey,
           cloudName: shared.cloudName,
         }), "application/json");
       }
 
-      if (req.method === "POST" && url.pathname === "/api/youtube/resolve") {
+      if (req.method === "POST" && url.pathname === "/api/photo-setup") {
+        const body = await readJson(req);
+        if (body === null || typeof body !== "object" || Array.isArray(body) ||
+            typeof body.cloudName !== "string" || typeof body.apiKey !== "string" ||
+            typeof body.apiSecret !== "string") {
+          return send(res, 400, "Invalid request: cloud name, API key and API secret are required");
+        }
+        if (typeof credentialsHome !== "string" || !path.isAbsolute(credentialsHome)) {
+          return send(res, 503, "Photo setup is unavailable because the home folder could not be determined");
+        }
+        const cloudName = body.cloudName.trim();
+        const apiKey = body.apiKey.trim();
+        const apiSecret = body.apiSecret.trim();
+        // Lazy by design: security tests run copied, reduced server fixtures that never
+        // expose this endpoint and deliberately do not copy the interactive setup module.
+        const { writeCredentials } = require("./setup.js");
+        writeCredentials({
+          homedir: credentialsHome,
+          contentPath: path.join(root, "content.js"),
+          cloudName,
+          apiKey,
+          apiSecret,
+        });
+        activeSecrets = { cloudinaryApiKey: apiKey, cloudinaryApiSecret: apiSecret };
+        return send(res, 200, JSON.stringify({ ok: true, cloudName }), "application/json");
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/youtube/add") {
         const body = await readJson(req);
         if (body === null || typeof body !== "object" || Array.isArray(body) || typeof body.url !== "string") {
           return send(res, 400, "Invalid request: expected { url: \"...\" }");
         }
+        if (body.url.length > 2048) return send(res, 400, "The YouTube link is too long.");
         const id = parseVideoId(body.url);
         if (!id) {
           return send(res, 422, "That doesn't look like a YouTube link. Paste the video's own URL " +
             "from youtube.com or youtu.be (open the video in YouTube Studio and use Share).");
         }
-        // oEmbed is public and keyless, and answers 4xx for exactly the videos that
-        // would render as broken players on the site: private, deleted, or embedding
-        // disabled. A network failure must NOT block the editor (offline laptops are
-        // normal here) — the id is already validated, so resolve it unverified and
-        // let the client ask for a name instead of a title.
+        // Verification and insertion deliberately live in this ONE request. The old
+        // resolve-then-POST-/api/media sequence allowed a valid-shaped but nonexistent
+        // ID to bypass verification, and could strand a verified result between calls.
+        // Fail closed when YouTube is unavailable: saving an unverified player would
+        // make the public page the place where failure is first discovered.
         let r;
         try {
           r = await fetchOembed(
@@ -410,7 +453,7 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
             { signal: AbortSignal.timeout(5000) }
           );
         } catch {
-          return send(res, 200, JSON.stringify({ id, title: null, unverified: true }), "application/json");
+          return send(res, 503, "YouTube could not be reached to verify this video. Check the connection and try again; nothing was added.");
         }
         if (!r.ok) {
           return send(res, 422, "YouTube wouldn't confirm that video (HTTP " + r.status + "). " +
@@ -419,8 +462,21 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
         }
         let meta;
         try { meta = await r.json(); } catch { meta = null; }
-        const title = meta !== null && typeof meta === "object" && typeof meta.title === "string" ? meta.title : null;
-        return send(res, 200, JSON.stringify({ id, title, unverified: title === null }), "application/json");
+        const title = meta !== null && typeof meta === "object" && typeof meta.title === "string"
+          ? meta.title.trim() : "";
+        if (!title || meta.provider_name !== "YouTube" || meta.type !== "video") {
+          return send(res, 502, "YouTube returned an invalid verification response. Try again; nothing was added.");
+        }
+        const existing = readLibrary(root).find((record) => record && record.id === id);
+        if (existing) return send(res, 409, "This YouTube video is already in the media library: " + id);
+        const record = {
+          id,
+          kind: "video",
+          name: title.slice(0, 300),
+          createdAt: new Date().toISOString(),
+        };
+        addRecord(root, record);
+        return send(res, 200, JSON.stringify({ record }), "application/json");
       }
 
       // ---- media library (media.json — see lib/media-db.js) ----
@@ -432,7 +488,12 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
         // Same source /api/sign uses for cloudName: shared content. The client needs it
         // to build Cloudinary thumbnail/delivery URLs from each record's bare id.
         const shared = extractContent(fs.readFileSync(path.join(root, "content.js"), "utf8")).data;
-        return send(res, 200, JSON.stringify({ cloudName: shared.cloudName, records }), "application/json");
+        return send(res, 200, JSON.stringify({
+          cloudName: shared.cloudName,
+          records,
+          photoUploadsEnabled: hasValidCloudinarySecrets(activeSecrets),
+          mediaUncommitted: pathHasWork(root, "media.json"),
+        }), "application/json");
       }
 
       if (req.method === "POST" && url.pathname === "/api/media") {
@@ -443,6 +504,9 @@ function createServer({ root, config, templates, secrets, token, oembedFetch }) 
           return send(res, 400, "Invalid request: expected { record: { id, kind, ... } }");
         }
         validateRecord(body.record); // throws => outer catch answers 400 with the named problem
+        if (body.record.kind === "video") {
+          return send(res, 422, "Videos must be verified and added through /api/youtube/add.");
+        }
         // Duplicate is a 409 (a conflict with existing state), not a 400 (a malformed
         // request) — checked here, before addRecord, because addRecord's own duplicate
         // throw would be indistinguishable from a validation failure by the outer catch.
@@ -597,7 +661,6 @@ if (require.main === module) {
   // served web root is reachable by construction (case-varied URLs, symlinks, even hard
   // links; see the static-handler comments above). ~/.msc-editor/secrets.json can never be
   // requested over HTTP and can never be committed by accident.
-  const secretsPath = secretsPathFor(os.homedir());
   const secrets = loadSecrets(os.homedir());
   // A stray secrets.json from before this fix would have been inside the served tree.
   // Warn loudly, but never read, migrate, or delete it automatically — leave that to the
@@ -606,7 +669,7 @@ if (require.main === module) {
   const staleWarning = staleSecretsWarning(__dirname);
   if (staleWarning) console.warn(staleWarning);
   const token = crypto.randomUUID();
-  const srv = createServer({ root, config, templates, secrets, token });
+  const srv = createServer({ root, config, templates, secrets, token, credentialsHome: os.homedir() });
   // A second editor process (or anything else already bound to the port) must not crash
   // with a raw stack trace in front of non-technical staff — name the actual problem.
   srv.on("error", (e) => {
@@ -628,7 +691,7 @@ if (require.main === module) {
     // implying uploads work — while /api/sign still 503s on every request. The two gates must
     // agree, or boot output actively misleads the collaborator about upload readiness.
     if (!hasValidCloudinarySecrets(secrets)) {
-      console.log("(uploads disabled — no " + (secretsPath || "usable home directory") + "; run: npm run setup)");
+      console.log("(uploads disabled until one-time setup — open Media → Photos, or run: npm run setup)");
     }
     if (process.env.EDITOR_NO_PUSH === "1") console.log("(EDITOR_NO_PUSH=1 — publish will commit but NOT push)");
     if (process.platform === "darwin") execFile("open", [url]);

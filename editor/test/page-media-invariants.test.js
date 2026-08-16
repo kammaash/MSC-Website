@@ -13,6 +13,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const { extractContent } = require("../lib/content-io.js");
 
 const ROOT = path.join(__dirname, "..", "..");
 const PAGES = ["index.html", "montessori-acamp.html", "montessori-vidyanagar.html"];
@@ -52,19 +53,47 @@ test("both school pages map the empty video sentinel to about:blank exactly", ()
   }
 });
 
+test("showcase video slots use wrappers so iframe browsing contexts cannot swallow editor events", () => {
+  for (const page of ["montessori-acamp.html", "montessori-vidyanagar.html"]) {
+    const src = readPage(page);
+    const tags = openingTags(src).filter((t) => /data-media-kind="video"/.test(t));
+    assert.equal(tags.length, 1, page + ": expected one showcase video slot");
+    assert.match(tags[0], /^<div\b/, page + ": video slot must be a wrapper, not the iframe");
+    assert.doesNotMatch(tags[0], /^<iframe\b/);
+  }
+});
+
 // Only index.html and montessori-vidyanagar.html sentinel an empty photo to the 1x1
 // transparent GIF placeholder — montessori-acamp.html's hero.photo and founder.photo
 // hold real paths and bind directly ({{ hero.photo }}, {{ founder.photo }}), which is
-// fine, so no sentinel assertion is made for acamp here.
+// safe only while those two direct-bound values remain non-empty.
 test("index.html and montessori-vidyanagar.html map the empty hero-photo sentinel to the 1x1 transparent GIF", () => {
   const GIF = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
   for (const page of ["index.html", "montessori-vidyanagar.html"]) {
     const src = readPage(page);
     assert.match(
       src,
-      /heroPhotoSrc:\s*CONTENT\.hero\.photo\s*\|\|\s*\n\s*"data:image\/gif;base64,[A-Za-z0-9+/=]+"/,
+      /heroPhotoSrc:\s*CONTENT\.hero\.photo\s*\|\|\s*"data:image\/gif;base64,[A-Za-z0-9+/=]+"/,
       page + ": heroPhotoSrc must fall back to a 1x1 transparent GIF data URI when CONTENT.hero.photo is \"\""
     );
     assert.ok(src.includes(GIF), page + ": expected the 1x1 transparent GIF placeholder data URI");
   }
+});
+
+test("A-Camp's directly-bound hero and founder media values are never empty", () => {
+  const { data } = extractContent(readPage("montessori-acamp.html"));
+  assert.notEqual(data.hero.photo, "");
+  assert.notEqual(data.founder.photo, "");
+});
+
+test("A-Camp gallery groups expose their photo arrays to the editor", () => {
+  const src = readPage("montessori-acamp.html");
+  assert.match(src, /data-list="\{\{ grp\.p \}\}\.photos"/);
+  assert.match(src, /data-media-slot="\{\{ ph\.p \}\}\.src"/);
+});
+
+test("Vidyanagar gallery videos always receive a non-empty iframe title", () => {
+  const src = readPage("montessori-vidyanagar.html");
+  assert.match(src, /videoTitle:\s*it\.caption\s*\|\|\s*"School gallery video"/);
+  assert.match(src, /<iframe[^>]*title="\{\{ ga\.videoTitle \}\}"/);
 });
