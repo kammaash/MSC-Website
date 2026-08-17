@@ -197,10 +197,10 @@
      real number (see README). Both links jump to the admissions form below. -->
 <div style="background:#a51915;color:#f6e3d8;font-size:12.5px;letter-spacing:.02em">
   <div class="wrap util-bar" style="padding-top:9px;padding-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-    <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Two branches · Kurnool, Andhra Pradesh</span>
+    <span data-edit="utilBar.note" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">{{ utilBar.note }}</span>
     <div style="display:flex;gap:22px;align-items:center">
       <a href="#admissions" style="display:flex;align-items:center;gap:7px">☎ <span data-edit="shared:contact.phone">{{ contact.phone }}</span></a>
-      <a href="#admissions" data-btn="" data-glow="#e8541b" style="color:#fff;font-weight:600;padding:4px 10px;border-radius:999px">Enquire →</a>
+      <a href="#admissions" data-btn="" data-glow="#e8541b" style="color:#fff;font-weight:600;padding:4px 10px;border-radius:999px"><span data-edit="utilBar.enquire">{{ utilBar.enquire }}</span></a>
     </div>
   </div>
 </div>
@@ -215,15 +215,15 @@
     <a href="index.html" style="display:flex;align-items:center;gap:13px">
       <img src="assets/group-logo.png" alt="Montessori Schools" style="height:44px;width:auto">
       <span style="display:flex;flex-direction:column;line-height:1">
-        <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;letter-spacing:.01em">Montessori Schools</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#8a7d75;margin-top:3px">MONTESSORI SCHOOL COMMITTEE&nbsp;· KURNOOL</span>
+        <span data-edit="shared:site.groupName" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;letter-spacing:.01em">{{ site.groupName }}</span>
+        <span data-edit="brand.sub" style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#8a7d75;margin-top:3px">{{ brand.sub }}</span>
       </span>
     </a>
     <div class="nav-links" style="display:flex;align-items:center;gap:26px;font-size:14.5px;font-weight:500">
-      <a href="#legacy" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px">Our Approach</a>
-      <a href="#schools" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px">Our Schools</a>
-      <a href="#campus" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px">Campus</a>
-      <a href="#admissions" data-btn="" data-glow="#e8541b" style="background:#a51915;color:#fff;padding:11px 22px;border-radius:999px;font-weight:600">Admissions</a>
+      <a href="#legacy" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px" data-edit="nav.approach">{{ nav.approach }}</a>
+      <a href="#schools" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px" data-edit="nav.schools">{{ nav.schools }}</a>
+      <a href="#campus" style="opacity:.82;padding-bottom:3px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,opacity .2s ease" style-hover="opacity:1;background-size:100% 1.5px" data-edit="nav.campus">{{ nav.campus }}</a>
+      <a href="#admissions" data-btn="" data-glow="#e8541b" style="background:#a51915;color:#fff;padding:11px 22px;border-radius:999px;font-weight:600" data-edit="nav.admissions">{{ nav.admissions }}</a>
     </div>
   </nav>
 </header>
@@ -241,7 +241,7 @@
   <div class="g g-hero">
     <div>
       <div style="display:inline-flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915;animation:fadeIn .8s ease both">
-        <span style="width:26px;height:1px;background:#e8541b;display:inline-block"></span>Two branches · Kurnool
+        <span style="width:26px;height:1px;background:#e8541b;display:inline-block"></span><span data-edit="hero.kicker">{{ hero.kicker }}</span>
       </div>
       <h1 class="h-hero" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.03;letter-spacing:-.01em;margin:20px 0 0;animation:riseIn .9s ease both">
         <span data-edit="hero.title">{{ hero.title }}</span><br><span data-edit="hero.title2">{{ hero.title2 }}</span> <em style="font-style:italic;color:#a51915" data-edit="hero.titleEm">{{ hero.titleEm }}</em>
@@ -250,8 +250,8 @@
         {{ hero.sub }}
       </p>
       <div class="row row-btns" style="animation:riseIn .9s ease .2s both">
-        <a href="#schools" data-btn="" data-glow="#e8541b" style="background:#a51915;color:#fff;padding:15px 30px;border-radius:999px;font-weight:600;font-size:15px">Explore the schools →</a>
-        <a href="#admissions" data-btn="" data-glow="#a51915" data-ink="#fff" style="padding:15px 26px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid rgba(38,32,29,.22)">Book a campus visit</a>
+        <a href="#schools" data-btn="" data-glow="#e8541b" style="background:#a51915;color:#fff;padding:15px 30px;border-radius:999px;font-weight:600;font-size:15px" data-edit="hero.ctaPrimary">{{ hero.ctaPrimary }}</a>
+        <a href="#admissions" data-btn="" data-glow="#a51915" data-ink="#fff" style="padding:15px 26px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid rgba(38,32,29,.22)" data-edit="hero.ctaSecondary">{{ hero.ctaSecondary }}</a>
       </div>
     </div>
 
@@ -283,14 +283,14 @@
 <section id="legacy" style="background:#faf5f1;border-top:1px solid rgba(38,32,29,.07);border-bottom:1px solid rgba(38,32,29,.07)">
   <div class="wrap g g-split" style="padding-top:80px;padding-bottom:80px">
     <div>
-      <div style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">The Montessori Method</div>
-      <h2 class="h-2" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.08;margin:16px 0 0">Learning without<br>fear, from the start.</h2>
-      <p style="font-size:16.5px;line-height:1.64;color:#5a504a;margin:22px 0 0">At both of our branches, children learn at their own pace in a prepared, child-centred environment. We measure success not in ranks alone, but in empathy, discipline and respect.</p>
+      <div data-edit="approach.kicker" style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">{{ approach.kicker }}</div>
+      <h2 class="h-2" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.08;margin:16px 0 0"><span data-edit="approach.title">{{ approach.title }}</span><br><span data-edit="approach.title2">{{ approach.title2 }}</span></h2>
+      <p data-edit="approach.body" style="font-size:16.5px;line-height:1.64;color:#5a504a;margin:22px 0 0">{{ approach.body }}</p>
       <div style="margin-top:28px;display:flex;gap:16px;align-items:center">
         <div style="width:64px;height:64px;border-radius:50%;background:repeating-linear-gradient(45deg,#efe6dd 0 8px,#e7dcd1 8px 16px);border:1px solid rgba(38,32,29,.12);flex:none"></div>
         <div>
-          <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:20px">Montessori School Committee</div>
-          <div style="font-size:12.5px;color:#6b615b;font-family:'Space Mono',monospace;letter-spacing:.04em">Kurnool, Andhra Pradesh</div>
+          <div data-edit="approach.creditName" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:20px">{{ approach.creditName }}</div>
+          <div data-edit="approach.creditPlace" style="font-size:12.5px;color:#6b615b;font-family:'Space Mono',monospace;letter-spacing:.04em">{{ approach.creditPlace }}</div>
         </div>
       </div>
     </div>
@@ -314,23 +314,23 @@
      added by appending to that array rather than by copying markup. -->
 <section id="schools" class="wrap" style="padding-top:86px;padding-bottom:30px">
   <div style="text-align:center;max-width:640px;margin:0 auto 48px">
-    <div style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">Two Branches</div>
-    <h2 class="h-1" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.06;margin:14px 0 0">Two&nbsp;branches,<br>one standard of care.</h2>
-    <p style="font-size:16px;line-height:1.6;color:#5a504a;margin:16px auto 0;max-width:520px">Each branch has its own campus and character — explore them individually.</p>
+    <div data-edit="schoolsSection.kicker" style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">{{ schoolsSection.kicker }}</div>
+    <h2 class="h-1" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.06;margin:14px 0 0"><span data-edit="schoolsSection.title">{{ schoolsSection.title }}</span><br><span data-edit="schoolsSection.title2">{{ schoolsSection.title2 }}</span></h2>
+    <p data-edit="schoolsSection.sub" style="font-size:16px;line-height:1.6;color:#5a504a;margin:16px auto 0;max-width:520px">{{ schoolsSection.sub }}</p>
   </div>
 
   <div class="g g-2">
     <sc-for list="{{ schools }}" as="sc" hint-placeholder-count="2">
       <a href="{{ sc.page }}" data-reveal="" data-card="" style="opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;display:flex;flex-direction:column;border:1px solid rgba(38,32,29,.12);border-radius:16px;overflow:hidden;background:#fff">
         <div style="position:relative;min-height:150px;background:{{ sc.accent }};display:flex;align-items:flex-end;padding:18px">
-          <span style="position:absolute;top:18px;left:18px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:{{ sc.accent }};background:{{ sc.ink }};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center">{{ sc.tag }}</span>
-          <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:#fff;background:rgba(0,0,0,.18);padding:5px 10px;border-radius:6px">{{ sc.imgLabel }}</span>
+          <span data-edit="{{ sc.p }}.tag" style="position:absolute;top:18px;left:18px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:{{ sc.accent }};background:{{ sc.ink }};width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center">{{ sc.tag }}</span>
+          <span data-edit="{{ sc.p }}.imgLabel" style="font-family:'Space Mono',monospace;font-size:10.5px;color:#fff;background:rgba(0,0,0,.18);padding:5px 10px;border-radius:6px">{{ sc.imgLabel }}</span>
         </div>
         <div style="padding:26px 28px 28px">
           <div data-edit="{{ sc.p }}.kicker" style="display:inline-flex;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:{{ sc.ink2 }};border:1px solid {{ sc.ink2 }};padding:5px 11px;border-radius:999px">{{ sc.kicker }}</div>
           <h3 data-edit="{{ sc.p }}.name" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:28px;line-height:1.06;margin:13px 0 0">{{ sc.name }}</h3>
           <p data-edit="{{ sc.p }}.short" style="font-size:14.5px;line-height:1.58;color:#5a504a;margin:9px 0 0">{{ sc.short }}</p>
-          <span style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:{{ sc.ink2 }}">Visit the school page →</span>
+          <span data-edit="schoolsSection.cardCta" style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;color:{{ sc.ink2 }}">{{ schoolsSection.cardCta }}</span>
         </div>
       </a>
     </sc-for>
@@ -345,10 +345,10 @@
 <section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px">
   <div class="sec-head">
     <div>
-      <div style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">All at one place</div>
-      <h2 class="h-2" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.06;margin:14px 0 0">Everything a complete<br>childhood needs.</h2>
+      <div data-edit="campusSection.kicker" style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">{{ campusSection.kicker }}</div>
+      <h2 class="h-2" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.06;margin:14px 0 0"><span data-edit="campusSection.title">{{ campusSection.title }}</span><br><span data-edit="campusSection.title2">{{ campusSection.title2 }}</span></h2>
     </div>
-    <p style="max-width:340px;font-size:15px;line-height:1.6;color:#6b615b">Across our campuses in Kurnool, learning spills far beyond the classroom.</p>
+    <p data-edit="campusSection.sub" style="max-width:340px;font-size:15px;line-height:1.6;color:#6b615b">{{ campusSection.sub }}</p>
   </div>
   <div class="g g-3">
     <sc-for list="{{ facilities }}" as="f" hint-placeholder-count="6">
@@ -373,25 +373,25 @@
 <section id="admissions" class="wrap" style="padding-top:84px;padding-bottom:84px">
   <div class="g g-cta cta-box" style="background:#faf5f1;border:1px solid rgba(38,32,29,.1);border-radius:20px;padding:54px">
     <div>
-      <div style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">Admissions 2026–27 open</div>
-      <h2 class="h-1" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.05;margin:14px 0 0">Begin your child's<br>journey with us.</h2>
-      <p style="font-size:16px;line-height:1.6;color:#5a504a;margin:18px 0 0;max-width:440px">Tell us a little about your child and the branch you're drawn to. Our admissions team will guide you through visits, entrance assessment and enrolment — across both branches.</p>
+      <div data-edit="admissionsSection.kicker" style="font-family:'Space Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a51915">{{ admissionsSection.kicker }}</div>
+      <h2 class="h-1" style="font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.05;margin:14px 0 0"><span data-edit="admissionsSection.title">{{ admissionsSection.title }}</span><br><span data-edit="admissionsSection.title2">{{ admissionsSection.title2 }}</span></h2>
+      <p data-edit="admissionsSection.body" style="font-size:16px;line-height:1.6;color:#5a504a;margin:18px 0 0;max-width:440px">{{ admissionsSection.body }}</p>
       <div style="margin-top:24px">
 
 
       </div>
     </div>
     <div style="background:#fff;border:1px solid rgba(38,32,29,.12);border-radius:16px;padding:28px">
-      <div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;margin-bottom:16px">Enquire now</div>
+      <div data-edit="admissionsSection.formTitle" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:22px;margin-bottom:16px">{{ admissionsSection.formTitle }}</div>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="Parent / student name" style="width:100%;padding:13px 15px;border:1px solid rgba(38,32,29,.18);border-radius:10px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-        <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="Phone number" style="width:100%;padding:13px 15px;border:1px solid rgba(38,32,29,.18);border-radius:10px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+        <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid rgba(38,32,29,.18);border-radius:10px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+        <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid rgba(38,32,29,.18);border-radius:10px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
         <select value="{{ form.school }}" onChange="{{ onSchool }}" style="width:100%;padding:13px 15px;border:1px solid rgba(38,32,29,.18);border-radius:10px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-          <option>Montessori School, A-Camp</option>
-          <option>Montessori School, Vidyanagar</option>
-          <option>Not sure yet — help me choose</option>
+          <option>{{ schoolOption1 }}</option>
+          <option>{{ schoolOption2 }}</option>
+          <option>{{ admissionsSection.optionUnsure }}</option>
         </select>
-        <button onClick="{{ submit }}" data-btn="" data-glow="#e8541b" style="width:100%;padding:14px;border:none;border-radius:10px;background:#a51915;color:#fff;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer">{{ submitLabel }}</button>
+        <button onClick="{{ submit }}" data-btn="" data-glow="#e8541b" style="width:100%;padding:14px;border:none;border-radius:10px;background:#a51915;color:#fff;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer" data-edit="{{ submitLabelPath }}">{{ submitLabel }}</button>
       </div>
     </div>
   </div>
@@ -409,38 +409,38 @@
       <div>
         <div style="display:flex;align-items:center;gap:12px">
           <img src="assets/group-logo.png" alt="Montessori Schools" style="height:42px;width:auto">
-          <span style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;color:#fff">Montessori Schools</span>
+          <span data-edit="shared:site.groupName" style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;color:#fff">{{ site.groupName }}</span>
         </div>
-        <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">Kurnool, Andhra Pradesh, India — full address to be added.</p>
+        <p data-edit="footer.address" style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px">{{ footer.address }}</p>
         <p style="font-size:14px;margin:14px 0 0"><a href="{{ mailtoEmail }}" class="link-accent" style="color:#e8541b"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
-        <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">Schools</div>
+        <div data-edit="footer.schoolsHeading" style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">{{ footer.schoolsHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="montessori-acamp.html" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Montessori School, A-Camp</a>
-          <a href="montessori-vidyanagar.html" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Montessori School, Vidyanagar</a>
+          <a href="montessori-acamp.html" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="shared:site.acampName">{{ site.acampName }}</a>
+          <a href="montessori-vidyanagar.html" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="shared:site.vidyanagarName">{{ site.vidyanagarName }}</a>
         </div>
       </div>
       <div>
-        <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">Explore</div>
+        <div data-edit="footer.exploreHeading" style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">{{ footer.exploreHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="#legacy" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Our Approach</a>
-          <a href="#campus" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Campus &amp; Facilities</a>
-          <a href="#admissions" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Admissions</a>
+          <a href="#legacy" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.exploreApproach">{{ footer.exploreApproach }}</a>
+          <a href="#campus" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.exploreCampus">{{ footer.exploreCampus }}</a>
+          <a href="#admissions" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.exploreAdmissions">{{ footer.exploreAdmissions }}</a>
         </div>
       </div>
       <div>
-        <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">Connect</div>
+        <div data-edit="footer.connectHeading" style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7d75;margin-bottom:14px">{{ footer.connectHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Instagram</a>
-          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">YouTube</a>
-          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px">Facebook</a>
+          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.social1">{{ footer.social1 }}</a>
+          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.social2">{{ footer.social2 }}</a>
+          <a href="#" style="align-self:flex-start;padding-bottom:2px;background-image:linear-gradient(#e8541b,#e8541b);background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .3s ease,color .2s ease" style-hover="color:#fff;background-size:100% 1.5px" data-edit="footer.social3">{{ footer.social3 }}</a>
         </div>
       </div>
     </div>
     <div style="margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:#8a7d75">
-      <span>© 2026 Montessori Schools · Montessori School Committee. All rights reserved.</span>
-      <span style="font-family:'Space Mono',monospace;letter-spacing:.06em">Empathy · Discipline · Respect</span>
+      <span data-edit="footer.copyright">{{ footer.copyright }}</span>
+      <span data-edit="footer.motto" style="font-family:'Space Mono',monospace;letter-spacing:.06em">{{ footer.motto }}</span>
     </div>
   </div>
 </footer>
@@ -502,12 +502,75 @@
 */
 /* CONTENT:BEGIN */
 const CONTENT = {
+  "utilBar": {
+    "note": "Two branches · Kurnool, Andhra Pradesh",
+    "enquire": "Enquire →"
+  },
+  "brand": {
+    "sub": "MONTESSORI SCHOOL COMMITTEE · KURNOOL"
+  },
+  "nav": {
+    "approach": "Our Approach",
+    "schools": "Our Schools",
+    "campus": "Campus",
+    "admissions": "Admissions"
+  },
   "hero": {
+    "kicker": "Two branches · Kurnool",
     "title": "Help the child",
     "title2": "to help",
     "titleEm": "himself.",
     "sub": "Montessori School Committee runs two branches in Kurnool — A-Camp and Vidyanagar — each offering value-based, child-centred Montessori education in an environment built around empathy, discipline and respect.",
+    "ctaPrimary": "Explore the schools →",
+    "ctaSecondary": "Book a campus visit",
     "photo": ""
+  },
+  "approach": {
+    "kicker": "The Montessori Method",
+    "title": "Learning without",
+    "title2": "fear, from the start.",
+    "body": "At both of our branches, children learn at their own pace in a prepared, child-centred environment. We measure success not in ranks alone, but in empathy, discipline and respect.",
+    "creditName": "Montessori School Committee",
+    "creditPlace": "Kurnool, Andhra Pradesh"
+  },
+  "schoolsSection": {
+    "kicker": "Two Branches",
+    "title": "Two branches,",
+    "title2": "one standard of care.",
+    "sub": "Each branch has its own campus and character — explore them individually.",
+    "cardCta": "Visit the school page →"
+  },
+  "campusSection": {
+    "kicker": "All at one place",
+    "title": "Everything a complete",
+    "title2": "childhood needs.",
+    "sub": "Across our campuses in Kurnool, learning spills far beyond the classroom."
+  },
+  "admissionsSection": {
+    "kicker": "Admissions 2026–27 open",
+    "title": "Begin your child's",
+    "title2": "journey with us.",
+    "body": "Tell us a little about your child and the branch you're drawn to. Our admissions team will guide you through visits, entrance assessment and enrolment — across both branches.",
+    "formTitle": "Enquire now",
+    "namePlaceholder": "Parent / student name",
+    "phonePlaceholder": "Phone number",
+    "optionUnsure": "Not sure yet — help me choose",
+    "submit": "Send enquiry",
+    "submitted": "✓ Enquiry received"
+  },
+  "footer": {
+    "address": "Kurnool, Andhra Pradesh, India — full address to be added.",
+    "schoolsHeading": "Schools",
+    "exploreHeading": "Explore",
+    "exploreApproach": "Our Approach",
+    "exploreCampus": "Campus & Facilities",
+    "exploreAdmissions": "Admissions",
+    "connectHeading": "Connect",
+    "social1": "Instagram",
+    "social2": "YouTube",
+    "social3": "Facebook",
+    "copyright": "© 2026 Montessori Schools · Montessori School Committee. All rights reserved.",
+    "motto": "Empathy · Discipline · Respect"
   },
   "stats": [
     { "n": "2", "label": "Branches in Kurnool" },
@@ -541,7 +604,10 @@ class Component extends DCLogic {
   // the admissions section; `submitted` just swaps the button label, since
   // there is no submission endpoint yet.
   state = {
-    form: { name: "", phone: "", school: "Montessori School, A-Camp" },
+    // The default branch is read from CONTENT rather than repeated here, so
+    // renaming schools[0] cannot leave the select showing a name that no
+    // longer matches any of its options.
+    form: { name: "", phone: "", school: CONTENT.schools[0].name },
     submitted: false,
   };
 
@@ -749,7 +815,21 @@ class Component extends DCLogic {
       // markup used to hard-code, so an empty slot looks exactly as before.
       heroPhotoSrc: CONTENT.hero.photo ||
         "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==",
+      // Section copy. Every group below is plain editable text: the markup holds
+      // only the {{ }} holes and their data-edit paths, so nothing a visitor
+      // reads on this page is spelled out in the template any more.
+      utilBar: CONTENT.utilBar,
+      brand: CONTENT.brand,
+      nav: CONTENT.nav,
+      approach: CONTENT.approach,
+      schoolsSection: CONTENT.schoolsSection,
+      campusSection: CONTENT.campusSection,
+      admissionsSection: CONTENT.admissionsSection,
+      footer: CONTENT.footer,
       contact: window.SHARED_CONTENT.contact,
+      // Cross-page chrome (school names, group name) lives in content.js so one
+      // edit renames a school everywhere it appears, not just on this page.
+      site: window.SHARED_CONTENT.site,
       // The footer's mailto: href, built here because {{ }} cannot concatenate. The
       // address used to be hard-coded in the markup as well as rendered from CONTENT,
       // so the first edit to contact.email would have shown the new address while every
@@ -766,7 +846,16 @@ class Component extends DCLogic {
       onName: set("name"),
       onPhone: set("phone"),
       onSchool: set("school"),
-      submitLabel: this.state.submitted ? "✓ Enquiry received" : "Send enquiry",
+      // The two branch options are the branch names themselves — rendered from
+      // the same array as the cards above, so the select can never offer a
+      // school under a name the rest of the page no longer uses. (<select> may
+      // only contain <option>, so these cannot be an <sc-for>.)
+      schoolOption1: CONTENT.schools[0].name,
+      schoolOption2: CONTENT.schools[1].name,
+      submitLabel: this.state.submitted ? CONTENT.admissionsSection.submitted : CONTENT.admissionsSection.submit,
+      // The button shows one of two strings, so its data-edit has to follow the
+      // state: whichever label is on screen is the one a click edits.
+      submitLabelPath: this.state.submitted ? "admissionsSection.submitted" : "admissionsSection.submit",
       // Front-end only: this acknowledges the click and discards the input.
       // Post form.* to a real endpoint here before the site goes live.
       submit: () => this.setState({ submitted: true }),

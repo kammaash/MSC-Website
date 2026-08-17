@@ -177,7 +177,7 @@
   <span style="display:block;background:#fff;border:4px solid #e8541b;border-radius:12px;padding:8px;line-height:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:loaderPop .9s cubic-bezier(.2,.8,.2,1) both">
     <img src="assets/monte-logo.png" alt="Montessori" style="height:96px;width:auto;display:block">
   </span>
-  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:#fff;text-transform:uppercase;animation:wordFloat .9s ease .25s both">Montessori</div>
+  <div data-edit="loader.wordmark" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:#fff;text-transform:uppercase;animation:wordFloat .9s ease .25s both">{{ loader.wordmark }}</div>
   <div style="width:180px;height:4px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden">
     <div style="height:100%;background:#e8541b;transform-origin:left;animation:loaderBar 1.15s cubic-bezier(.4,0,.2,1) .1s both"></div>
   </div>
@@ -185,9 +185,11 @@
 
 <!-- TOP BAR
      White band above the nav: logo and school name on the left, phone number
-     on the right (a placeholder awaiting the real number). It scrolls away
-     normally; only the peach nav below it sticks. On phones the two halves
-     stack, via .top-bar in the stylesheet. -->
+     on the right (a placeholder awaiting the real number). Every word in it is
+     shared: the school name, the tagline under it and the "call us" prompt all
+     come from content.js, so they read the same here as on the subpage. It
+     scrolls away normally; only the peach nav below it sticks. On phones the
+     two halves stack, via .top-bar in the stylesheet. -->
 <div style="background:#fff;border-bottom:1px solid #f3e6e2">
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="#top" style="display:flex;align-items:center;gap:18px">
@@ -195,12 +197,12 @@
         <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
       </span>
       <span style="display:flex;flex-direction:column;line-height:1.15">
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori School, A-Camp</span>
-        <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
+        <span data-edit="shared:site.acampName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">{{ site.acampName }}</span>
+        <span data-edit="shared:site.tagline" style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">{{ site.tagline }}</span>
       </span>
     </a>
     <div class="phone-block" style="text-align:right">
-      <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
+      <div data-edit="shared:site.callPrompt" style="font-size:14px;color:#6b615b">{{ site.callPrompt }}</div>
       <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a>
     </div>
   </div>
@@ -209,9 +211,12 @@
 <!-- YELLOW NAV WITH DROPDOWNS
      The main navigation, built entirely from the `menus` array in renderVals()
      rather than hand-written markup: one entry per top-level item, each with
-     its own list of dropdown links. Menus open on hover (onMouseEnter sets
-     openMenu to that index) and there is no click or keyboard affordance, so
-     the dropdowns are effectively desktop-only.
+     its own list of dropdown links. The labels come from shared:nav.menus in
+     content.js, which is why their data-edit paths are `shared:` — the same
+     menu serves all four school pages, so rewording an item renames it
+     everywhere rather than on this page alone. Menus open on hover
+     (onMouseEnter sets openMenu to that index) and there is no click or
+     keyboard affordance, so the dropdowns are effectively desktop-only.
      The bar sticks to the top of the viewport; ref="{{ navRef }}" hands the
      element to the logic block, which measures it to decide when to show the
      floating pill below. -->
@@ -220,11 +225,11 @@
     <div style="{{ menuRowStyle }}">
       <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
         <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)"><span data-edit="{{ m.p }}.label">{{ m.label }}</span><sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
           <sc-if value="{{ m.showDropdown }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
               <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
-                <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#26201d" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+                <a href="{{ it.href }}" data-edit="{{ it.p }}.label" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#26201d" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
               </sc-for>
             </div>
           </sc-if>
@@ -240,17 +245,23 @@
      keeps `currentTab` up to date) and expands on hover to offer that
      section's dropdown links. All of its styles are computed in renderVals()
      as pill*Style objects, because they depend on state the stylesheet cannot
-     see: whether it is expanded, and how many items it has to grow to fit. -->
+     see: whether it is expanded, and how many items it has to grow to fit.
+     Its title and its drawer links are the current menu's own entries out of
+     shared:nav.menus, so both edit the same shared labels the bar above does
+     — which is why their data-edit paths are holes: the path has to follow the
+     scrollspy from one menu to the next (see currentTabPath in renderVals).
+     The hint beside the title switches between three CONTENT strings with the
+     pill's state, and carries the path of whichever one is showing. -->
 <sc-if value="{{ showPill }}" hint-placeholder-val="{{ false }}">
   <div onMouseEnter="{{ pillEnter }}" onMouseLeave="{{ pillLeave }}" style="{{ pillWrapStyle }}">
     <div style="{{ pillCardStyle }}">
       <a href="{{ pillHref }}" style="{{ pillHeadStyle }}">
-        <span>{{ currentTab }}</span>
-        <span style="{{ pillHintStyle }}">{{ pillHint }}</span>
+        <span data-edit="{{ currentTabPath }}">{{ currentTab }}</span>
+        <span data-edit="{{ pillHintPath }}" style="{{ pillHintStyle }}">{{ pillHint }}</span>
       </a>
       <div style="{{ pillItemsWrapStyle }}">
         <sc-for list="{{ pillItems }}" as="it" hint-placeholder-count="4">
-          <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#a51915" style-hover="background:rgba(165,25,21,.12)">{{ it.label }}</a>
+          <a href="{{ it.href }}" data-edit="{{ it.p }}.label" style="display:block;padding:10px 14px;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#a51915" style-hover="background:rgba(165,25,21,.12)">{{ it.label }}</a>
         </sc-for>
       </div>
     </div>
@@ -271,8 +282,8 @@
     <p data-edit="hero.p1" style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">{{ hero.p1 }}</p>
     <p data-edit="hero.p2" style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">{{ hero.p2 }}</p>
     <div class="hero-btns" style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
-      <a href="#admissions" style="background:#a51915;color:#fff;padding:14px 28px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#7f120f">Send enquiry →</a>
-      <a href="#about" style="background:#e8541b;color:#fff;padding:14px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#c2410f">Discover the school</a>
+      <a href="#admissions" data-edit="hero.ctaPrimary" style="background:#a51915;color:#fff;padding:14px 28px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#7f120f">{{ hero.ctaPrimary }}</a>
+      <a href="#about" data-edit="hero.ctaSecondary" style="background:#e8541b;color:#fff;padding:14px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px" style-hover="background:#c2410f">{{ hero.ctaSecondary }}</a>
     </div>
   </div>
   <div style="position:relative;background:#f6e7e2;min-height:420px">
@@ -286,32 +297,34 @@
 </section>
 
 <!-- ABOUT / EXCEL + VISION
-     Static section (no template data): the "Explore, Experience and Excel"
-     statement, then the vision card and the core-values card side by side.
+     The "Explore, Experience and Excel" statement, then the vision card and
+     the core-values card side by side — all of it the `aboutSection` object in
+     CONTENT. The three core values are separate keys because the bullets
+     between them are markup, not copy.
      scroll-margin-top:110px appears on this and every other anchored section
      so that jumping to #about does not park the heading underneath the sticky
      nav bar. -->
 <section id="about" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:760px;margin:0 auto">
-    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">About Us</div>
-    <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">Explore, Experience &amp; Excel at Montessori</h2>
-    <p style="font-size:17px;line-height:1.7;color:#4a423c;margin:20px 0 0">Through the pursuance of excellence in education, Montessori — with the traditional values of empathy, respect and discipline — renders a liberal education where the mind flowers without fear. A vision that accentuates human excellence and moulds the younger generation for a meaningful and productive life in a globalized society.</p>
+    <div data-edit="aboutSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ aboutSection.kicker }}</div>
+    <h2 data-edit="aboutSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">{{ aboutSection.title }}</h2>
+    <p data-edit="aboutSection.body" style="font-size:17px;line-height:1.7;color:#4a423c;margin:20px 0 0">{{ aboutSection.body }}</p>
   </div>
   <div class="g g-2" style="margin-top:44px">
     <div style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:34px">
-      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#c2410f">Our Vision</div>
-      <p style="font-size:17px;line-height:1.65;color:#3d3531;margin:12px 0 0">To create citizens of tomorrow steeped in the traditional values of empathy, discipline and respect — where no fears prevail; a vision that leads to change.</p>
+      <div data-edit="aboutSection.visionKicker" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#c2410f">{{ aboutSection.visionKicker }}</div>
+      <p data-edit="aboutSection.visionBody" style="font-size:17px;line-height:1.65;color:#3d3531;margin:12px 0 0">{{ aboutSection.visionBody }}</p>
     </div>
     <div style="background:#a51915;border-radius:16px;padding:34px;color:#fff">
-      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">Core Values</div>
+      <div data-edit="aboutSection.valuesKicker" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">{{ aboutSection.valuesKicker }}</div>
       <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;align-items:center">
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">Empathy</span>
+        <span data-edit="aboutSection.value1" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">{{ aboutSection.value1 }}</span>
         <span style="opacity:.4">•</span>
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#fff">Respect</span>
+        <span data-edit="aboutSection.value2" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#fff">{{ aboutSection.value2 }}</span>
         <span style="opacity:.4">•</span>
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">Discipline</span>
+        <span data-edit="aboutSection.value3" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:26px;color:#ffd9c4">{{ aboutSection.value3 }}</span>
       </div>
-      <p style="font-size:15px;line-height:1.6;color:#f4ddd2;margin:18px 0 0">The three pillars behind every classroom, playground and interaction at Montessori.</p>
+      <p data-edit="aboutSection.valuesBody" style="font-size:15px;line-height:1.6;color:#f4ddd2;margin:18px 0 0">{{ aboutSection.valuesBody }}</p>
     </div>
   </div>
 </section>
@@ -346,13 +359,13 @@
 <section id="academics" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="text-align:center;max-width:620px;margin:0 auto 40px">
-      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Teaching &amp; Learning</div>
-      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Our Academics</h2>
+      <div data-edit="academicsSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ academicsSection.kicker }}</div>
+      <h2 data-edit="academicsSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">{{ academicsSection.title }}</h2>
     </div>
     <div class="g g-3">
       <sc-for list="{{ academics }}" as="a" hint-placeholder-count="6">
         <div data-reveal style="opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease;background:#fff;border:1px solid #f0e0dc;border-radius:16px;padding:28px 26px;border-top:4px solid #e8541b">
-          <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#c2410f;letter-spacing:.05em">{{ a.tag }}</div>
+          <div data-edit="{{ a.p }}.tag" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#c2410f;letter-spacing:.05em">{{ a.tag }}</div>
           <h4 data-edit="{{ a.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin:8px 0 0">{{ a.title }}</h4>
           <p data-edit="{{ a.p }}.desc" style="font-size:14.5px;line-height:1.6;color:#6b615b;margin:9px 0 0">{{ a.desc }}</p>
         </div>
@@ -362,15 +375,16 @@
 </section>
 
 <!-- SCHOOL LIFE
-     Left: four short points from the `life` array in CONTENT. Right: the four
-     houses, hard-coded here rather than driven by an array because each has
-     its own fixed swatch colour and the set does not change. -->
+     Left: the section copy in `lifeSection` plus four short points from the
+     `life` array in CONTENT. Right: the four houses, each an entry in the
+     `houses` array — `name` is editable copy, `swatch` is the fixed colour of
+     the square beside it and is not offered to the editor. -->
 <section id="life" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div class="g g-split">
     <div>
-      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">School Life &amp; Activities</div>
-      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">A day, built around the child.</h2>
-      <p style="font-size:16.5px;line-height:1.65;color:#4a423c;margin:16px 0 0;max-width:490px">From timings and the house system to clubs, physical education and co-curricular activities, life at Montessori balances rigorous academics with the joy of growing up.</p>
+      <div data-edit="lifeSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ lifeSection.kicker }}</div>
+      <h2 data-edit="lifeSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;color:#a51915;margin:12px 0 0">{{ lifeSection.title }}</h2>
+      <p data-edit="lifeSection.body" style="font-size:16.5px;line-height:1.65;color:#4a423c;margin:16px 0 0;max-width:490px">{{ lifeSection.body }}</p>
       <div class="g g-2t" style="margin-top:26px">
         <sc-for list="{{ life }}" as="l" hint-placeholder-count="4">
           <div style="border-left:3px solid #e8541b;padding:2px 0 2px 14px">
@@ -381,14 +395,13 @@
       </div>
     </div>
     <div style="background:#a51915;border-radius:18px;padding:36px;color:#fff">
-      <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">The Four Houses</div>
+      <div data-edit="lifeSection.housesTitle" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ffd9c4">{{ lifeSection.housesTitle }}</div>
       <div class="g g-2t" style="margin-top:20px">
-        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#e8541b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Valour</span></div>
-        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#2f9e6b"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Wisdom</span></div>
-        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#3f7fd0"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Harmony</span></div>
-        <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:#e0533a"></span><span style="font-family:'Quicksand',sans-serif;font-weight:600">Integrity</span></div>
+        <sc-for list="{{ houses }}" as="h" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:12px"><span style="width:28px;height:28px;border-radius:7px;background:{{ h.swatch }}"></span><span data-edit="{{ h.p }}.name" style="font-family:'Quicksand',sans-serif;font-weight:600">{{ h.name }}</span></div>
+        </sc-for>
       </div>
-      <p style="font-size:14.5px;line-height:1.6;color:#f4ddd2;margin:22px 0 0">Every student belongs to a house — earning points through academics, sport and service, building lifelong belonging and healthy competition.</p>
+      <p data-edit="lifeSection.housesBody" style="font-size:14.5px;line-height:1.6;color:#f4ddd2;margin:22px 0 0">{{ lifeSection.housesBody }}</p>
     </div>
   </div>
 </section>
@@ -401,9 +414,9 @@
 <section style="background:#a51915;color:#fff">
   <div class="wrap g g-split2" style="padding-top:72px;padding-bottom:72px">
     <div>
-      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Students Showcase</div>
-      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">Creativity at the Grand Art Exhibition</h2>
-      <p style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori.</p>
+      <div data-edit="showcase.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">{{ showcase.kicker }}</div>
+      <h2 data-edit="showcase.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:38px;line-height:1.12;margin:12px 0 0">{{ showcase.title }}</h2>
+      <p data-edit="showcase.body" style="font-size:16px;line-height:1.65;color:#f4ddd2;margin:16px 0 0;max-width:400px">{{ showcase.body }}</p>
     </div>
     <div data-media-slot="showcase.video" data-media-kind="video" style="border-radius:16px;overflow:hidden;border:3px solid #e8541b;background:#000">
       <iframe src="{{ showcaseVideoSrc }}" title="Students showcase video" style="width:100%;display:block;aspect-ratio:16/9;border:0;background:#000" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
@@ -422,8 +435,8 @@
      has no data-btn/data-card JavaScript effects. -->
 <section id="campus" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="text-align:center;max-width:620px;margin:0 auto 40px">
-    <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Campus &amp; Facilities</div>
-    <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">For complete growth, all at one place</h2>
+    <div data-edit="campusSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ campusSection.kicker }}</div>
+    <h2 data-edit="campusSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">{{ campusSection.title }}</h2>
   </div>
   <div class="g g-3">
     <sc-for list="{{ facilities }}" as="f" hint-placeholder-count="6">
@@ -449,10 +462,10 @@
 <section id="transport" style="background:#fbf3f2;border-top:1px solid #f0e0dc;border-bottom:1px solid #f0e0dc;scroll-margin-top:110px">
   <div class="wrap g g-split3" style="padding-top:64px;padding-bottom:64px">
     <div>
-      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Transport</div>
-      <h2 style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:36px;line-height:1.12;color:#a51915;margin:12px 0 0">Safe rides, every route.</h2>
+      <div data-edit="transportSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ transportSection.kicker }}</div>
+      <h2 data-edit="transportSection.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:36px;line-height:1.12;color:#a51915;margin:12px 0 0">{{ transportSection.title }}</h2>
     </div>
-    <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:0">A GPS-enabled bus fleet covers routes across Kurnool and the surrounding areas, with trained attendants on every bus. Pick-up and drop timings are shared with parents at the start of each term, and detailed bus routes are available from the school office.</p>
+    <p data-edit="transportSection.body" style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:0">{{ transportSection.body }}</p>
   </div>
 </section>
 
@@ -470,11 +483,11 @@
 <section id="news" class="wrap" style="padding-top:78px;padding-bottom:78px;scroll-margin-top:110px">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:34px">
     <div>
-      <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">News Room</div>
-      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Latest &amp; upcoming</h2>
+      <div data-edit="newsSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ newsSection.kicker }}</div>
+      <h2 data-edit="newsSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">{{ newsSection.title }}</h2>
     </div>
   </div>
-  <sc-if value="{{ noNews }}"><p style="color:#6b615b;font-size:14.5px">News and announcements coming soon.</p></sc-if>
+  <sc-if value="{{ noNews }}"><p data-edit="newsSection.empty" style="color:#6b615b;font-size:14.5px">{{ newsSection.empty }}</p></sc-if>
   <div class="g g-3" data-list="shared:news.acamp">
     <sc-for list="{{ news }}" as="n" hint-placeholder-count="3">
       <a href="acamp-subpage.html#events-news" data-item="" tabindex="0" class="flip" style="display:block;aspect-ratio:4/3;border-radius:16px">
@@ -485,7 +498,7 @@
           </div>
           <div class="flip-b" style="background:#fff;border:1px solid #f0e0dc;padding:24px">
             <p data-edit="{{ n.p }}.body" style="font-size:14.5px;line-height:1.6;color:#4a423c;margin:0">{{ n.body }}</p>
-            <span style="margin-top:14px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#a51915">Read more →</span>
+            <span data-edit="newsSection.readMore" style="margin-top:14px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#a51915">{{ newsSection.readMore }}</span>
           </div>
         </div>
       </a>
@@ -510,10 +523,10 @@
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:8px">
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Gallery</div>
-        <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Life in pictures</h2>
+        <div data-edit="gallerySection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">{{ gallerySection.kicker }}</div>
+        <h2 data-edit="gallerySection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">{{ gallerySection.title }}</h2>
       </div>
-      <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">hover a photo to see what it is</span>
+      <span data-edit="gallerySection.hint" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">{{ gallerySection.hint }}</span>
     </div>
     <sc-for list="{{ galleryGroups }}" as="grp" hint-placeholder-count="2">
       <div style="margin-top:42px">
@@ -542,6 +555,10 @@
 <!-- ADMISSIONS
      Left: the four-step procedure from the `steps` array. Right: the enquiry
      form, whose fields are controlled by form.* in state.
+     Every string here is in admissionsSection, but the editor can only edit
+     element TEXT: the two placeholders and the four <option> labels are
+     attributes and option content, so they render from CONTENT for
+     single-sourcing and are changed there by hand, not by clicking.
      IMPORTANT: the form is front-end only. Pressing the button just flips its
      label to "Enquiry received"; nothing is transmitted or stored. Wire
      `submit` to a real endpoint before go-live. The two buttons on the left
@@ -550,12 +567,12 @@
   <div class="wrap" style="padding-top:78px;padding-bottom:78px">
     <div class="g g-splitS">
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">Admissions 2026–27</div>
-        <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;margin:12px 0 0">The admission procedure</h2>
+        <div data-edit="admissionsSection.kicker" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#ffd9c4">{{ admissionsSection.kicker }}</div>
+        <h2 data-edit="admissionsSection.title" class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.1;margin:12px 0 0">{{ admissionsSection.title }}</h2>
         <div style="display:flex;flex-direction:column;gap:16px;margin-top:26px">
           <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
             <div style="display:flex;gap:16px;align-items:flex-start">
-              <span style="flex:none;width:36px;height:36px;border-radius:50%;background:#e8541b;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px">{{ s.n }}</span>
+              <span data-edit="{{ s.p }}.n" style="flex:none;width:36px;height:36px;border-radius:50%;background:#e8541b;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px">{{ s.n }}</span>
               <div>
                 <div data-edit="{{ s.p }}.title" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px">{{ s.title }}</div>
                 <div data-edit="{{ s.p }}.desc" style="font-size:14px;color:#f4ddd2;line-height:1.5;margin-top:2px">{{ s.desc }}</div>
@@ -564,23 +581,23 @@
           </sc-for>
         </div>
         <div style="display:flex;gap:12px;margin-top:28px;flex-wrap:wrap">
-          <a href="#admissions" style="background:#e8541b;color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="background:#c2410f">Download brochure</a>
-          <a href="#admissions" style="border:1px solid rgba(255,255,255,.4);color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="border-color:#fff">School fee</a>
+          <a href="#admissions" data-edit="admissionsSection.brochureCta" style="background:#e8541b;color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="background:#c2410f">{{ admissionsSection.brochureCta }}</a>
+          <a href="#admissions" data-edit="admissionsSection.feeCta" style="border:1px solid rgba(255,255,255,.4);color:#fff;padding:12px 22px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14px" style-hover="border-color:#fff">{{ admissionsSection.feeCta }}</a>
         </div>
       </div>
       <div style="background:#fff;color:#26201d;border-radius:16px;padding:30px">
-        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin-bottom:16px">Send an enquiry</div>
+        <div data-edit="admissionsSection.formTitle" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin-bottom:16px">{{ admissionsSection.formTitle }}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="Parent / student name" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="Phone number" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
           <select value="{{ form.track }}" onChange="{{ onTrack }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-            <option>Pre-Primary Program</option>
-            <option>Primary School</option>
-            <option>Secondary School</option>
-            <option>Not sure yet</option>
+            <option>{{ admissionsSection.trackPrePrimary }}</option>
+            <option>{{ admissionsSection.trackPrimary }}</option>
+            <option>{{ admissionsSection.trackSecondary }}</option>
+            <option>{{ admissionsSection.trackUnsure }}</option>
           </select>
-          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="Message (optional)" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
-          <button onClick="{{ submit }}" style="width:100%;padding:14px;border:none;border-radius:9px;background:#a51915;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#7f120f">{{ submitLabel }}</button>
+          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="{{ admissionsSection.msgPlaceholder }}" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
+          <button onClick="{{ submit }}" data-edit="{{ submitLabelPath }}" style="width:100%;padding:14px;border:none;border-radius:9px;background:#a51915;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#7f120f">{{ submitLabel }}</button>
         </div>
       </div>
     </div>
@@ -592,7 +609,12 @@
      then the group column pointing at the landing page and the sibling branch.
      Address, phone numbers and email come from the shared contact block in
      content.js, so their edit paths start with `shared:`, and all three are
-     still placeholders. That block holds only one phone number, so both slots
+     still placeholders. So are the three names — this school's, the group's
+     and the sibling branch's — and the motto beside the copyright: renaming a
+     school is then one edit in content.js rather than one per page. Only the
+     column headings and the links under them are this page's own copy, in
+     CONTENT.footer.
+     The shared contact block holds only one phone number, so both slots
      in the line below render it. Only the FIRST slot carries data-edit: the
      blur handler in editor-client.js applies a change and calls update(), but
      not rerender() (a full React remount on every text edit would be needless
@@ -608,41 +630,41 @@
       <div>
         <div style="display:flex;align-items:center;gap:14px">
           <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
-          <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori A-Camp</span>
+          <span data-edit="shared:site.acampShortName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">{{ site.acampShortName }}</span>
         </div>
         <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px"><span data-edit="shared:contact.acampAddress">{{ contact.acampAddress }}</span>.</p>
         <p style="font-size:14px;margin:14px 0 0"><a href="#admissions" style="color:#ffd9c4"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a> · <a href="#admissions" style="color:#ffd9c4"><span>{{ contact.phone }}</span></a></p>
         <p style="font-size:14px;margin:6px 0 0"><a href="{{ mailtoEmail }}" style="color:#ffd9c4"><span data-edit="shared:contact.email">{{ contact.email }}</span></a></p>
       </div>
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">School</div>
+        <div data-edit="footer.schoolHeading" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">{{ footer.schoolHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="#about" style-hover="color:#fff">About Us</a>
-          <a href="#academics" style-hover="color:#fff">Academics</a>
-          <a href="#life" style-hover="color:#fff">School Life</a>
-          <a href="#campus" style-hover="color:#fff">Campus</a>
+          <a href="#about" style-hover="color:#fff" data-edit="footer.schoolAbout">{{ footer.schoolAbout }}</a>
+          <a href="#academics" style-hover="color:#fff" data-edit="footer.schoolAcademics">{{ footer.schoolAcademics }}</a>
+          <a href="#life" style-hover="color:#fff" data-edit="footer.schoolLife">{{ footer.schoolLife }}</a>
+          <a href="#campus" style-hover="color:#fff" data-edit="footer.schoolCampus">{{ footer.schoolCampus }}</a>
         </div>
       </div>
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">Quick links</div>
+        <div data-edit="footer.quickHeading" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">{{ footer.quickHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="#gallery" style-hover="color:#fff">Gallery</a>
-          <a href="#news" style-hover="color:#fff">News Room</a>
-          <a href="#admissions" style-hover="color:#fff">Admission</a>
-          <a href="acamp-subpage.html#house" style-hover="color:#fff">School Life</a>
+          <a href="#gallery" style-hover="color:#fff" data-edit="footer.quickGallery">{{ footer.quickGallery }}</a>
+          <a href="#news" style-hover="color:#fff" data-edit="footer.quickNews">{{ footer.quickNews }}</a>
+          <a href="#admissions" style-hover="color:#fff" data-edit="footer.quickAdmission">{{ footer.quickAdmission }}</a>
+          <a href="acamp-subpage.html#house" style-hover="color:#fff" data-edit="footer.quickSchoolLife">{{ footer.quickSchoolLife }}</a>
         </div>
       </div>
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">Group</div>
+        <div data-edit="footer.groupHeading" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">{{ footer.groupHeading }}</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="index.html" style-hover="color:#fff">Montessori Schools</a>
-          <a href="montessori-vidyanagar.html" style-hover="color:#fff">Montessori Vidyanagar</a>
+          <a href="index.html" style-hover="color:#fff" data-edit="shared:site.groupName">{{ site.groupName }}</a>
+          <a href="montessori-vidyanagar.html" style-hover="color:#fff" data-edit="shared:site.vidyanagarShortName">{{ site.vidyanagarShortName }}</a>
                   </div>
       </div>
     </div>
     <div style="margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:#cf9c8f">
-      <span>© 2026 Montessori School, A-Camp · Montessori School Committee. All rights reserved.</span>
-      <span style="font-family:'Quicksand',sans-serif;font-weight:600;letter-spacing:.04em">Empathy · Respect · Discipline</span>
+      <span data-edit="footer.copyright">{{ footer.copyright }}</span>
+      <span data-edit="shared:site.motto" style="font-family:'Quicksand',sans-serif;font-weight:600;letter-spacing:.04em">{{ site.motto }}</span>
     </div>
   </div>
 </footer>
@@ -676,28 +698,55 @@
   Keep the block strict JSON: double-quoted keys AND values, no comments and
   no trailing commas inside the markers, or the editor cannot parse it.
 
-  The contact details in the top bar and the footer are NOT here: they are
-  shared across every page and live in content.js, reached through
-  window.SHARED_CONTENT and written data-edit="shared:contact.phone".
+  Two kinds of copy a visitor reads on this page are deliberately NOT here:
 
+    - the contact details in the top bar and the footer, and the chrome that
+      repeats on every page — the school names, the tagline, the call prompt
+      and the footer motto. Those live in content.js, reached through
+      window.SHARED_CONTENT and written data-edit="shared:site.tagline", so
+      that renaming a school is one edit rather than four.
+    - the navigation labels, which are shared:nav.menus in content.js: one
+      menu serves all four school pages. renderVals() turns each entry's `key`
+      into an href for this page and stamps its shared path so the bar, the
+      dropdowns and the floating pill's drawer are all editable in place.
+
+  The groups below are in the order their sections appear on the page.
+
+  loader  the wordmark on the red splash screen.
+  pill    the three hints the floating current-page pill shows beside the
+          section name — one for a section with sub-pages, one for while the
+          drawer is open, one for a section without any. Which is on screen
+          depends on state, so renderVals hands the template the matching
+          CONTENT path (pillHintPath) alongside the text; without it a click
+          would edit whichever key happened to be named in the markup.
   hero    the welcome line, the school name headline, the two introductory
-          paragraphs and the quotation banner over the hero photo. This is the
-          branch-specific copy: the Vidyanagar twin says something different.
+          paragraphs, the quotation banner over the hero photo and the two
+          buttons. This is the branch-specific copy: the Vidyanagar twin says
+          something different.
           `photo` is a media slot, placed through the editor's media drawer;
           removing it writes "" and renderVals maps that to a transparent image.
+  aboutSection  the About band: kicker, heading and statement, then the vision
+          card and the core-values card. The three values are separate keys
+          because the bullets between them are markup, not copy.
   founder the five text fields of the Founder panel — eyebrow, name, title,
           two body paragraphs and the closing quotation — plus `photo`, the
           portrait, which is a media slot placed through the editor's media
           drawer like any other image slot; an empty value renders transparently.
-  showcase  one key, `video`: a full youtube-nocookie embed URL written by the
-          editor when a video is placed on the showcase's media slot. ""
-          means the slot is empty — renderVals maps it to about:blank. A bare
-          video ID or a youtube.com/watch?v= URL is not a valid value here
-          and will render a broken frame.
+  academicsSection  the kicker and heading above the academics cards.
   academics  the six academics cards. `tag` is the card's ordinal badge.
           Deliberately generic: no examination board, affiliation or grade
           range is claimed, as none has been confirmed.
+  lifeSection  the School Life kicker, heading and paragraph, plus the title
+          and closing paragraph of the house panel beside them.
+  houses  the four houses. `name` is editable copy; `swatch` is the colour of
+          the square beside it and is not offered to the editor.
   life    the four school-life points shown beside the house panel.
+  showcase  the Students Showcase copy, plus `video`: a full youtube-nocookie
+          embed URL written by the editor when a video is placed on the
+          section's media slot. "" means the slot is empty — renderVals maps
+          it to about:blank. A bare video ID or a youtube.com/watch?v= URL is
+          not a valid value here and will render a broken frame.
+  campusSection  the kicker and heading above the facility cards.
   facilities  the six linked facility cards. Each `href` must match a key in
           the `pages` map in acamp-subpage.html, or the link lands on that
           page's generic fallback. Every `icon` is a transparent-GIF
@@ -705,9 +754,11 @@
   facilityChips  plain strings, one per facility with no detail page of its
           own. Kept as strings rather than objects so the chips stay simple;
           renderVals() pairs each with its path for data-edit.
-  steps   the four numbered admission steps; `n` is the step number in the
-          circle. Kept in sync by hand with the "procedure" entry in the
-          subpage's content map.
+  transportSection  the whole Transport band: kicker, heading and paragraph.
+  newsSection  the News Room kicker and heading, the line shown while the
+          shared news pool is empty, and the "Read more" label that appears on
+          the back of every card.
+  gallerySection  the Gallery kicker, heading and the hover hint beside them.
   galleryGroups  the gallery, one entry per category, each with a `label` and
           a `photos` array of { src, caption }. Labels and captions are
           editable, and each `src` is a media slot placed through the editor's
@@ -715,16 +766,52 @@
           added, reordered and removed without hand-editing this JSON. The
           stored src remains a full delivery URL because this grouped gallery
           is page content rather than a shared media-id collection.
+  admissionsSection  the left column's kicker, heading and two buttons, and
+          every string in the enquiry form. `submit` / `submitted` are the two
+          states of the button, and renderVals picks the path to match the one
+          on screen. The placeholders and the four <option> labels are here
+          for single-sourcing only: the editor edits element text, so it can
+          reach neither an attribute nor an <option>, and those five strings
+          have to be changed here by hand.
+  steps   the four numbered admission steps; `n` is the step number in the
+          circle. Kept in sync by hand with the "procedure" entry in the
+          subpage's content map.
+  footer  the three column headings and the in-page links beneath them, and
+          the copyright line. The two names in the Group column, the school
+          name at the top of the first column and the motto beside the
+          copyright are shared:site values rather than page copy.
 */
 /* CONTENT:BEGIN */
 const CONTENT = {
+  "loader": {
+    "wordmark": "Montessori"
+  },
+  "pill": {
+    "hintCollapsed": "hover for more options",
+    "hintExpanded": "select a page",
+    "hintDetails": "click for more details"
+  },
   "hero": {
     "welcome": "Welcome to",
     "title": "Montessori School, A-Camp",
     "p1": "Montessori A-Camp is a co-educational & semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.",
     "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
     "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”",
+    "ctaPrimary": "Send enquiry →",
+    "ctaSecondary": "Discover the school",
     "photo": "assets/gallery/campus-2.jpg"
+  },
+  "aboutSection": {
+    "kicker": "About Us",
+    "title": "Explore, Experience & Excel at Montessori",
+    "body": "Through the pursuance of excellence in education, Montessori — with the traditional values of empathy, respect and discipline — renders a liberal education where the mind flowers without fear. A vision that accentuates human excellence and moulds the younger generation for a meaningful and productive life in a globalized society.",
+    "visionKicker": "Our Vision",
+    "visionBody": "To create citizens of tomorrow steeped in the traditional values of empathy, discipline and respect — where no fears prevail; a vision that leads to change.",
+    "valuesKicker": "Core Values",
+    "value1": "Empathy",
+    "value2": "Respect",
+    "value3": "Discipline",
+    "valuesBody": "The three pillars behind every classroom, playground and interaction at Montessori."
   },
   "founder": {
     "eyebrow": "Our Founder",
@@ -735,7 +822,10 @@ const CONTENT = {
     "quote": "\"My work is my relaxation.\"",
     "photo": "assets/people/founder.jpg"
   },
-  "showcase": { "video": "" },
+  "academicsSection": {
+    "kicker": "Teaching & Learning",
+    "title": "Our Academics"
+  },
   "academics": [
     { "tag": "01", "title": "Pedagogy", "desc": "A student-centric approach focusing on interactive, experiential and inquiry-based learning to foster critical thinking and problem-solving." },
     { "tag": "02", "title": "Pre-Primary Program", "desc": "A play-based curriculum developing cognitive, social and motor skills through engaging, hands-on experiences." },
@@ -744,12 +834,35 @@ const CONTENT = {
     { "tag": "05", "title": "Lower & Primary", "desc": "Foundational programs building strong literacy, numeracy and enquiry habits." },
     { "tag": "06", "title": "Assessment Policy", "desc": "A well-defined framework of continuous formative and summative assessment that promotes academic growth." }
   ],
+  "lifeSection": {
+    "kicker": "School Life & Activities",
+    "title": "A day, built around the child.",
+    "body": "From timings and the house system to clubs, physical education and co-curricular activities, life at Montessori balances rigorous academics with the joy of growing up.",
+    "housesTitle": "The Four Houses",
+    "housesBody": "Every student belongs to a house — earning points through academics, sport and service, building lifelong belonging and healthy competition."
+  },
+  "houses": [
+    { "name": "Valour", "swatch": "#e8541b" },
+    { "name": "Wisdom", "swatch": "#2f9e6b" },
+    { "name": "Harmony", "swatch": "#3f7fd0" },
+    { "name": "Integrity", "swatch": "#e0533a" }
+  ],
   "life": [
     { "title": "School Timings", "desc": "Structured day with breaks, activity periods and supervised study." },
     { "title": "Rules & Regulations", "desc": "Clear, kind expectations that build discipline and respect." },
     { "title": "Clubs & Societies", "desc": "From robotics to debate, drama and eco clubs." },
     { "title": "Physical Education", "desc": "Daily sport, athletics and access to the sports arena." }
   ],
+  "showcase": {
+    "video": "",
+    "kicker": "Students Showcase",
+    "title": "Creativity at the Grand Art Exhibition",
+    "body": "Our students bring learning to life — in the studio, on the stage and across the campus. A glimpse of a day at Montessori."
+  },
+  "campusSection": {
+    "kicker": "Campus & Facilities",
+    "title": "For complete growth, all at one place"
+  },
   "facilities": [
     { "href": "acamp-subpage.html#ac-classrooms", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Classrooms", "desc": "Centrally air-conditioned rooms with smart audio-visual teaching aids." },
     { "href": "acamp-subpage.html#science-labs", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Labs", "desc": "Science, robotics, maths and computing labs for hands-on discovery." },
@@ -759,12 +872,22 @@ const CONTENT = {
     { "href": "acamp-subpage.html#music", "icon": "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==", "title": "Music", "desc": "Vocal and instrumental music with regular performances." }
   ],
   "facilityChips": ["AC Classrooms", "Auditorium", "Computer Lab", "Math Lab", "Music Room", "Scholar's Mess", "Library", "Infirmary", "Robotics", "Swimming Pool"],
-  "steps": [
-    { "n": "1", "title": "Enquiry & campus visit", "desc": "Send an enquiry or drop by — meet our team and tour the campus." },
-    { "n": "2", "title": "Application form", "desc": "Complete the admission form for your child's grade and pathway." },
-    { "n": "3", "title": "Interaction / assessment", "desc": "A friendly interaction to understand your child's learning needs." },
-    { "n": "4", "title": "Confirmation", "desc": "Complete enrolment and fee formalities to secure the seat." }
-  ],
+  "transportSection": {
+    "kicker": "Transport",
+    "title": "Safe rides, every route.",
+    "body": "A GPS-enabled bus fleet covers routes across Kurnool and the surrounding areas, with trained attendants on every bus. Pick-up and drop timings are shared with parents at the start of each term, and detailed bus routes are available from the school office."
+  },
+  "newsSection": {
+    "kicker": "News Room",
+    "title": "Latest & upcoming",
+    "empty": "News and announcements coming soon.",
+    "readMore": "Read more →"
+  },
+  "gallerySection": {
+    "kicker": "Gallery",
+    "title": "Life in pictures",
+    "hint": "hover a photo to see what it is"
+  },
   "galleryGroups": [
     { "label": "Campus", "photos": [
       { "src": "assets/gallery/campus-1.jpg", "caption": "Campus entrance" },
@@ -787,7 +910,43 @@ const CONTENT = {
       { "src": "assets/gallery/computer-lab-2.jpg", "caption": "Students at the computer lab" },
       { "src": "assets/gallery/math-lab.jpg", "caption": "Math lab" }
     ] }
-  ]
+  ],
+  "admissionsSection": {
+    "kicker": "Admissions 2026–27",
+    "title": "The admission procedure",
+    "brochureCta": "Download brochure",
+    "feeCta": "School fee",
+    "formTitle": "Send an enquiry",
+    "namePlaceholder": "Parent / student name",
+    "phonePlaceholder": "Phone number",
+    "trackPrePrimary": "Pre-Primary Program",
+    "trackPrimary": "Primary School",
+    "trackSecondary": "Secondary School",
+    "trackUnsure": "Not sure yet",
+    "msgPlaceholder": "Message (optional)",
+    "submit": "Send enquiry",
+    "submitted": "✓ Enquiry received"
+  },
+  "steps": [
+    { "n": "1", "title": "Enquiry & campus visit", "desc": "Send an enquiry or drop by — meet our team and tour the campus." },
+    { "n": "2", "title": "Application form", "desc": "Complete the admission form for your child's grade and pathway." },
+    { "n": "3", "title": "Interaction / assessment", "desc": "A friendly interaction to understand your child's learning needs." },
+    { "n": "4", "title": "Confirmation", "desc": "Complete enrolment and fee formalities to secure the seat." }
+  ],
+  "footer": {
+    "schoolHeading": "School",
+    "schoolAbout": "About Us",
+    "schoolAcademics": "Academics",
+    "schoolLife": "School Life",
+    "schoolCampus": "Campus",
+    "quickHeading": "Quick links",
+    "quickGallery": "Gallery",
+    "quickNews": "News Room",
+    "quickAdmission": "Admission",
+    "quickSchoolLife": "School Life",
+    "groupHeading": "Group",
+    "copyright": "© 2026 Montessori School, A-Camp · Montessori School Committee. All rights reserved."
+  }
 };
 /* CONTENT:END */
 
@@ -795,10 +954,17 @@ class Component extends DCLogic {
   // openMenu     index of the open nav dropdown, or -1 for none
   // navFixed     true once scrolled past the nav (shows the floating pill)
   // pillExpanded true while hovering the pill, which opens its link list
-  // currentTab   label of the section currently in view, from the scrollspy
+  // currentTab   index into the shared menu tree of the section currently in
+  //              view, from the scrollspy. An index and not a label: the pill
+  //              renders shared:nav.menus.<i>.label, so rewording a menu item
+  //              renames the pill too, where a stored label would have stopped
+  //              matching anything the moment it was edited.
   // form         the controlled admissions inputs
   // submitted    swaps the button label; there is no submission endpoint yet
-  state = { openMenu: -1, navFixed: false, pillExpanded: false, currentTab: "Home", form: { name: "", phone: "", track: "Pre-Primary Program", msg: "" }, submitted: false };
+  // The default track is read from CONTENT rather than repeated here, so
+  // rewording the first <option> cannot leave the select preset to a value
+  // that no longer matches any option.
+  state = { openMenu: -1, navFixed: false, pillExpanded: false, currentTab: 0, form: { name: "", phone: "", track: CONTENT.admissionsSection.trackPrePrimary, msg: "" }, submitted: false };
 
   componentDidMount() {
     // ---- Editor hooks ----
@@ -851,16 +1017,22 @@ class Component extends DCLogic {
       // page is scrolled past that point the nav is pinned and the pill shows.
       this._headerOffset = header.offsetTop;          // top-bar height, before it ever fixes
       this._navH = header.offsetHeight || 52;         // measured but currently unused
-      // Section id -> the label the pill shows for it, in document order.
-      const SPY = [["top","Home"],["about","About"],["academics","Academics"],["life","School Life"],["campus","Campus & Facilities"],["transport","Transport"],["gallery","Gallery"],["news","News Room"],["admissions","Admission"]];
+      // Section id -> the index in shared:nav.menus whose label names it, in
+      // document order. It maps to an index rather than to a label so that the
+      // pill shows whatever that menu entry is currently called; matching by
+      // string would break the pill's dropdown the first time somebody
+      // reworded a menu item. Note #life maps to "School Life" (2), not to
+      // "Activities" (4) whose key is #life — that is the name this section
+      // has always been given in the pill.
+      const SPY = [["top",0],["about",1],["academics",3],["life",2],["campus",5],["transport",6],["gallery",7],["news",8],["admissions",9]];
       const apply = () => {
         const y = window.scrollY;
         const fixed = y > (this._headerOffset - 4);
         // Walk the sections in order and keep the LAST one whose top has
         // already crossed 140px (just under the nav). Because the list is in
         // document order, the survivor is the section currently in view.
-        let cur = "Home";
-        for (const [id, label] of SPY) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= 140) cur = label; }
+        let cur = 0;
+        for (const [id, mi] of SPY) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= 140) cur = mi; }
         // Only call setState when something actually changed: this runs on
         // every frame of every scroll, and an unconditional setState would
         // re-render the whole page continuously.
@@ -926,44 +1098,31 @@ class Component extends DCLogic {
     // on the hash. This prefix is one of the few genuine differences between
     // this file and its Vidyanagar twin.
     const SUB = "acamp-subpage.html#";
-    // The full navigation tree. A top-level entry with an empty `items` is a
-    // plain link with no dropdown. Note the mix of destinations: `href` may be
-    // a section of this page (#academics) or a subpage route.
-    const rawMenus = [
-      { label: "Home", href: "#top", items: [] },
-      { label: "About", href: "#about", items: [
-        { label: "Core Values", href: SUB + "core-values" }, { label: "Founder's Message", href: SUB + "founders-message" },
-        { label: "From Principal's Desk", href: SUB + "principals-desk" }, { label: "Team Montessori", href: SUB + "team-monte" },
-        { label: "Affiliations", href: SUB + "affiliations" }, { label: "Documents", href: SUB + "documents" } ] },
-      { label: "School Life", href: SUB + "house", items: [] },
-      { label: "Academics", href: "#academics", items: [
-        { label: "Pre-Primary Program", href: SUB + "pre-primary" },
-        { label: "Primary School", href: SUB + "primary" }, { label: "Secondary School", href: SUB + "secondary" },
-        { label: "Assessment Policy", href: SUB + "assessment" } ] },
-      { label: "Activities", href: "#life", items: [
-        { label: "School Calendar", href: SUB + "calendar" }, { label: "Co-Curricular Activity", href: SUB + "co-curricular" },
-        { label: "Physical Education", href: SUB + "physical-education" }, { label: "Clubs & Societies", href: SUB + "clubs" }, { label: "Events", href: SUB + "events" } ] },
-      { label: "Campus & Facilities", href: "#campus", items: [
-        { label: "The Campus", href: SUB + "the-campus" }, { label: "Classrooms", href: SUB + "ac-classrooms" },
-        { label: "Labs", href: SUB + "science-labs" }, { label: "Library", href: SUB + "library" },
-        { label: "Swimming Pool", href: SUB + "swimming-pool" }, { label: "Sports", href: SUB + "sports-arena" },
-        { label: "Music", href: SUB + "music" }, { label: "Infirmary", href: SUB + "infirmary" } ] },
-      { label: "Transport", href: SUB + "transport", items: [] },
-      { label: "Gallery", href: "#gallery", items: [
-        { label: "Photo Gallery", href: SUB + "photo-gallery" }, { label: "Videos", href: SUB + "videos" } ] },
-      { label: "News Room", href: "#news", items: [
-        { label: "Events", href: SUB + "events-news" }, { label: "Latest News", href: SUB + "latest-news" },
-        { label: "Awards & Achievements", href: SUB + "awards" }, { label: "Circulars & Downloads", href: SUB + "circulars" } ] },
-      { label: "Admission", href: "#admissions", items: [
-        { label: "Admission Procedure", href: SUB + "procedure" }, { label: "Admission Form", href: SUB + "form" },
-        { label: "Brochure", href: SUB + "brochure" }, { label: "School Fee", href: SUB + "fee" } ] },
-    ];
+    // The full navigation tree, read from the one menu shared by all four
+    // school pages (content.js) rather than spelled out here, so that a label
+    // reworded on any of them is reworded on all of them. Only `label` is
+    // copy; `key` is the destination and is deliberately not editable. Read
+    // from this file a key is either "#anchor", a section of this very page,
+    // or a bare route on the branch's detail page, which takes the SUB prefix.
+    // A top-level entry with an empty `items` is a plain link with no
+    // dropdown. `p` is where each label came from, for the editor; it points
+    // into content.js, hence the shared: prefix.
+    const rawMenus = S.nav.menus.map((m, i) => ({
+      label: m.label,
+      href: m.key.startsWith("#") ? m.key : SUB + m.key,
+      p: "shared:nav.menus." + i,
+      items: m.items.map((it, j) => ({
+        label: it.label,
+        href: it.key.startsWith("#") ? it.key : SUB + it.key,
+        p: "shared:nav.menus." + i + ".items." + j,
+      })),
+    }));
     // Flatten the tree into exactly what the template needs. The {{ }} language
     // cannot compare or compute, so every decision is resolved to a plain
     // value here: hasItems drives the caret, showDropdown drives the panel,
     // and color/bg highlight the first item ("Home") as the active tab.
     const menus = rawMenus.map((m, i) => ({
-      label: m.label, href: m.href, items: m.items,
+      label: m.label, href: m.href, p: m.p, items: m.items,
       hasItems: m.items.length > 0,
       isOpen: open === i,
       showDropdown: open === i && m.items.length > 0,
@@ -984,18 +1143,29 @@ class Component extends DCLogic {
     // effectively always enabled.
     const pillEnabled = (this.props.navStyle || "Floating") === "Floating";
     const showPill = pillEnabled && this.state.navFixed;
-    // Match the scrollspy's current section back to its menu entry, so the
-    // pill can offer that section's dropdown links. The labels in SPY above
-    // are written to match these menu labels exactly; the fallback to
-    // rawMenus[0] covers a section whose label has no matching menu.
-    const curMenu = rawMenus.find((m) => m.label === this.state.currentTab) || rawMenus[0];
+    // The scrollspy stores the index of the menu entry that names the section
+    // in view, so the pill can show that entry's label and offer its dropdown
+    // links. The fallback to 0 (Home) covers a shortened menu: SPY's indices
+    // are fixed, so removing an entry from content.js would otherwise leave
+    // curMenu undefined for the sections below it.
+    const curIdx = rawMenus[this.state.currentTab] ? this.state.currentTab : 0;
+    const curMenu = rawMenus[curIdx];
     const pillItems = curMenu.items || [];
     const hasItems = pillItems.length > 0;
     // Only expand if there is actually something to show.
     const pillExpanded = this.state.pillExpanded && hasItems;
     // Hint text tells the visitor what the pill will do, which differs by
-    // whether the current section has sub-pages at all.
-    const pillHint = hasItems ? (pillExpanded ? "select a page" : "hover for more options") : (this.state.currentTab === "Home" ? "" : "click for more details");
+    // whether the current section has sub-pages at all. Three strings, one on
+    // screen at a time, so the data-edit path has to switch with them: without
+    // pillHintPath a click would save the new wording over whichever key the
+    // markup happened to name. Home shows no hint at all (pillHintStyle hides
+    // the span), and keeps the "no sub-pages" path so it still resolves.
+    const pillHint = hasItems
+      ? (pillExpanded ? CONTENT.pill.hintExpanded : CONTENT.pill.hintCollapsed)
+      : (curIdx === 0 ? "" : CONTENT.pill.hintDetails);
+    const pillHintPath = hasItems
+      ? (pillExpanded ? "pill.hintExpanded" : "pill.hintCollapsed")
+      : "pill.hintDetails";
     const pillHref = curMenu.href;
 
     // Pill styling. These are objects rather than stylesheet rules because
@@ -1035,8 +1205,13 @@ class Component extends DCLogic {
       // to measure or time.
       navRef: (el) => { this._navEl = el; },
       loaderRef: (el) => { this._loaderEl = el; },
-      navHeaderStyle, navBarStyle, menuRowStyle, currentTab: this.state.currentTab,
-      showPill, pillItems, pillHint, pillHref,
+      navHeaderStyle, navBarStyle, menuRowStyle,
+      // The pill's title is the current menu entry's own label, and its
+      // data-edit path is that entry's path in the shared menu — so the pill
+      // is one more place the same label can be reworded, not a second copy
+      // of it that could drift.
+      currentTab: curMenu.label, currentTabPath: curMenu.p + ".label",
+      showPill, pillItems, pillHint, pillHintPath, pillHref,
       pillWrapStyle, pillCardStyle, pillHeadStyle, pillHintStyle, pillItemsWrapStyle,
       pillEnter: () => { if (hasItems) this.setState({ pillExpanded: true }); },
       pillLeave: () => this.setState({ pillExpanded: false }),
@@ -1047,14 +1222,29 @@ class Component extends DCLogic {
       // data-edit. facilityChips holds plain strings, which cannot be stamped
       // that way, so each is paired with its own path here instead: the
       // template reads c.t for the text and c.p for the path.
+      loader: CONTENT.loader,
       hero: CONTENT.hero,
       heroPhotoSrc: CONTENT.hero.photo || EMPTY_IMAGE,
+      aboutSection: CONTENT.aboutSection,
       founder: CONTENT.founder,
       founderPhotoSrc: CONTENT.founder.photo || EMPTY_IMAGE,
+      academicsSection: CONTENT.academicsSection,
+      lifeSection: CONTENT.lifeSection,
+      houses: withPaths(CONTENT.houses, "houses"),
+      showcase: CONTENT.showcase,
+      campusSection: CONTENT.campusSection,
+      transportSection: CONTENT.transportSection,
+      newsSection: CONTENT.newsSection,
+      gallerySection: CONTENT.gallerySection,
+      admissionsSection: CONTENT.admissionsSection,
+      footer: CONTENT.footer,
       // "" means "no video chosen yet": about:blank keeps the iframe an empty
       // black box instead of recursively loading this page inside itself.
       showcaseVideoSrc: CONTENT.showcase.video || "about:blank",
       contact: S.contact,
+      // Cross-page chrome (school names, tagline, call prompt, motto) lives in
+      // content.js so one edit renames a school on every page, not just here.
+      site: S.site,
       // The footer's mailto: href, built here because {{ }} cannot concatenate. The
       // address used to be hard-coded in the markup as well as rendered from CONTENT,
       // so the first edit to contact.email would have shown the new address while every
@@ -1071,7 +1261,10 @@ class Component extends DCLogic {
       // ---- Enquiry form wiring ----
       form: this.state.form,
       onName: set("name"), onPhone: set("phone"), onTrack: set("track"), onMsg: set("msg"),
-      submitLabel: this.state.submitted ? "✓ Enquiry received" : "Send enquiry",
+      submitLabel: this.state.submitted ? CONTENT.admissionsSection.submitted : CONTENT.admissionsSection.submit,
+      // The button shows one of two strings, so its data-edit has to follow the
+      // state: whichever label is on screen is the one a click edits.
+      submitLabelPath: this.state.submitted ? "admissionsSection.submitted" : "admissionsSection.submit",
       // Front-end only: acknowledges the click and discards the input. Post
       // form.* to a real endpoint here before the site goes live.
       submit: () => this.setState({ submitted: true }),

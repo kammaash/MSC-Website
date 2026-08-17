@@ -15,6 +15,33 @@
 4. ↑ ↓ reorder items; ✕ deletes (asks first).
 5. Press **Publish**. The live site updates in about a minute. **Discard** throws away unsaved changes.
 
+### Some text is shared — one edit changes it everywhere
+A few things are stored once and reused, so they can never drift apart or contradict each other:
+
+- **The big menu** is shared by the four school pages — A-Camp and Vidyanagar, and the detail
+  pages behind each of them. Rename "Admission" on A-Camp and it is renamed on all four. (The
+  front landing page has its own short menu of its own sections; that one is page-local.)
+- **The school names, the phone number and the email address** are shared by every page that
+  shows them, the landing page included.
+- **The tagline "Help the child to help himself" and the "Don't hesitate to call" line** sit in
+  the header of the four school pages and are shared between them.
+- **The footer motto** is shared by the two school home pages. The landing page keeps its own
+  wording, which orders the three words differently — that was already true and was left as it is.
+
+Everything else — headings, paragraphs, buttons, section titles, the footer link columns — belongs
+to the page you are on, so editing it there affects only that page.
+
+### A few words can't be clicked
+Almost all the writing on the site is clickable, but four kinds of text are not:
+
+- the grey hint text **inside** an empty form box ("Parent / student name", "Phone number"),
+- the choices in the admissions **drop-down** ("Pre-Primary Program", "Not sure yet", …),
+- the description of a photo that screen readers and search engines use,
+- the page name that appears in the browser tab.
+
+These are stored in the same place as everything else, so the admin can change them in a few
+minutes — just ask. Nothing else on the site needs a developer.
+
 ### Important: the editor only works one way
 Editing mode only appears when the site is opened through `npm run edit`. If you open one of the
 website's `.html` files directly, or the site is served any other way, you will see the ordinary

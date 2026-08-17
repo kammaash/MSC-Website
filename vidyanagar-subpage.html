@@ -119,23 +119,24 @@
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="montessori-vidyanagar.html#top" style="display:flex;align-items:center;gap:18px">
       <span style="display:block;line-height:0">
-        <img src="assets/monte-logo.png" alt="Montessori School, Vidyanagar" style="height:74px;width:auto;display:block">
+        <img src="assets/monte-logo.png" alt="{{ site.vidyanagarName }}" style="height:74px;width:auto;display:block">
       </span>
       <span style="display:flex;flex-direction:column;line-height:1.15">
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori School, Vidyanagar</span>
-        <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
+        <span data-edit="shared:site.vidyanagarName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">{{ site.vidyanagarName }}</span>
+        <span data-edit="shared:site.tagline" style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">{{ site.tagline }}</span>
       </span>
     </a>
     <div class="phone-block" style="text-align:right">
-      <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
+      <div data-edit="shared:site.callPrompt" style="font-size:14px;color:#6b615b">{{ site.callPrompt }}</div>
       <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915"><span data-edit="shared:contact.phone">{{ contact.phone }}</span></a>
     </div>
   </div>
 </div>
 
 <!-- YELLOW NAV WITH DROPDOWNS
-     The same navigation as the branch page, rebuilt from this file's own
-     `menus` array. Two differences worth knowing:
+     The same navigation as the branch page, and literally the same data: the
+     labels and destinations come from shared:nav.menus in content.js, which
+     renderVals() turns into this page's hrefs. Two differences worth knowing:
        - top-level links point back at the branch page's sections, since those
          sections do not exist here;
        - dropdown links are bare "#hash" routes into this same file, and the
@@ -150,11 +151,11 @@
   <nav class="wrap" style="padding-left:12px;padding-right:12px;display:flex;align-items:stretch;flex-wrap:wrap">
     <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
       <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-        <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:#a51915" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+        <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:#a51915" style-hover="background:rgba(165,25,21,.1)"><span data-edit="{{ m.p }}.label">{{ m.label }}</span><sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
         <sc-if value="{{ m.isOpen }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
             <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
-              <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:{{ it.color }}" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+              <a href="{{ it.href }}" data-edit="{{ it.p }}.label" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:{{ it.color }}" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
             </sc-for>
           </div>
         </sc-if>
@@ -172,11 +173,11 @@
 <section style="background:#a51915;color:#fff">
   <div class="wrap" style="padding-top:46px;padding-bottom:50px">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13.5px;color:#ffd9c4;display:flex;gap:9px;align-items:center;flex-wrap:wrap">
-      <a href="montessori-vidyanagar.html#top" style="opacity:.85" style-hover="opacity:1">Home</a>
+      <a href="montessori-vidyanagar.html#top" data-edit="breadcrumb.home" style="opacity:.85" style-hover="opacity:1">{{ breadcrumb.home }}</a>
       <span style="opacity:.5">/</span>
-      <span style="color:#f4ddd2">{{ current.parent }}</span>
+      <span data-edit="{{ current.parentPath }}" style="color:#f4ddd2">{{ current.parent }}</span>
       <span style="opacity:.5">/</span>
-      <span style="color:#fff">{{ current.title }}</span>
+      <span data-edit="{{ current.titlePath }}" style="color:#fff">{{ current.title }}</span>
     </div>
     <h1 data-edit="{{ current.titlePath }}" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:44px;line-height:1.1;margin:16px 0 0">{{ current.title }}</h1>
     <p data-edit="{{ current.introPath }}" style="font-size:17px;line-height:1.65;color:#f4ddd2;margin:14px 0 0;max-width:680px">{{ current.intro }}</p>
@@ -199,11 +200,15 @@
      Adding a sixth type means adding a flag in the normaliser and an sc-if
      here.
 
-     Only the heading and paragraph blocks carry data-edit: their text is a
-     single editable string, reached at the block's own CONTENT path (b.p, e.g.
-     "pages.library.blocks.0") plus the authoring key that holds it. A list, a
-     gallery and a note are structures rather than one string, so they are not
-     click-editable in this first version. -->
+     Every string in here is click-editable. Each block knows its own CONTENT
+     path (b.p, e.g. "pages.library.blocks.0"); the markup appends the
+     authoring key holding the string it is about to render — ".p", ".h",
+     ".note", ".sub" — and a list row goes one level deeper still, to
+     "{{ li.p }}.0" for the term and ".1" for the description, because a row is
+     authored as a [term, description] pair. The gallery is the exception: its
+     tiles are placeholders with no copy, and the note beneath them is the same
+     sentence on every route, so it comes from CONTENT.gallery rather than from
+     the block. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
   <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
     <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
@@ -219,7 +224,7 @@
             <sc-for list="{{ b.items }}" as="li" hint-placeholder-count="4">
               <div style="display:flex;gap:13px;align-items:flex-start;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:12px;padding:16px 18px">
                 <span style="flex:none;width:9px;height:9px;border-radius:50%;background:#e8541b;margin-top:7px"></span>
-                <div style="font-size:15.5px;line-height:1.55;color:#3d3531"><strong style="color:#a51915">{{ li.h }}</strong>{{ li.sep }}{{ li.d }}</div>
+                <div style="font-size:15.5px;line-height:1.55;color:#3d3531"><strong data-edit="{{ li.p }}.0" style="color:#a51915">{{ li.h }}</strong>{{ li.sep }}<span data-edit="{{ li.p }}.1">{{ li.d }}</span></div>
               </div>
             </sc-for>
           </div>
@@ -233,12 +238,12 @@
             <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
             <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
           </div>
-          <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">photos coming soon — share your images and we'll add them</div>
+          <div data-edit="gallery.note" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">{{ gallery.note }}</div>
         </sc-if>
         <sc-if value="{{ b.isNote }}" hint-placeholder-val="{{ false }}">
           <div style="background:#fdeadf;border:1px solid #f6c8ae;border-radius:14px;padding:22px 24px;margin:22px 0 0">
-            <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:#a51915">{{ b.text }}</div>
-            <div style="font-size:14.5px;color:#6b615b;margin-top:6px">{{ b.sub }}</div>
+            <div data-edit="{{ b.p }}.note" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;color:#a51915">{{ b.text }}</div>
+            <div data-edit="{{ b.p }}.sub" style="font-size:14.5px;color:#6b615b;margin-top:6px">{{ b.sub }}</div>
           </div>
         </sc-if>
       </div>
@@ -247,8 +252,8 @@
     <!-- CTA: fixed on every route. The second button returns to whichever
          section of the branch page this route belongs to (current.parentHref). -->
     <div style="margin-top:44px;display:flex;gap:12px;flex-wrap:wrap">
-      <a href="montessori-vidyanagar.html#admissions" style="background:#a51915;color:#fff;padding:13px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#7f120f">Enquire about admission →</a>
-      <a href="{{ current.parentHref }}" style="background:#e8541b;color:#fff;padding:13px 24px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#c2410f">Back to {{ current.parent }}</a>
+      <a href="montessori-vidyanagar.html#admissions" data-edit="cta.enquire" style="background:#a51915;color:#fff;padding:13px 26px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#7f120f">{{ cta.enquire }}</a>
+      <a href="{{ current.parentHref }}" style="background:#e8541b;color:#fff;padding:13px 24px;border-radius:8px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px" style-hover="background:#c2410f"><span data-edit="cta.back">{{ cta.back }}</span> <span data-edit="{{ current.parentPath }}">{{ current.parent }}</span></a>
     </div>
   </div>
 </section>
@@ -259,15 +264,15 @@
 <footer style="background:#7f120f;color:#f4ddd2">
   <div class="wrap foot-row" style="padding-top:52px;padding-bottom:30px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;align-items:center">
     <a href="montessori-vidyanagar.html#top" style="display:flex;align-items:center;gap:14px">
-      <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:52px;width:auto;display:block"></span>
-      <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">Montessori Vidyanagar</span>
+      <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="{{ footer.logoAlt }}" style="height:52px;width:auto;display:block"></span>
+      <span data-edit="shared:site.vidyanagarShortName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">{{ site.vidyanagarShortName }}</span>
     </a>
     <div style="display:flex;gap:22px;font-size:14px;flex-wrap:wrap">
-      <a href="montessori-vidyanagar.html#top" style-hover="color:#fff">Home</a>
-      <a href="montessori-vidyanagar.html#admissions" style-hover="color:#fff">Admission</a>
-      <a href="index.html" style-hover="color:#fff">Montessori Schools</a>
+      <a href="montessori-vidyanagar.html#top" data-edit="footer.home" style-hover="color:#fff">{{ footer.home }}</a>
+      <a href="montessori-vidyanagar.html#admissions" data-edit="footer.admission" style-hover="color:#fff">{{ footer.admission }}</a>
+      <a href="index.html" data-edit="shared:site.groupName" style-hover="color:#fff">{{ site.groupName }}</a>
     </div>
-    <span style="font-size:12.5px;color:#cf9c8f;font-family:'Quicksand',sans-serif">Vidyanagar, Kurnool</span>
+    <span data-edit="footer.place" style="font-size:12.5px;color:#cf9c8f;font-family:'Quicksand',sans-serif">{{ footer.place }}</span>
   </div>
 </footer>
 
@@ -298,6 +303,22 @@
 
   Keep the block strict JSON: double-quoted keys AND values, no comments and
   no trailing commas inside the markers, or the editor cannot parse it.
+
+  breadcrumb / gallery / cta / footer
+            the fixed chrome that surrounds every route: the first breadcrumb
+            crumb, the note under the placeholder photo grid, the two buttons
+            at the foot of the body, and the footer's own links. It is the same
+            on all thirty-odd routes, so it sits beside `pages` rather than
+            being repeated inside each entry. Anything that also appears on the
+            branch page or the landing page — the school's names, the tagline,
+            the "call us" prompt — is NOT here: it is read from content.js
+            instead, so renaming the school is one edit for the whole site.
+            `cta.back` is only the prefix; the section name after it is
+            current.parent, which changes per route. `footer.logoAlt` is an
+            alt attribute: the editor cannot click one, so it is here to be
+            single-sourced and hand-edited rather than to be clicked. The top
+            bar's logo alt has no key because it is already the school's
+            shared name.
 
   pages     one entry per route. A key here is exactly the hash that reaches
             it, so "library" is served at vidyanagar-subpage.html#library and must
@@ -334,6 +355,22 @@
 */
 /* CONTENT:BEGIN */
 const CONTENT = {
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "gallery": {
+    "note": "photos coming soon — share your images and we'll add them"
+  },
+  "cta": {
+    "enquire": "Enquire about admission →",
+    "back": "Back to"
+  },
+  "footer": {
+    "home": "Home",
+    "admission": "Admission",
+    "place": "Vidyanagar, Kurnool",
+    "logoAlt": "Montessori"
+  },
   "pages": {
     "core-values": {
       "parent": "About",
@@ -726,42 +763,37 @@ class Component extends DCLogic {
     // between this file and its A-Camp twin.
     const MI = "montessori-vidyanagar.html";
     // ---- nav menu structure (minor items => this file's hashes) ----
-    // Same menu as the branch page, but the dropdown entries are written as
-    // compact [label, routeKey] pairs rather than objects, because every one
-    // of them resolves to a hash in this same file. Each routeKey must match a
-    // key in CONTENT.pages, in the block above this class.
-    const rawMenus = [
-      { label: "Home", href: MI + "#top", items: [] },
-      { label: "About", href: MI + "#about", items: [
-        ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
-        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
-      { label: "School Life", href: "#house", items: [] },
-      { label: "Academics", href: MI + "#academics", items: [
-        ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
-        ["Secondary School", "secondary"], ["Assessment Policy", "assessment"] ] },
-      { label: "Activities", href: MI + "#life", items: [
-        ["School Calendar", "calendar"], ["Co-Curricular Activity", "co-curricular"], ["Physical Education", "physical-education"],
-        ["Clubs & Societies", "clubs"], ["Events", "events"] ] },
-      { label: "Campus & Facilities", href: MI + "#campus", items: [
-        ["The Campus", "the-campus"], ["Classrooms", "ac-classrooms"], ["Labs", "science-labs"], ["Library", "library"],
-        ["Swimming Pool", "swimming-pool"], ["Sports", "sports-arena"], ["Music", "music"], ["Infirmary", "infirmary"] ] },
-      { label: "Transport", href: "#transport", items: [] },
-      { label: "Gallery", href: MI + "#gallery", items: [
-        ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
-      { label: "News Room", href: MI + "#news", items: [
-        ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
-      { label: "Admission", href: MI + "#admissions", items: [
-        ["Admission Procedure", "procedure"], ["Admission Form", "form"], ["Brochure", "brochure"], ["School Fee", "fee"] ] },
-    ];
+    // The menu itself lives in content.js, so all four school pages share one
+    // copy and a reworded label changes everywhere at once. Only `label` is
+    // editable copy; `key` is the destination and is never exposed to the
+    // editor, because changing it would break a link rather than reword one.
+    // A key is read the same way on every page — "#anchor" is a section of the
+    // branch's main page, anything else is a route — but each page turns it
+    // into a real href itself, and this is a subpage: the routes are hashes in
+    // this very file (and must match a key in CONTENT.pages above), while the
+    // anchors have to travel back to the branch page. Hence the inversion, "#"
+    // prefixed here and MI prefixed there. `p` is each label's path into the
+    // shared block, for data-edit.
+    const rawMenus = window.SHARED_CONTENT.nav.menus.map((m, i) => ({
+      label: m.label,
+      href: m.key.startsWith("#") ? MI + m.key : "#" + m.key,
+      p: "shared:nav.menus." + i,
+      items: m.items.map((it, j) => ({
+        label: it.label,
+        key: it.key,
+        href: it.key.startsWith("#") ? MI + it.key : "#" + it.key,
+        p: "shared:nav.menus." + i + ".items." + j,
+      })),
+    }));
     const open = this.state.openMenu;
     const route = this.state.route;
-    // Expand the pairs into what the template needs. The colour comparison is
+    // Add the per-render state the template needs. The colour comparison is
     // done here rather than in the markup because {{ }} cannot compare values:
     // the entry matching the current route is tinted red as a "you are here".
     const menus = rawMenus.map((m, i) => ({
-      label: m.label, href: m.href, hasItems: m.items.length > 0, isOpen: open === i,
+      label: m.label, href: m.href, p: m.p, hasItems: m.items.length > 0, isOpen: open === i,
       open: () => this.setState({ openMenu: i }),
-      items: m.items.map(([label, key]) => ({ label, href: "#" + key, color: key === route ? "#a51915" : "#26201d" })),
+      items: m.items.map((it) => ({ label: it.label, href: it.href, p: it.p, color: it.key === route ? "#a51915" : "#26201d" })),
     }));
 
     // ---- the page for this route ----
@@ -784,38 +816,51 @@ class Component extends DCLogic {
     // `key` gives each block a stable identity for the list rendering, and the
     // list blocks also pre-split each pair into term / separator / description
     // so the markup does not have to concatenate anything.
-    // The two block types that are click-editable also carry `p`, their own
-    // path into CONTENT (e.g. "pages.library.blocks.0"), following the same
-    // per-item convention as the branch pages' withPaths(). The name is reused
-    // deliberately and does not clash: the authoring shape's `p` is a
-    // paragraph's text on the source block `b`, while this `p` is a path on
-    // the new flagged object the template loops over — which is why the
-    // template can write data-edit="{{ b.p }}.p". The index comes from the
-    // source array, so the path keeps pointing at the entry it was built from.
+    // Every flagged block carries `p`, its own path into CONTENT (e.g.
+    // "pages.library.blocks.0"), following the same per-item convention as the
+    // branch pages' withPaths(); the template appends the authoring key that
+    // holds the string it is rendering, so a paragraph writes
+    // data-edit="{{ b.p }}.p" and a note's two lines write ".note" and ".sub".
+    // The name is reused deliberately and does not clash: the authoring
+    // shape's `p` is a paragraph's text on the source block `b`, while this
+    // `p` is a path on the new flagged object the template loops over. The
+    // index comes from the source array, so the path keeps pointing at the
+    // entry it was built from.
+    // A list row is a [term, description] pair, so it gets its own path one
+    // level deeper and the template addresses the two halves by array index,
+    // "{{ li.p }}.0" and ".1" — the separator between them stays punctuation
+    // the markup renders, not something either half owns.
     let k = 0;
     const blocks = [];
     current.blocks.forEach((b, i) => {
       const p = base + ".blocks." + i;
       if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p, p });
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h, p });
-      else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
-      else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true });
-      else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
+      else if (b.list) blocks.push({ key: "b" + (k++), isList: true, p, items: b.list.map(([h, d], j) => ({ h, sep: " — ", d, p: p + ".list." + j })) });
+      else if (b.gallery) blocks.push({ key: "b" + (k++), isGallery: true, p });
+      else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "", p });
     });
 
     return {
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
-      // The top bar's phone number. Shared across every page, so it lives in
-      // content.js rather than in this file's CONTENT block, and is written
-      // data-edit="shared:contact.phone".
+      // The top bar's phone number, and the names, tagline and "call us"
+      // prompt around it. All of them appear on other pages too, so they live
+      // in content.js rather than in this file's CONTENT block and are written
+      // data-edit="shared:…".
       contact: window.SHARED_CONTENT.contact,
+      site: window.SHARED_CONTENT.site,
+      // The fixed chrome around the routed body.
+      breadcrumb: CONTENT.breadcrumb,
+      gallery: CONTENT.gallery,
+      cta: CONTENT.cta,
+      footer: CONTENT.footer,
       // Only the four fields the banner and CTA display, plus the CONTENT
-      // paths of the two editable ones; `blocks` is passed separately in its
+      // paths of the three editable ones; `blocks` is passed separately in its
       // normalised form, so current.blocks is not exposed.
       current: {
         parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro,
-        titlePath: base + ".title", introPath: base + ".intro",
+        titlePath: base + ".title", introPath: base + ".intro", parentPath: base + ".parent",
       },
       blocks,
     };
