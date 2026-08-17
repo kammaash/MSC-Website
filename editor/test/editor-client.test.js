@@ -389,3 +389,128 @@ test("gallery Add controls open the photo library and build the correct item sha
   assert.match(onAdd, /\{ src: window\.EditorMediaUrls\.deliveryUrl\(selectedCloudName, record\), caption: "" \}/);
   assert.match(SRC, /"\+ Add photo"/);
 });
+
+// ---- the attribute / <option> panel (text that can't take a caret) ----
+// The popover that edits placeholders, alt text and dropdown choices lives in this
+// file, beside the contenteditable handlers it complements. Its pure half — the
+// parser, the attribute allowlist, the labels and the multi-field commit rule — lives
+// in editor/lib/attr-spec.js and is unit-tested there. What is left is DOM code that
+// only runs in a browser, so these are source-level checks in the style of the rest of
+// this file: the properties that would otherwise ship silently broken.
+
+test("the native <select> dropdown is suppressed on mousedown, the only event that can do it", () => {
+  // preventDefault() on click is too late — the popup list is already on screen by then.
+  assert.match(SRC, /addEventListener\(\s*"mousedown"/, "a mousedown listener is required to suppress the native <select> popup");
+  const md = SRC.slice(SRC.indexOf('addEventListener("mousedown"'));
+  assert.match(md.slice(0, 900), /preventDefault\(\)/);
+});
+
+test("the panel records edits through the same draft pipeline as every other edit", () => {
+  // No hand-rolled save: apply to the in-memory content, then draft.set, then rerender.
+  // A direct fetch() here would bypass the save/publish transaction entirely (the
+  // apiFetch test above pins the total call count, which is what keeps that honest).
+  const body = extractBlockAfter(SRC, "function commitAttrPanel(");
+  assert.match(body, /applyLocal\(/);
+  assert.match(body, /draft\.set\(/);
+  assert.match(body, /rerender\(\)/);
+  assert.ok(body.indexOf("applyLocal(") < body.indexOf("draft.set("),
+    "applyLocal must precede draft.set so a failed apply never leaves an op in the log");
+});
+
+test("Exit disarms an already-open panel — Save cannot record an edit afterwards", () => {
+  // The bar is fixed above the page, so Exit is clickable with a panel open, and the
+  // panel's own Save button is still there afterwards. openAttrPanel() checking edit
+  // mode is not enough: it only runs at open time. Same defence-in-depth as
+  // media-slots.js's applyToSlot, which guards a callback the picker captured pre-Exit.
+  const body = extractBlockAfter(SRC, "function commitAttrPanel(");
+  const guard = body.indexOf("if (!editing)");
+  const apply = body.indexOf("applyLocal(");
+  assert.ok(guard !== -1, "commitAttrPanel must check the editing flag");
+  assert.ok(guard < apply, "the edit-mode check must come before anything is applied");
+});
+
+test("Exit also removes the panel, the chip and the attribute outlines", () => {
+  // Leaving edit mode must leave a plain public page: this happens in the Exit handler
+  // itself, not on the user's next click.
+  const exitHandler = extractBlockAfter(SRC, '#ed-exit").onclick');
+  assert.match(exitHandler, /closeAttrPanel\(\)/);
+  assert.match(exitHandler, /ed-attr-hover/);
+  assert.match(exitHandler, /chip\.style\.display = "none"/);
+});
+
+test("the panel never writes the bound attribute onto the page element by hand", () => {
+  // Every editor affordance is injected chrome. Writing the edited attribute directly
+  // would desync the element from CONTENT on the next rerender, showing the user a
+  // value the file disagrees with — rerender() is what repaints it.
+  assert.doesNotMatch(SRC, /setAttribute\(\s*pair\.attr/);
+});
+
+test("the popover and its chip are fixed-position, so opening one cannot shift the page", () => {
+  const style = SRC.slice(SRC.indexOf("attrStyle.textContent"), SRC.indexOf("document.head.appendChild(attrStyle)"));
+  assert.equal((style.match(/position:fixed/g) || []).length, 2, "both #ed-attr-panel and #ed-attr-chip must be fixed");
+});
+
+test("every attribute-panel listener is gated on edit mode", () => {
+  // Exit must leave a plain public page, so each delegated listener has to ask.
+  for (const evt of ["mouseover", "mousedown", "click", "keydown"]) {
+    const idx = SRC.indexOf('attrTargetFrom(e.target)');
+    assert.notEqual(idx, -1, "attrTargetFrom must be the shared hit-test");
+  }
+  // The four listeners that can OPEN or decorate a panel each begin with the check.
+  const opens = SRC.match(/addEventListener\("(mouseover|mousedown|click|keydown)", \(e\) => \{\n    if \(!editing/g) || [];
+  assert.ok(opens.length >= 3, "expected at least three edit-mode-gated attribute listeners, found " + opens.length);
+});
+
+test("media-slots.js reaches the panel through EditorUI, not a second global", () => {
+  const slots = fs.readFileSync(path.join(CLIENT_DIR, "media-slots.js"), "utf8");
+  assert.match(slots, /UI\.openAttrPanel\(/);
+  assert.doesNotMatch(slots, /window\.EditorAttrEdit/, "the standalone attr-edit global is gone");
+  assert.match(SRC, /openAttrPanel, attrPairs/, "editor-client.js must export both on window.EditorUI");
+});
+
+test("an attribute-backed edit survives the whole real save pipeline, on the real page", () => {
+  // Nothing about this round trip is a stand-in. It takes montessori-acamp.html AS IT
+  // SHIPS, reads a placeholder binding out of its markup, drives the exact op the
+  // panel would emit through the server's own applyPatch + replaceContent, and re-reads
+  // the file's CONTENT block to see the new words. If data-edit-attr needed anything
+  // the set-op pipeline does not already provide, this is where it would show.
+  const { applyPatch } = require("../lib/patch.js");
+  const { extractContent, replaceContent } = require("../lib/content-io.js");
+  const { parseAttrSpec } = require("../lib/attr-spec.js");
+
+  const file = path.join(__dirname, "..", "..", "montessori-acamp.html");
+  const src = fs.readFileSync(file, "utf8");
+
+  // Comments first. The page documents this very feature in its own prose, quoting a
+  // data-edit-attr with an ellipsis for a path — real markup only, the same rule
+  // check-paths.js applies for the same reason.
+  const binding = require("../check-paths.js").stripComments(src).match(/data-edit-attr="(placeholder:[^"]+)"/);
+  assert.ok(binding, "montessori-acamp.html should carry at least one placeholder binding");
+  const [{ attr, path: contentPath }] = parseAttrSpec(binding[1]);
+  assert.equal(attr, "placeholder");
+
+  const data = extractContent(src).data;
+  const before = contentPath.split(".").reduce((o, k) => o[k], data);
+  assert.equal(typeof before, "string");
+
+  applyPatch(data, { ops: [{ type: "set", path: contentPath, value: "Child's full name" }] }, {});
+  const written = replaceContent(src, data);
+
+  const after = contentPath.split(".").reduce((o, k) => o[k], extractContent(written).data);
+  assert.equal(after, "Child's full name");
+  assert.notEqual(after, before);
+  // And the file is still a file: markers intact, block still strict JSON (the
+  // extractContent above would have thrown otherwise), page markup untouched.
+  assert.ok(written.includes(binding[0]), "the binding itself must not be rewritten by a save");
+});
+
+test("the server injects attr-spec.js before editor-client.js, which needs it", () => {
+  const server = fs.readFileSync(path.join(__dirname, "..", "server.js"), "utf8");
+  const at = (f) => server.indexOf('"' + f + '">');
+  const spec = at("/editor/lib/attr-spec.js");
+  const ui = at("/editor/client/editor-client.js");
+  assert.ok(spec !== -1, "attr-spec.js missing from INJECT");
+  assert.ok(ui !== -1, "editor-client.js missing from INJECT");
+  assert.ok(spec < ui, "attr-spec.js must load first — editor-client.js reads window.EditorAttrSpec");
+  assert.doesNotMatch(server, /attr-edit\.js/, "the standalone attr-edit.js is no longer injected");
+});

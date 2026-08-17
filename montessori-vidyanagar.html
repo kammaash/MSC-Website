@@ -164,7 +164,7 @@
      timer, a slow connection can still reveal an unstyled moment behind it. -->
 <div ref="{{ loaderRef }}" style="position:fixed;inset:0;z-index:9998;background:#a51915;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease">
   <span style="display:block;background:#fff;border:4px solid #e8541b;border-radius:12px;padding:8px;line-height:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:loaderPop .9s cubic-bezier(.2,.8,.2,1) both">
-    <img src="assets/monte-logo.png" alt="Montessori" style="height:96px;width:auto;display:block">
+    <img src="assets/monte-logo.png" alt="{{ loader.logoAlt }}" data-edit-attr="alt:loader.logoAlt" style="height:96px;width:auto;display:block">
   </span>
   <div data-edit="loader.wordmark" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:#fff;text-transform:uppercase;animation:wordFloat .9s ease .25s both">{{ loader.wordmark }}</div>
   <div style="width:180px;height:4px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden">
@@ -181,7 +181,7 @@
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="#top" style="display:flex;align-items:center;gap:18px">
       <span style="display:block;line-height:0">
-        <img src="assets/monte-logo.png" alt="Montessori School, Vidyanagar" style="height:74px;width:auto;display:block">
+        <img src="assets/monte-logo.png" alt="{{ topBar.logoAlt }}" data-edit-attr="alt:topBar.logoAlt" style="height:74px;width:auto;display:block">
       </span>
       <span style="display:flex;flex-direction:column;line-height:1.15">
         <span data-edit="shared:site.vidyanagarName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">{{ site.vidyanagarName }}</span>
@@ -280,7 +280,7 @@
       <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
     <div class="ed-hero-photo-slot" data-media-slot="hero.photo" data-media-kind="image" style="position:absolute;inset:0">
-      <img src="{{ heroPhotoSrc }}" alt="Montessori School, Vidyanagar" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+      <img src="{{ heroPhotoSrc }}" alt="{{ hero.photoAlt }}" data-edit-attr="alt:hero.photoAlt" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
     </div>
   </div>
 </section>
@@ -526,15 +526,15 @@
       <div style="background:#fff;color:#26201d;border-radius:16px;padding:30px">
         <div data-edit="admissionsSection.formTitle" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin-bottom:16px">{{ admissionsSection.formTitle }}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" data-edit-attr="placeholder:admissionsSection.namePlaceholder" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" data-edit-attr="placeholder:admissionsSection.phonePlaceholder" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
           <select value="{{ form.track }}" onChange="{{ onTrack }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
             <option>{{ trackOption1 }}</option>
             <option>{{ trackOption2 }}</option>
             <option>{{ trackOption3 }}</option>
-            <option>{{ admissionsSection.optionUnsure }}</option>
+            <option data-edit="admissionsSection.optionUnsure">{{ admissionsSection.optionUnsure }}</option>
           </select>
-          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="{{ admissionsSection.msgPlaceholder }}" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
+          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="{{ admissionsSection.msgPlaceholder }}" data-edit-attr="placeholder:admissionsSection.msgPlaceholder" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
           <button onClick="{{ submit }}" data-edit="{{ submitLabelPath }}" style="width:100%;padding:14px;border:none;border-radius:9px;background:#a51915;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#7f120f">{{ submitLabel }}</button>
         </div>
       </div>
@@ -570,7 +570,7 @@
     <div class="g g-foot">
       <div>
         <div style="display:flex;align-items:center;gap:14px">
-          <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
+          <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="{{ footer.logoAlt }}" data-edit-attr="alt:footer.logoAlt" style="height:56px;width:auto;display:block"></span>
           <span data-edit="shared:site.vidyanagarShortName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">{{ site.vidyanagarShortName }}</span>
         </div>
         <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px"><span data-edit="shared:contact.vidyanagarAddress">{{ contact.vidyanagarAddress }}</span>.</p>
@@ -690,14 +690,21 @@
           line. The column entries are page-local because they name sections
           of THIS page; the group/branch names beside them are shared.
 
-  The form's placeholders and <option> labels are here too even though the
-  click-to-edit editor cannot reach an attribute or an <option>: keeping them
-  in CONTENT means all the copy on the page is single-sourced in one place.
+  The form's placeholders and its last <option> label are edited through the
+  attribute panel in editor/client/editor-client.js rather than by clicking the words
+  (an attribute has no text node, and an <option> cannot be contenteditable).
+  The first three options stay unbound on purpose: they ARE the academics
+  cards above, which are already click-editable there, and binding them again
+  would give one string two editing surfaces.
 */
 /* CONTENT:BEGIN */
 const CONTENT = {
   "loader": {
-    "wordmark": "Montessori"
+    "wordmark": "Montessori",
+    "logoAlt": "Montessori"
+  },
+  "topBar": {
+    "logoAlt": "Montessori School, Vidyanagar"
   },
   "pill": {
     "hintCollapsed": "hover for more options",
@@ -710,6 +717,7 @@ const CONTENT = {
     "p1": "Montessori School, Vidyanagar is a co-educational day school, established under the aegis of Montessori School Committee, as a valued branch of the Montessori family of schools. Located in the Vidyanagar area of Kurnool city, the school offers a warm, well-appointed campus with state-of-the-art facilities in a specifically designed ambience, replete with centralized AC classrooms and dedicated sporting facilities.",
     "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
     "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”",
+    "photoAlt": "Montessori School, Vidyanagar",
     "ctaPrimary": "Send enquiry →",
     "ctaSecondary": "Discover the school",
     "photo": ""
@@ -775,6 +783,7 @@ const CONTENT = {
     "submitted": "✓ Enquiry received"
   },
   "footer": {
+    "logoAlt": "Montessori",
     "schoolHeading": "School",
     "about": "About Us",
     "academics": "Academics",

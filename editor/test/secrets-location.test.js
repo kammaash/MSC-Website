@@ -266,7 +266,7 @@ test("Fix 3: a dotted client filename (e.g. a minified bundle) is servable; nest
 
 // ---- Positive controls that must still pass ----
 
-test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 200; page HTML still carries the token and six script tags", async () => {
+test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 200; page HTML still carries the token and all seven script tags", async () => {
   const fixture = buildFixture({ withClient: true });
   let srv;
   try {
@@ -284,7 +284,7 @@ test("positive controls: /editor/lib/paths.js and /editor/client/draft.js are 20
 
     const page = await fetch(base + "/");
     const html = await page.text();
-    assert.match(html, /window\.__EDITOR_TOKEN="[^"]+";<\/script><script src="\/editor\/lib\/paths\.js"><\/script><script src="\/editor\/lib\/media-urls\.js"><\/script><script src="\/editor\/client\/draft\.js"><\/script><script src="\/editor\/client\/editor-client\.js"><\/script><script src="\/editor\/client\/media\.js"><\/script><script src="\/editor\/client\/media-slots\.js"><\/script><\/body>/);
+    assert.match(html, /window\.__EDITOR_TOKEN="[^"]+";<\/script><script src="\/editor\/lib\/paths\.js"><\/script><script src="\/editor\/lib\/media-urls\.js"><\/script><script src="\/editor\/lib\/attr-spec\.js"><\/script><script src="\/editor\/client\/draft\.js"><\/script><script src="\/editor\/client\/editor-client\.js"><\/script><script src="\/editor\/client\/media\.js"><\/script><script src="\/editor\/client\/media-slots\.js"><\/script><\/body>/);
   } finally {
     if (srv) await new Promise((r) => srv.close(r));
     fixture.cleanup();

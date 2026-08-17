@@ -167,3 +167,108 @@ test("retired data-media-poster attributes are not part of the path contract", (
   assert.deepEqual(errors, []);
   assert.equal(checked, 1);
 });
+
+// ---- data-edit-attr (attribute-backed text) ----
+// data-edit-attr names the same kind of thing data-edit does — a content path
+// holding a string — but wraps it in an attribute:path pair, so it needs its own
+// resolution pass or every placeholder and alt binding on the site would ship
+// unvalidated.
+
+test("a resolving data-edit-attr path is checked like a data-edit one", () => {
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"title":"t","hint":"Parent / student name"}};',
+      '<h1 data-edit="hero.title">x</h1><input data-edit-attr="placeholder:hero.hint">'
+    ),
+  });
+  const { errors, checked } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, []);
+  assert.equal(checked, 2, "both the data-edit and the data-edit-attr path must be counted");
+});
+
+test("an unresolved data-edit-attr path is reported, naming the attribute", () => {
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"title":"t"}};',
+      '<input data-edit-attr="placeholder:hero.nope">'
+    ),
+  });
+  const { errors } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, ["a.html: unresolved hero.nope (placeholder)"]);
+});
+
+test("every pair in a multi-pair data-edit-attr is resolved, not just the first", () => {
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"a":"x"}};',
+      '<img data-edit-attr="alt:hero.a;title:hero.b">'
+    ),
+  });
+  const { errors, checked } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, ["a.html: unresolved hero.b (title)"]);
+  assert.equal(checked, 2);
+});
+
+test("a data-edit-attr path resolving to a non-string is reported", () => {
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"list":["a"]}};',
+      '<input data-edit-attr="placeholder:hero.list">'
+    ),
+  });
+  const { errors } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, [
+    "a.html: hero.list resolves to an array, but data-edit-attr must name a text value",
+  ]);
+});
+
+test("a data-edit-attr naming a non-text attribute fails the build", () => {
+  // The allowlist in lib/attr-spec.js is only worth having if the build enforces
+  // it — this is the gate that stops `src`/`href` binding from ever shipping.
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"photo":"a.png"}};',
+      '<img data-edit-attr="src:hero.photo">'
+    ),
+  });
+  const { errors } = checkPaths(dir, ["a.html"]);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /^a\.html: data-edit-attr="src:hero\.photo" — "src" is not an editable attribute/);
+});
+
+test("a malformed data-edit-attr spec fails the build", () => {
+  const dir = fixture({
+    "a.html": page('const CONTENT = {"hero":{"a":"x"}};', '<input data-edit-attr="placeholder">'),
+  });
+  const { errors } = checkPaths(dir, ["a.html"]);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /data-edit-attr="placeholder" — /);
+});
+
+test("a shared: data-edit-attr path is resolved against content.js", () => {
+  const dir = fixture({
+    "content.js": '/* CONTENT:BEGIN */\nwindow.SHARED_CONTENT = {"site":{"groupName":"Montessori Schools"}};\n/* CONTENT:END */',
+    "a.html": page(
+      'const CONTENT = {"hero":{"title":"t"}};',
+      '<h1 data-edit="hero.title">x</h1><img data-edit-attr="alt:shared:site.groupName">'
+    ),
+  });
+  const { errors, checked } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, []);
+  assert.equal(checked, 2);
+});
+
+test("an interpolated data-edit-attr is left to the renderer, like an interpolated data-edit", () => {
+  // "{{ … }}" values are built per-item inside an sc-for and cannot be resolved
+  // statically. The existing data-edit scan skips them the same way.
+  const dir = fixture({
+    "a.html": page(
+      'const CONTENT = {"hero":{"title":"t"}};',
+      '<h1 data-edit="hero.title">x</h1><img data-edit-attr="alt:{{ ph.p }}.caption">'
+    ),
+  });
+  const { errors, checked } = checkPaths(dir, ["a.html"]);
+  assert.deepEqual(errors, []);
+  // 1, not 2: the scan ran (the data-edit was resolved) and skipped the interpolated pair.
+  assert.equal(checked, 1);
+});

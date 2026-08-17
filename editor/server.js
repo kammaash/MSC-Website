@@ -32,6 +32,7 @@ const MIME = {
 };
 const INJECT = '<script src="/editor/lib/paths.js"></script>' +
   '<script src="/editor/lib/media-urls.js"></script>' +
+  '<script src="/editor/lib/attr-spec.js"></script>' + // before editor-client.js — parses data-edit-attr, and owns the attribute panel's commit rule
   '<script src="/editor/client/draft.js"></script>' +
   '<script src="/editor/client/editor-client.js"></script>' +
   '<script src="/editor/client/media.js"></script>' + // after editor-client.js — needs window.EditorUI

@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { extractContent } = require("./lib/content-io.js");
 const { getPath } = require("./lib/paths.js");
+const { parseAttrSpec } = require("./lib/attr-spec.js");
 
 const PAGES = ["index.html", "montessori-acamp.html", "montessori-vidyanagar.html", "acamp-subpage.html", "vidyanagar-subpage.html"];
 
@@ -70,25 +71,54 @@ function checkPaths(root, pages = PAGES) {
       continue;
     }
 
-    for (const m of stripComments(src).matchAll(/data-(edit|list|media-slot)="([^"{]+)"/g)) {
-      const attr = m[1];
-      const raw = m[2];
+    const markup = stripComments(src);
+
+    // Resolves one content path and reports it, shared or page-local. `label` is what
+    // the error names the path as (a bare path for data-edit; the path plus the
+    // attribute it feeds for data-edit-attr, since a single element can bind several
+    // and "unresolved hero.b" alone would not say which one). `mustBeText` is false
+    // only for data-list, whose paths resolve to arrays by definition.
+    const resolve = (raw, label, mustBeText, attrName) => {
       const isShared = raw.startsWith("shared:");
       const scope = isShared ? shared : data;
       const p = isShared ? raw.slice(7) : raw;
       checked++;
-      if (scope === null) { errors.push(`${page}: ${raw} — ${sharedReason}`); continue; }
+      if (scope === null) { errors.push(`${page}: ${raw} — ${sharedReason}`); return; }
       const value = getPath(scope, p);
-      if (value === undefined) { errors.push(`${page}: unresolved ${raw}`); continue; }
+      if (value === undefined) { errors.push(`${page}: unresolved ${label}`); return; }
       // A data-edit path names an editable TEXT value, and lib/patch.js's validateText
       // rejects a non-string server-side — so a path that resolves to an object or an
       // array is one the editor will happily offer for editing and then refuse to save,
       // with the failure surfacing at Publish rather than at the click. "Resolves to
-      // something" was too weak a check to catch that. data-list is deliberately left
-      // alone: those paths resolve to arrays by definition.
-      if ((attr === "edit" || attr === "media-slot") && typeof value !== "string") {
-        errors.push(`${page}: ${raw} resolves to ${describe(value)}, but data-${attr} must name a text value`);
+      // something" was too weak a check to catch that.
+      if (mustBeText && typeof value !== "string") {
+        errors.push(`${page}: ${raw} resolves to ${describe(value)}, but ${attrName} must name a text value`);
       }
+    };
+
+    for (const m of markup.matchAll(/data-(edit|list|media-slot)="([^"{]+)"/g)) {
+      const attr = m[1];
+      const raw = m[2];
+      resolve(raw, raw, attr === "edit" || attr === "media-slot", "data-" + attr);
+    }
+
+    // data-edit-attr carries attribute:path pairs rather than a bare path, so it needs
+    // its own pass. Two things are validated, not one: the SHAPE of the spec (via the
+    // same parser the browser uses — including its allowlist, which is what keeps a
+    // `src:` or `href:` binding from ever reaching a deployed page) and then each
+    // path it names. As with data-edit, a value containing "{{" is built per-item at
+    // render time and cannot be resolved statically, so it is left to the renderer.
+    for (const m of markup.matchAll(/data-edit-attr="([^"]+)"/g)) {
+      const raw = m[1];
+      if (raw.includes("{{")) continue;
+      let pairs;
+      try {
+        pairs = parseAttrSpec(raw);
+      } catch (err) {
+        errors.push(`${page}: data-edit-attr="${raw}" — ${err.message}`);
+        continue;
+      }
+      for (const { attr, path: p } of pairs) resolve(p, `${p} (${attr})`, true, "data-edit-attr");
     }
   }
 
@@ -101,5 +131,5 @@ if (require.main === module) {
   const { errors } = checkPaths(path.join(__dirname, ".."));
   for (const e of errors) console.error(e);
   if (errors.length) { console.error(errors.length + " check-paths failure(s)"); process.exit(1); }
-  console.log("check-paths: all static data-edit/data-list/data-media-slot paths resolve");
+  console.log("check-paths: all static data-edit/data-edit-attr/data-list/data-media-slot paths resolve");
 }

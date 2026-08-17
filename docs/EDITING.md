@@ -31,16 +31,32 @@ A few things are stored once and reused, so they can never drift apart or contra
 Everything else — headings, paragraphs, buttons, section titles, the footer link columns — belongs
 to the page you are on, so editing it there affects only that page.
 
-### A few words can't be clicked
-Almost all the writing on the site is clickable, but four kinds of text are not:
+### Words that open a small box instead of editing in place
+Three kinds of writing can't have a cursor put in them — there is nothing on the page to click
+into. Hovering each one still outlines it and shows a label; clicking opens a small panel with the
+wording in a box. Change it, press **Save** (or Enter), then **Publish** as usual. **Cancel**,
+Escape, or clicking anywhere else on the page closes the panel without saving.
 
-- the grey hint text **inside** an empty form box ("Parent / student name", "Phone number"),
-- the choices in the admissions **drop-down** ("Pre-Primary Program", "Not sure yet", …),
-- the description of a photo that screen readers and search engines use,
-- the page name that appears in the browser tab.
+- **The grey hint inside an empty form box** ("Parent / student name", "Phone number", "Message
+  (optional)"). Click the box itself.
+- **The choices in the admissions drop-down.** Click the drop-down: it will not open its list
+  while you are editing — you get the panel of choices instead.
+  - On the **A-Camp** page all four choices are edited here.
+  - On the **landing page** and the **Vidyanagar** page the first choices are the school /
+    programme names taken straight from the cards higher up that page, so they are edited *there*
+    and the panel shows them greyed out. Rename the card and the drop-down follows by itself.
+- **A photo's description** — the sentence screen readers read aloud and search engines index,
+  which nobody sees on screen. Logos: hover the logo and click. Big photos that can be swapped
+  (the picture at the top of each page): hover the photo and use the **✎ Describe** button that
+  appears beside **Replace** and **Remove**.
+  - Photos in a gallery have no separate description: they use their own caption, which you edit
+    by clicking the caption itself.
 
-These are stored in the same place as everything else, so the admin can change them in a few
-minutes — just ask. Nothing else on the site needs a developer.
+### One thing still can't be edited
+**The page name that appears in the browser tab**, and the one-line summary Google shows beneath
+a search result. These live outside the part of the page the editor can reach. They are stored
+with everything else, so the admin can change them in a few minutes — just ask. Nothing else on
+the site needs a developer.
 
 ### Important: the editor only works one way
 Editing mode only appears when the site is opened through `npm run edit`. If you open one of the

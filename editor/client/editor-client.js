@@ -218,6 +218,356 @@
     update();
   }, true);
 
+  // ---- text that can't take a caret: attributes and <option> labels ----
+  // The handlers above make an element's TEXT editable: click, contentEditable, blur,
+  // save. That covers almost the whole site, but it structurally cannot cover two
+  // things a visitor still reads:
+  //
+  //   1. ATTRIBUTES — a form field's placeholder, an image's alt text. There is no
+  //      text node to put a caret in.
+  //   2. <option> LABELS — the browser paints a native dropdown, no click ever
+  //      reaches the <option>, and no browser lets an <option> be contenteditable.
+  //
+  // Both are solved the same way: a small fixed-position popover holding one plain
+  // <input> per string. The popover is the ONLY new thing. Everything behind it is
+  // the machinery every other edit already uses — validated with draft.js's
+  // rejectText, applied with applyLocal, recorded with draft.set, repainted by
+  // rerender. The op that reaches /api/save is a plain {type:"set", path, value},
+  // indistinguishable from one a contenteditable blur produced, so patch.js, paths.js
+  // and the save/publish transaction needed no changes at all.
+  //
+  // Markup contract:
+  //   <input  data-edit-attr="placeholder:admissionsSection.namePlaceholder">
+  //   <img    data-edit-attr="alt:footer.logoAlt">        (";"-separated for several)
+  //   <select>… <option data-edit="admissionsSection.optionUnsure">…
+  //
+  // <option> deliberately reuses plain data-edit rather than inventing a third
+  // attribute: an option's editable string IS its element text, so it gets
+  // check-paths.js's existing validation for free. Only the AFFORDANCE differs. The
+  // [data-edit] handlers above never fire for one, because a click on a <select>
+  // targets the <select> and closest() only ever walks upwards.
+  //
+  // The parsing, the attribute allowlist, the field labels and the multi-field commit
+  // rule all live in editor/lib/attr-spec.js — require()-able, and unit-tested there.
+  const SPEC = window.EditorAttrSpec;
+
+  const attrStyle = document.createElement("style");
+  attrStyle.textContent =
+    // Mirrors [data-edit]'s dashed outline, so the two kinds of editable text read as
+    // one feature rather than two.
+    ".ed-attr-hover{outline:2px dashed #e8541b!important;outline-offset:2px}" +
+    "body.ed-editing [data-edit-attr]{cursor:text!important}" +
+    "body.ed-editing select.ed-attr-select{cursor:pointer!important}" +
+    // The chip names what a click would edit. Fixed, so it can never move the page.
+    "#ed-attr-chip{position:fixed;z-index:2147483001;display:none;max-width:280px;padding:5px 9px;border-radius:7px;" +
+    "background:#26201d;color:#fff;font:12px/1.35 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;" +
+    "box-shadow:0 4px 14px rgba(0,0,0,.3);pointer-events:none}" +
+    // Likewise fixed: opening the popover must not reflow a single pixel of the page.
+    "#ed-attr-panel{position:fixed;z-index:2147483002;width:340px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);" +
+    "overflow:auto;background:#fff;color:#26201d;border-radius:12px;border:1px solid rgba(38,32,29,.16);" +
+    "box-shadow:0 18px 44px rgba(0,0,0,.28);padding:16px;font:13px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}" +
+    "#ed-attr-panel h3{margin:0 0 4px;font:600 15px/1.3 inherit}" +
+    "#ed-attr-panel .ed-attr-note{margin:0 0 12px;color:#6b615b;font-size:12px}" +
+    "#ed-attr-panel label{display:block;margin:0 0 12px}" +
+    "#ed-attr-panel label span{display:block;margin-bottom:4px;color:#6b615b;font-size:11.5px}" +
+    "#ed-attr-panel input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid rgba(38,32,29,.28);" +
+    "border-radius:7px;font:14px inherit;color:#26201d;background:#fff}" +
+    "#ed-attr-panel input:focus{outline:2px solid #e8541b;outline-offset:1px}" +
+    "#ed-attr-panel .ed-attr-fixed{margin:0 0 12px;padding:8px 10px;border-radius:7px;background:#f6f1ed;color:#6b615b;font-size:12px}" +
+    "#ed-attr-panel .ed-attr-fixed b{display:block;color:#26201d;font-size:13.5px;font-weight:600;margin-bottom:2px}" +
+    "#ed-attr-panel .ed-attr-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}" +
+    "#ed-attr-panel button{font:inherit;padding:7px 14px;border-radius:7px;border:0;cursor:pointer;background:#eee7e1;color:#26201d}" +
+    "#ed-attr-panel button.ed-attr-save{background:#a51915;color:#fff;font-weight:600}";
+  document.head.appendChild(attrStyle);
+
+  const chip = document.createElement("div");
+  chip.id = "ed-attr-chip";
+  document.body.appendChild(chip);
+
+  // The attribute bindings on `el`, or [] if it has none / the spec is malformed. A
+  // malformed spec is a page-authoring bug that `node editor/check-paths.js` fails on;
+  // here it just means "not editable", so one bad binding can never take the whole
+  // editor down mid-session.
+  function attrPairs(el) {
+    const raw = el.getAttribute && el.getAttribute("data-edit-attr");
+    if (!raw) return [];
+    try { return SPEC.parseAttrSpec(raw); } catch { return []; }
+  }
+
+  // A <select> is editable when at least one of its options carries data-edit. Options
+  // WITHOUT one are shown in the panel as read-only rows: on index.html and
+  // montessori-vidyanagar.html the first few choices are rendered from the school /
+  // programme cards above, and those are already click-editable there. Binding them
+  // here as well would give one string two editing surfaces — the same reason the
+  // alt="{{ f.title }}" images are left alone.
+  function optionRows(sel) {
+    return Array.prototype.map.call(sel.options, (opt, i) => ({ opt, path: opt.getAttribute("data-edit"), index: i }));
+  }
+  function selectIsEditable(sel) {
+    return optionRows(sel).some((r) => !!r.path);
+  }
+
+  // The element a click should open a panel for, or null. Order matters: an <option>
+  // lives inside a <select>, and a bound <img> can live inside anything.
+  function attrTargetFrom(node) {
+    if (!node || !node.closest) return null;
+    const sel = node.closest("select");
+    if (sel && selectIsEditable(sel)) return sel;
+    const bound = node.closest("[data-edit-attr]");
+    if (bound && attrPairs(bound).length) return bound;
+    return null;
+  }
+
+  // What the hover chip says. Deliberately describes the STRING, not the mechanism.
+  function chipTextFor(el) {
+    if (el.tagName === "SELECT") return "✏️ Edit the choices in this list";
+    const pairs = attrPairs(el);
+    if (pairs.length === 1) return "✏️ " + SPEC.labelFor(pairs[0].attr);
+    return "✏️ Edit this text";
+  }
+
+  let attrPanel = null;
+  let attrAnchor = null;
+
+  function closeAttrPanel() {
+    if (attrPanel) attrPanel.remove();
+    attrPanel = null;
+    attrAnchor = null;
+  }
+
+  // Clamped to the viewport so a field near the bottom or the right edge still gets a
+  // fully visible panel. Measured after insertion, because the height depends on how
+  // many rows there are.
+  function placeAttrPanel(el) {
+    const r = el.getBoundingClientRect();
+    const p = attrPanel.getBoundingClientRect();
+    const gap = 8;
+    let top = r.bottom + gap;
+    if (top + p.height > window.innerHeight - gap) top = Math.max(gap, r.top - p.height - gap);
+    if (top + p.height > window.innerHeight - gap) top = Math.max(gap, window.innerHeight - p.height - gap);
+    let left = r.left;
+    if (left + p.width > window.innerWidth - gap) left = window.innerWidth - p.width - gap;
+    attrPanel.style.top = Math.max(gap, top) + "px";
+    attrPanel.style.left = Math.max(gap, left) + "px";
+  }
+
+  // Reads the value a row should open with. The DOM is the source of truth for what is
+  // on screen, but CONTENT is the source of truth for what will be saved, and the two
+  // agree except for the whitespace the template leaves around a {{ hole }} — so
+  // prefer CONTENT and fall back to the DOM only if the path cannot be read.
+  function attrCurrentValue(path, domFallback) {
+    let v;
+    try { v = getLocal(path); } catch { v = undefined; }
+    return typeof v === "string" ? v : String(domFallback == null ? "" : domFallback).trim();
+  }
+
+  function attrFieldRow(labelText, path, value) {
+    const label = document.createElement("label");
+    const cap = document.createElement("span");
+    cap.textContent = labelText;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = value;
+    label.appendChild(cap);
+    label.appendChild(input);
+    return { node: label, input, path, orig: value, label: labelText };
+  }
+
+  function attrFixedRow(text) {
+    const d = document.createElement("div");
+    d.className = "ed-attr-fixed";
+    const b = document.createElement("b");
+    b.textContent = text;
+    d.appendChild(b);
+    d.appendChild(document.createTextNode("Edited with the cards above — change it there and this choice follows."));
+    return d;
+  }
+
+  // Builds the row list for `el`. A <select> contributes its options; anything else
+  // contributes its data-edit-attr pairs.
+  function buildAttrRows(el, body) {
+    const rows = [];
+    if (el.tagName === "SELECT") {
+      optionRows(el).forEach((r) => {
+        if (!r.path) { body.appendChild(attrFixedRow(r.opt.text.trim())); return; }
+        const f = attrFieldRow("Choice " + (r.index + 1), r.path, attrCurrentValue(r.path, r.opt.text));
+        rows.push(f);
+        body.appendChild(f.node);
+      });
+      return rows;
+    }
+    attrPairs(el).forEach((pair) => {
+      const f = attrFieldRow(SPEC.labelFor(pair.attr), pair.path, attrCurrentValue(pair.path, el.getAttribute(pair.attr)));
+      rows.push(f);
+      body.appendChild(f.node);
+    });
+    return rows;
+  }
+
+  function commitAttrPanel(rows) {
+    // Defence in depth, and not a theoretical one: the editor bar is fixed above the
+    // page, so Exit is perfectly clickable with a panel open, and the panel's own Save
+    // button survives the click. openAttrPanel() checks edit mode, but only at the
+    // moment it opens. Without this, Exit → Save would record content edits on a page
+    // that is meant to be behaving as the plain public site. (media-slots.js's
+    // applyToSlot carries the same guard, for the same shape of bug.)
+    if (!editing) { closeAttrPanel(); return false; }
+    const plan = SPEC.planCommit(
+      rows.map((r) => ({ path: r.path, value: r.input.value, orig: r.orig, label: r.label })),
+      {
+        rejectText: window.EditorDraft.rejectText,
+        getLocal: (p) => { try { return getLocal(p); } catch { return undefined; } },
+      }
+    );
+    if (plan.error) { alert("Can't save this edit:\n" + plan.error); return false; }
+    if (!plan.ops.length) return true;
+    for (const op of plan.ops) {
+      try {
+        // Apply first, record only on success — the same invariant as the blur handler
+        // above and doOp below. planCommit already proved each path resolves to a
+        // string, so reaching this catch means something changed underneath us; stop
+        // rather than press on, so the log never describes an edit that did not happen.
+        applyLocal(op.path, op.value);
+      } catch (err) {
+        alert("Can't save this edit:\n" + err.message);
+        return false;
+      }
+      draft.set(op.path, op.value);
+    }
+    rerender();
+    update();
+    return true;
+  }
+
+  function openAttrPanel(el) {
+    if (!editing || !el) return;
+    closeAttrPanel();
+    chip.style.display = "none";
+    attrAnchor = el;
+
+    attrPanel = document.createElement("div");
+    attrPanel.id = "ed-attr-panel";
+    attrPanel.setAttribute("role", "dialog");
+    attrPanel.setAttribute("aria-label", "Edit text");
+
+    const h = document.createElement("h3");
+    h.textContent = el.tagName === "SELECT" ? "The choices in this list" : "Text you can't click on the page";
+    const note = document.createElement("p");
+    note.className = "ed-attr-note";
+    note.textContent = el.tagName === "SELECT"
+      ? "These are the options someone picks from when sending an enquiry."
+      : "This wording is part of the page but can't be clicked directly.";
+    attrPanel.appendChild(h);
+    attrPanel.appendChild(note);
+
+    const body = document.createElement("div");
+    attrPanel.appendChild(body);
+    const rows = buildAttrRows(el, body);
+
+    const buttons = document.createElement("div");
+    buttons.className = "ed-attr-buttons";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeAttrPanel(); };
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "ed-attr-save";
+    saveBtn.textContent = "Save";
+    saveBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); if (commitAttrPanel(rows)) closeAttrPanel(); };
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(saveBtn);
+    attrPanel.appendChild(buttons);
+
+    // Enter saves, Escape cancels — the same two keys the contenteditable path binds
+    // (see the keydown handler above), so the muscle memory carries over.
+    attrPanel.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); if (commitAttrPanel(rows)) closeAttrPanel(); }
+      if (e.key === "Escape") { e.preventDefault(); closeAttrPanel(); }
+    });
+
+    document.body.appendChild(attrPanel);
+    placeAttrPanel(el);
+    if (rows.length) rows[0].input.focus();
+    else saveBtn.focus();
+  }
+
+  document.body.addEventListener("mouseover", (e) => {
+    if (!editing) return;
+    const el = attrTargetFrom(e.target);
+    if (!el) return;
+    if (el.tagName === "SELECT") el.classList.add("ed-attr-select");
+    el.classList.add("ed-attr-hover");
+    if (attrPanel) return; // an open panel already says what is being edited
+    chip.textContent = chipTextFor(el);
+    chip.style.display = "block";
+    const r = el.getBoundingClientRect();
+    const c = chip.getBoundingClientRect();
+    chip.style.top = Math.max(4, r.top - c.height - 6) + "px";
+    chip.style.left = Math.min(Math.max(4, r.left), window.innerWidth - c.width - 4) + "px";
+  });
+  document.body.addEventListener("mouseout", (e) => {
+    const el = attrTargetFrom(e.target);
+    if (el) el.classList.remove("ed-attr-hover");
+    chip.style.display = "none";
+  });
+
+  // The native <select> popup is opened by the browser's DEFAULT ACTION on mousedown.
+  // By the time a click event fires it is already on screen, so this is the only
+  // listener that can suppress it — preventDefault() here, and the list never appears.
+  document.body.addEventListener("mousedown", (e) => {
+    if (!editing) return;
+    const el = attrTargetFrom(e.target);
+    if (!el || el.tagName !== "SELECT") return; // only the dropdown needs its default suppressed
+    e.preventDefault();
+    e.stopPropagation();
+    openAttrPanel(el);
+  }, true);
+
+  document.body.addEventListener("click", (e) => {
+    if (!editing) return;
+    if (attrPanel && attrPanel.contains(e.target)) return; // the panel's own controls
+    const el = attrTargetFrom(e.target);
+    if (!el) {
+      // A click anywhere else closes the panel WITHOUT saving. Deliberately unlike the
+      // contenteditable path, which commits on blur: that field shows its edit in
+      // place, so a blur-commit is visible. A placeholder or an alt string is not on
+      // screen while you type it, and a stray click that silently rewrote three form
+      // labels would be both invisible and unexplained. Cancel is the safe default
+      // when the user's intent is ambiguous; Save is one click away.
+      if (attrPanel) closeAttrPanel();
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    if (el.tagName === "SELECT") return; // already handled on mousedown
+    openAttrPanel(el);
+  }, true);
+
+  // A select reached by keyboard must offer the same panel, and must not open the
+  // native list either.
+  document.body.addEventListener("keydown", (e) => {
+    if (!editing || attrPanel) return;
+    const el = attrTargetFrom(e.target);
+    if (!el) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    e.stopPropagation();
+    openAttrPanel(el);
+  }, true);
+
+  // The panel is anchored to an element's screen position, so scrolling or resizing
+  // moves the page out from under it. Re-place rather than close: closing would throw
+  // away typing the user has not saved.
+  function repositionAttrPanel() {
+    chip.style.display = "none";
+    if (!attrPanel || !attrAnchor) return;
+    if (attrAnchor.isConnected) placeAttrPanel(attrAnchor);
+    else closeAttrPanel(); // the anchor was removed by a rerender
+  }
+  window.addEventListener("scroll", repositionAttrPanel, true);
+  window.addEventListener("resize", repositionAttrPanel);
+
   // ---- publish / discard / exit ----
   // Publish is a two-step transaction — write every file, then commit them all — and
   // the draft models it as one (see the long comment over createDraft in draft.js).
@@ -348,6 +698,14 @@
       document.querySelectorAll(".ed-hover").forEach((n) => n.classList.remove("ed-hover"));
       const active = document.activeElement;
       if (active instanceof HTMLElement && isEditableNow(active)) active.blur(); // runs the normal commit/validate path
+      // The attribute panel is a body child, not page chrome, so nothing else would
+      // take it away — and it must go NOW rather than on the user's next click, since
+      // its Save button is still sitting there (commitAttrPanel refuses to act once
+      // `editing` is false, but leaving a dead dialog on a page pretending to be the
+      // public site is its own bug).
+      closeAttrPanel();
+      chip.style.display = "none";
+      document.querySelectorAll(".ed-attr-hover").forEach((n) => n.classList.remove("ed-attr-hover"));
     }
     // decorate() (Task 12) strips all .ed-add/.ed-menu chrome when !editing and rebuilds
     // it when re-entering — called last, after the blur() above, so decorate()'s own
@@ -578,6 +936,12 @@
 
   // apiFetch/describeApiError are shared so media.js (loaded right after this file)
   // talks to /api/* with the same token discipline instead of growing a drifting copy.
-  window.EditorUI = { draft, applyLocal, getLocal, rerender, decorate, update, apiFetch, describeApiError, isEditing: () => editing };
+  // openAttrPanel/attrPairs are shared so media-slots.js's "✎ Describe" action can
+  // open the attribute panel for a hero photo's alt text: that overlay covers the
+  // <img> edge-to-edge, so the img never receives a hover of its own.
+  window.EditorUI = {
+    draft, applyLocal, getLocal, rerender, decorate, update, apiFetch, describeApiError,
+    isEditing: () => editing, openAttrPanel, attrPairs,
+  };
   update();
 })();

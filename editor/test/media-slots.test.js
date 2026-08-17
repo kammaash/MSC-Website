@@ -162,3 +162,39 @@ test("no video-element special-casing survives — video slots are iframes now",
   assert.ok(!/data-media-poster/.test(SRC), "poster plumbing must not exist");
   assert.ok(!/posterUrl/.test(SRC), "posterUrl was deleted from media-urls");
 });
+
+// ---- alt text under a media slot ----
+// A hero photo's <img> is covered edge-to-edge by this file's own hover overlay, so
+// the data-edit-attr affordance in editor-client.js can never be reached with a mouse.
+// The overlay therefore grows a third action for it rather than leaving the photo's
+// description as the one string on the page with no way in.
+
+test("a filled slot offers Describe alongside Replace and Remove", () => {
+  const src = fs.readFileSync(FILE, "utf8");
+  assert.match(src, /"describe"/, "a describe action must exist");
+  assert.match(src, /Describe/, "the action needs a user-facing label");
+});
+
+test("Describe opens the editor's attribute panel rather than duplicating its logic", () => {
+  const src = fs.readFileSync(FILE, "utf8");
+  assert.match(src, /UI\.openAttrPanel\(/,
+    "the description panel lives in editor-client.js — media-slots.js must call into it");
+  assert.doesNotMatch(src, /draft\.set\(\s*[^)]*alt/i, "media-slots.js must not record alt edits itself");
+});
+
+test("Describe appears only when the slot actually contains a bound alt", () => {
+  // Most slots have no alt binding (gallery images take their alt from an editable
+  // caption). Offering the action there would open an empty panel.
+  const src = fs.readFileSync(FILE, "utf8");
+  assert.match(src, /\[data-edit-attr\]/, "the slot must be searched for a bound descendant");
+});
+
+test("a click on a bound element inside a slot is left to the attribute panel, not swallowed", () => {
+  // The slot's click handler claims any click that isn't on a known interactive
+  // control. [data-edit-attr] has to join that list or a bound <input> placeholder
+  // sitting inside a slot would open the media picker instead of its own panel.
+  const src = fs.readFileSync(FILE, "utf8");
+  const selector = src.match(/closest\(\s*"(button, a, input[^"]*)"\s*\)/);
+  assert.ok(selector, "the interactive-exclusion selector was not found");
+  assert.match(selector[1], /\[data-edit-attr\]/);
+});

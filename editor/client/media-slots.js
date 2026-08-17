@@ -148,9 +148,29 @@
     button.onclick = function (e) {
       e.preventDefault(); e.stopPropagation();
       if (action === "remove") removeFromSlot(slotEl);
+      else if (action === "describe") UI.openAttrPanel(describedEl(slotEl));
       else openPickerForSlot(slotEl);
     };
     return button;
+  }
+
+  // The element inside this slot whose alt text is bound to content, or null. The
+  // photo's description is the one visitor-readable string on a hero image that the
+  // hover affordance in editor-client.js cannot reach: this overlay covers the <img>
+  // edge-to-edge, so the img never receives a mouseover of its own. Rather than
+  // reimplement the editing UI here, the overlay offers a "Describe" action that
+  // opens editor-client.js's attribute panel against the bound element directly.
+  //
+  // Only slots that actually HAVE a binding get the action. Gallery images take
+  // their alt from an editable caption right beneath them (alt="{{ ph.caption }}"),
+  // and are deliberately left unbound so one string never grows two editing surfaces.
+  function describedEl(slotEl) {
+    if (!UI.openAttrPanel || !UI.attrPairs) return null;
+    var found = slotEl.querySelector("[data-edit-attr]");
+    if (!found) return null;
+    var pairs = UI.attrPairs(found);
+    for (var i = 0; i < pairs.length; i++) if (pairs[i].attr === "alt") return found;
+    return null;
   }
 
   function decorateSlotActions() {
@@ -160,7 +180,12 @@
       if (/^(IMG|IFRAME|VIDEO)$/.test(slotEl.tagName)) return;
       var value = slotValue(slotEl);
       if (typeof value !== "string") return;
-      var state = value === "" ? "empty" : "filled";
+      // The described-ness of a slot is part of its rendered state: a photo dropped
+      // into an empty slot brings its <img> (and so its alt binding) with it, so the
+      // "should this overlay have a Describe button" answer can change without the
+      // filled/empty answer changing. Both go in the state key, or the cheap
+      // "same state, leave it alone" bail below would keep a stale button set.
+      var state = (value === "" ? "empty" : "filled") + (describedEl(slotEl) ? "+alt" : "");
       var actions = Array.prototype.find.call(slotEl.children, function (child) {
         return child.classList && child.classList.contains("ed-slot-actions");
       });
@@ -170,12 +195,16 @@
       actions.className = "ed-slot-actions";
       actions.setAttribute("data-media-state", state);
       actions.setAttribute("aria-label", (slotEl.getAttribute("data-media-kind") === "image" ? "Photo" : "Video") + " options");
-      if (state === "empty") {
+      if (value === "") {
         actions.appendChild(mediaAction("add", "+", slotEl.getAttribute("data-media-kind") === "image" ? "Add photo" : "Add video", slotEl));
       } else {
         actions.appendChild(mediaAction("replace", "↻", "Replace", slotEl));
         actions.appendChild(mediaAction("remove", "×", "Remove", slotEl));
       }
+      // Offered in both states: the description belongs to the spot on the page, not
+      // to whichever photo currently fills it, and writing it before choosing a photo
+      // is perfectly reasonable.
+      if (describedEl(slotEl)) actions.appendChild(mediaAction("describe", "✎", "Describe", slotEl));
       slotEl.appendChild(actions);
     });
   }
@@ -216,7 +245,7 @@
     // its own click instead. Media slots may wrap elements with their own
     // interactive chrome, so only claim the click if it's on the slot itself or
     // a non-interactive descendant.
-    var interactive = e.target.closest && e.target.closest("button, a, input, textarea, select, [data-edit], .ed-menu");
+    var interactive = e.target.closest && e.target.closest("button, a, input, textarea, select, [data-edit], [data-edit-attr], .ed-menu");
     if (interactive && el.contains(interactive)) return;
     e.preventDefault(); e.stopPropagation();
     openPickerForSlot(el);

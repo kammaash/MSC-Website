@@ -175,7 +175,7 @@
      timer, a slow connection can still reveal an unstyled moment behind it. -->
 <div ref="{{ loaderRef }}" style="position:fixed;inset:0;z-index:9998;background:#a51915;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s ease">
   <span style="display:block;background:#fff;border:4px solid #e8541b;border-radius:12px;padding:8px;line-height:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:loaderPop .9s cubic-bezier(.2,.8,.2,1) both">
-    <img src="assets/monte-logo.png" alt="Montessori" style="height:96px;width:auto;display:block">
+    <img src="assets/monte-logo.png" alt="{{ loader.logoAlt }}" data-edit-attr="alt:loader.logoAlt" style="height:96px;width:auto;display:block">
   </span>
   <div data-edit="loader.wordmark" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;color:#fff;text-transform:uppercase;animation:wordFloat .9s ease .25s both">{{ loader.wordmark }}</div>
   <div style="width:180px;height:4px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden">
@@ -194,7 +194,7 @@
   <div class="wrap top-bar" style="padding-top:16px;padding-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
     <a href="#top" style="display:flex;align-items:center;gap:18px">
       <span style="display:block;line-height:0">
-        <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
+        <img src="assets/monte-logo.png" alt="{{ topBar.logoAlt }}" data-edit-attr="alt:topBar.logoAlt" style="height:74px;width:auto;display:block">
       </span>
       <span style="display:flex;flex-direction:column;line-height:1.15">
         <span data-edit="shared:site.acampName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">{{ site.acampName }}</span>
@@ -291,7 +291,7 @@
       <p data-edit="hero.quote" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:22px;line-height:1.3;margin:0;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.15)">{{ hero.quote }}</p>
     </div>
     <div class="ed-hero-photo-slot" data-media-slot="hero.photo" data-media-kind="image" style="position:absolute;inset:0">
-      <img src="{{ heroPhotoSrc }}" alt="Montessori School, A-Camp — students on the campus steps" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
+      <img src="{{ heroPhotoSrc }}" alt="{{ hero.photoAlt }}" data-edit-attr="alt:hero.photoAlt" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" loading="lazy">
     </div>
   </div>
 </section>
@@ -555,10 +555,13 @@
 <!-- ADMISSIONS
      Left: the four-step procedure from the `steps` array. Right: the enquiry
      form, whose fields are controlled by form.* in state.
-     Every string here is in admissionsSection, but the editor can only edit
-     element TEXT: the two placeholders and the four <option> labels are
-     attributes and option content, so they render from CONTENT for
-     single-sourcing and are changed there by hand, not by clicking.
+     Every string here is in admissionsSection. The two placeholders and the
+     four <option> labels cannot take a caret — there is no text node to click
+     into, and no browser makes an <option> contenteditable — so they are
+     edited through the attribute panel in editor/client/editor-client.js instead:
+     data-edit-attr="placeholder:…" on the fields, and a plain data-edit on
+     each <option>. Both still save exactly like any other click-to-edit
+     string.
      IMPORTANT: the form is front-end only. Pressing the button just flips its
      label to "Enquiry received"; nothing is transmitted or stored. Wire
      `submit` to a real endpoint before go-live. The two buttons on the left
@@ -588,15 +591,15 @@
       <div style="background:#fff;color:#26201d;border-radius:16px;padding:30px">
         <div data-edit="admissionsSection.formTitle" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915;margin-bottom:16px">{{ admissionsSection.formTitle }}</div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.name }}" onInput="{{ onName }}" placeholder="{{ admissionsSection.namePlaceholder }}" data-edit-attr="placeholder:admissionsSection.namePlaceholder" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
+          <input value="{{ form.phone }}" onInput="{{ onPhone }}" placeholder="{{ admissionsSection.phonePlaceholder }}" data-edit-attr="placeholder:admissionsSection.phonePlaceholder" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
           <select value="{{ form.track }}" onChange="{{ onTrack }}" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none">
-            <option>{{ admissionsSection.trackPrePrimary }}</option>
-            <option>{{ admissionsSection.trackPrimary }}</option>
-            <option>{{ admissionsSection.trackSecondary }}</option>
-            <option>{{ admissionsSection.trackUnsure }}</option>
+            <option data-edit="admissionsSection.trackPrePrimary">{{ admissionsSection.trackPrePrimary }}</option>
+            <option data-edit="admissionsSection.trackPrimary">{{ admissionsSection.trackPrimary }}</option>
+            <option data-edit="admissionsSection.trackSecondary">{{ admissionsSection.trackSecondary }}</option>
+            <option data-edit="admissionsSection.trackUnsure">{{ admissionsSection.trackUnsure }}</option>
           </select>
-          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="{{ admissionsSection.msgPlaceholder }}" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
+          <textarea value="{{ form.msg }}" onInput="{{ onMsg }}" placeholder="{{ admissionsSection.msgPlaceholder }}" data-edit-attr="placeholder:admissionsSection.msgPlaceholder" rows="3" style="width:100%;padding:13px 15px;border:1px solid #e3cfc9;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#26201d;outline:none;resize:vertical"></textarea>
           <button onClick="{{ submit }}" data-edit="{{ submitLabelPath }}" style="width:100%;padding:14px;border:none;border-radius:9px;background:#a51915;color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#7f120f">{{ submitLabel }}</button>
         </div>
       </div>
@@ -629,7 +632,7 @@
     <div class="g g-foot">
       <div>
         <div style="display:flex;align-items:center;gap:14px">
-          <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="Montessori" style="height:56px;width:auto;display:block"></span>
+          <span style="display:block;background:#fff;border:3px solid #e8541b;border-radius:8px;padding:3px;line-height:0"><img src="assets/monte-logo.png" alt="{{ footer.logoAlt }}" data-edit-attr="alt:footer.logoAlt" style="height:56px;width:auto;display:block"></span>
           <span data-edit="shared:site.acampShortName" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#fff">{{ site.acampShortName }}</span>
         </div>
         <p style="font-size:14px;line-height:1.6;margin:18px 0 0;max-width:300px"><span data-edit="shared:contact.acampAddress">{{ contact.acampAddress }}</span>.</p>
@@ -769,10 +772,9 @@
   admissionsSection  the left column's kicker, heading and two buttons, and
           every string in the enquiry form. `submit` / `submitted` are the two
           states of the button, and renderVals picks the path to match the one
-          on screen. The placeholders and the four <option> labels are here
-          for single-sourcing only: the editor edits element text, so it can
-          reach neither an attribute nor an <option>, and those five strings
-          have to be changed here by hand.
+          on screen. The placeholders and the four <option> labels are edited
+          in the browser too, through the attribute/option panel rather than
+          by clicking the words directly — see the ADMISSIONS comment above.
   steps   the four numbered admission steps; `n` is the step number in the
           circle. Kept in sync by hand with the "procedure" entry in the
           subpage's content map.
@@ -784,7 +786,11 @@
 /* CONTENT:BEGIN */
 const CONTENT = {
   "loader": {
-    "wordmark": "Montessori"
+    "wordmark": "Montessori",
+    "logoAlt": "Montessori"
+  },
+  "topBar": {
+    "logoAlt": "Montessori School, A-Camp"
   },
   "pill": {
     "hintCollapsed": "hover for more options",
@@ -797,6 +803,7 @@ const CONTENT = {
     "p1": "Montessori A-Camp is a co-educational & semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.",
     "p2": "Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.",
     "quote": "“ Make kindness an everyday practice for children, and see how humanity changes for the better! ”",
+    "photoAlt": "Montessori School, A-Camp — students on the campus steps",
     "ctaPrimary": "Send enquiry →",
     "ctaSecondary": "Discover the school",
     "photo": "assets/gallery/campus-2.jpg"
@@ -934,6 +941,7 @@ const CONTENT = {
     { "n": "4", "title": "Confirmation", "desc": "Complete enrolment and fee formalities to secure the seat." }
   ],
   "footer": {
+    "logoAlt": "Montessori",
     "schoolHeading": "School",
     "schoolAbout": "About Us",
     "schoolAcademics": "Academics",
