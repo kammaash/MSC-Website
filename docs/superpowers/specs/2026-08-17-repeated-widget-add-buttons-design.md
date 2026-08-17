@@ -57,7 +57,7 @@ un-deletable — the user would click Add and watch nothing happen.
 | --- | --- | --- |
 | `pages.*.blocks` | a whole content section on a subpage route | both subpages, 35 routes each |
 | `pages.*.blocks.*.list` | rows: Events, Awards, Clubs, Houses, Core Values, Affiliations | acamp 9 routes, vidyanagar 7 |
-| `pages.*.blocks.*.gallery` | photos in a grid | acamp only — see "Vidyanagar renders no photos" |
+| `pages.*.blocks.*.gallery` | photos in a grid | both subpages, after the parity port in §8 |
 | `galleryGroups` | a gallery *category* on the A-Camp home page | montessori-acamp.html |
 
 The four collections that already work keep working, and pick up the new delete affordance:
@@ -79,19 +79,12 @@ allows `alt`, `aria-label`, `placeholder` and `title` and no others, with the st
 a string that is harmless as alt text is not harmless as an href. A link block added in the editor
 would have a permanently dead destination. That leaves **seven** kinds, not eight.
 
-### Vidyanagar renders no photos
+### Vidyanagar is brought to parity
 
-`vidyanagar-subpage.html` is a reduced copy of `acamp-subpage.html`. Its normaliser handles five
-block kinds (`p`, `h`, `list`, `gallery`, `note`) against the A-Camp page's nine, and its gallery
-branch pushes `{isGallery: true, p}` with no `images` at all. The markup behind it is a hardcoded
-six-tile "photos coming soon" placeholder that never reads the `gallery` array.
-
-So a photo added to a vidyanagar gallery block would be written to content and never displayed.
-
-This spec takes the scope-honest option: **the chooser offers only the kinds the current page can
-render**, and `pages.*.blocks.*.gallery` is wired on the A-Camp subpage only. Porting the A-Camp
-gallery renderer (and the person / embed / video renderers) to the Vidyanagar subpage is a separate
-piece of work — real, worth doing, and not an Add-button feature.
+`vidyanagar-subpage.html` is a reduced copy of `acamp-subpage.html`: it renders five block kinds
+against A-Camp's nine, and its gallery branch never reads the photo array at all. Rather than wire
+the feature on one page and not the other, **the Vidyanagar subpage is brought to full parity with
+A-Camp as part of this work**. See §8.
 
 ## Design
 
@@ -136,10 +129,11 @@ a template is only ever matched against a **newly added** item, never against an
 since grown. Every seeded collection starts with exactly one child, satisfying the floor of one
 from birth — a new gallery category arrives with one photo, a new list block with one row.
 
-The `pages.*.blocks` declaration is shared by both subpages, because `collections.json` is keyed by
-content path and the two files use identical paths. The server therefore accepts all seven kinds on
-either page. Restricting Vidyanagar's chooser to four is a **UI affordance**, not a security
-boundary — it stops a collaborator from creating a block that page cannot draw, and nothing more.
+One `pages.*.blocks` declaration serves both subpages, because `collections.json` is keyed by
+content path and the two files use identical paths. With the parity port in §8 that is exactly
+right: both pages render the same kinds, so both should accept the same items. Before the port it
+would have been a mismatch — the server accepting `person` and `embed` blocks that Vidyanagar could
+not draw — which is a second reason to do the port rather than special-case the chooser.
 
 ### 2. Segment-wise wildcard matching
 
@@ -188,14 +182,13 @@ mode where Add succeeds locally and the whole Publish 400s.
 A popover reusing `#ed-attr-panel`'s existing visual language — same radius, shadow, type scale and
 button treatment — so it reads as the same editor rather than a third UI.
 
-It offers **seven** kinds on the A-Camp subpage and **four** on Vidyanagar (`p`, `h`, `list`,
-`note`). A-Camp's normaliser renders nine; two are withheld:
+After §8 both subpages render the same **eight** block kinds, so the chooser is identical on both
+and offers **seven** of them. `link` is the one withheld, because its href cannot be edited (see
+Out of scope).
 
-- `link`, because its href cannot be edited (see Out of scope).
-- `video`, the `<video><source>` mp4 player. YouTube embeds replaced it in `6dba997`
-  ("video slots switch to YouTube embeds; posterUrl retired") and no route's CONTENT carries a
-  `video` block any more — the render branch is dead code kept for safety. Offering it would
-  create content the project has deliberately moved away from.
+The ninth kind A-Camp renders today, `video` — the `<video><source>` mp4 player — is deleted in
+§8 rather than ported. YouTube embeds replaced it in `6dba997` ("video slots switch to YouTube
+embeds; posterUrl retired") and no route in either file carries a `video` block any more.
 
 Every kind seeds visible placeholder text, for the truthiness-dispatch reason above.
 
@@ -238,8 +231,16 @@ paths it already stamps. Then:
 
 - blocks container: `data-list="{{ blocksPath }}"`, each block root `data-item` + `position:relative`
 - list block: `data-list="{{ b.p }}.list"` on the row container, `data-item` per row
-- gallery block (A-Camp only): `data-list="{{ b.p }}.gallery"` on the grid, `data-item` per photo
+- gallery block: `data-list="{{ b.p }}.gallery"` on the grid, `data-item` per photo
 - montessori-acamp.html: `data-list="galleryGroups"` on the group container, `data-item` per group
+
+The gallery grid is the one case where the container is inside an `sc-if`. The `hasImages` split
+renders two different grids — the real one and the placeholder — so `data-list` goes on the **real**
+grid only, and the Add button must still appear when the array is empty. The `hasImages` false
+branch therefore also carries an (empty) `data-list` grid rather than only the decorative tiles, so
+`decorate()` has something to hang "+ Add photo" on. Without this a school with no photos yet would
+see the placeholder and no way to add the first one — which is the state all eleven Vidyanagar
+grids ship in.
 
 No new concepts reach `decorate()`; these are the same two attributes the news and gallery sections
 already use.
@@ -271,6 +272,73 @@ Floor is **1** for every collection except `shared:news.acamp` and `shared:news.
 are **0**. Both news lists ship empty (`"news": {"acamp": [], "vidyanagar": []}`) and both school
 pages render a designed `newsSection.empty` line at zero posts. A floor there would let a school
 add its first post and then never clear the section again, making that line unreachable.
+
+The floor forbids deleting the **last** item; it does not require a list to be non-empty. A gallery
+grid that ships with no photos stays at zero and shows its placeholder until someone adds one. From
+then on it keeps at least one photo. The way back to an empty grid is one level up: delete the
+whole gallery **block** and add a fresh one from the chooser. That escape hatch exists for every
+floored collection because block-level delete is part of this feature.
+
+### 8. Vidyanagar parity port
+
+The two subpages are already near-identical outside their CONTENT blocks — 553 lines against 499,
+and a diff of 32 hunks of which most are the school name, the `montessori-vidyanagar.html` hrefs,
+and prose in comments. Only four hunks are functional. The port is roughly **45 lines of markup and
+7 lines of normaliser**, not a rewrite.
+
+**8a — Render branches.** Copy A-Camp's `isPerson`, `isEmbed` and real `isGallery` markup into
+`vidyanagar-subpage.html`, adapting only the hrefs and school names, and copy the matching
+normaliser lines:
+
+```js
+else if (b.gallery) {
+  const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption], j) =>
+    ({ src, caption, p: p + ".gallery." + j })) : [];
+  blocks.push({ key: "b" + (k++), isGallery: true, p, hasImages: imgs.length > 0, images: imgs });
+}
+else if (b.person) …
+else if (b.embed)  …
+else if (b.link)   …
+```
+
+replacing Vidyanagar's current one-line `else if (b.gallery) blocks.push({ isGallery: true, p })`.
+`link` is ported even though the chooser will not offer it: A-Camp's CONTENT uses `link` blocks, so
+the branch is live code and parity means Vidyanagar can render one if content ever calls for it.
+What the editor refuses to *create* and what a page can *render* are different questions.
+
+**8b — Delete the dead `video` branch from both files.** No route in either CONTENT block carries a
+`video` block, so the branch, its markup, and A-Camp's now-orphaned `video` CONTENT key (holding
+only `fallback` and `fallbackLink`) all go. Porting dead code to achieve parity would be the wrong
+kind of "exactly alike" — both files end on eight live branches rather than nine of which one is
+unreachable. This also removes the `data-edit="video.fallback"` binding, which would otherwise have
+to be duplicated into Vidyanagar's CONTENT purely to keep `check-paths.js` happy.
+
+**8c — Migrate the `gallery: true` sentinel to `[]`.** This is the part that is not optional.
+`gallery` currently holds *either* an array of `[src, caption]` pairs *or* the literal `true`,
+meaning "draw the coming-soon placeholder":
+
+| File | `gallery: true` | real arrays |
+| --- | --- | --- |
+| acamp-subpage.html | 4 | 8 |
+| vidyanagar-subpage.html | 11 | 0 |
+
+`true` is not a list. `addItem` calls `getList`, which throws `Not a list`, so "+ Add photo" would
+fail on all fifteen of those blocks — including every grid on Vidyanagar. Rewriting them as `[]`
+fixes it with no visible change: `[]` is still truthy so the `else if (b.gallery)` dispatch is
+unaffected, `Array.isArray([])` yields `imgs = []`, `hasImages` stays false, and the placeholder
+renders exactly as before. The difference is that the array is now growable.
+
+The alternative — teaching the editor to convert `true` into an array on first add — would need a
+new op type, since `set` requires the existing value to be a string. A one-time data migration is
+strictly simpler and removes a two-typed field from the content model.
+
+**8d — Incidental.** The two files order one line of the nav `href` mapping differently
+(`href: it.key.startsWith("#") ? …` sits one line earlier in A-Camp). Aligning it costs nothing and
+makes future diffs between the twins mean something.
+
+**Not in this port:** Vidyanagar's own photographs. All eleven grids stay empty and show their
+placeholder. Giving them content is the school's job, and after this work it is a job they can do
+themselves — which is the point.
 
 ## Error handling
 
@@ -305,10 +373,19 @@ every `data-item` count equals that array's length. `check-paths.js` skips inter
 paths by construction, so a wrong binding inside an `sc-for` is invisible to it — this is the pass
 that catches it.
 
+**Parity** — a test asserting the two subpages render the same set of block kinds: same `sc-if`
+branch names in the markup, same dispatch branches in the normaliser. This is what stops the twins
+drifting apart again, which is how the gap arose in the first place.
+
+**Sentinel migration** — no `gallery` value in either CONTENT block is anything but an array; every
+gallery block on every route resolves through `getList` without throwing; and a route that shipped
+with `gallery: true` still renders the placeholder grid and its "photos coming soon" note.
+
 **Regression** — `page-media-invariants`, `page-content-fidelity`, `list-op-equivalence`,
 `security` and `check-paths` all still pass. `list-op-equivalence` matters most: it proves the
 client's `applyListOp` and the server's `addItem`/`removeItem`/`moveItem` agree, and nothing here
-changes either.
+changes either. `page-content-fidelity` runs against the real pages, so the Vidyanagar port is
+covered by it automatically.
 
 ## Documentation
 
@@ -323,5 +400,11 @@ that news is the one exception.
 - **The floor is one**, except news, which keeps its empty state.
 - **The item contract goes recursive** rather than moving to server-side item factories or
   migrating the content to a flat shape.
-- **Link is dropped** from the chooser; its href cannot be edited.
-- **Vidyanagar gallery blocks are not wired**; that page has no photo renderer.
+- **Link is dropped** from the chooser; its href cannot be edited. It is still *rendered* by both
+  pages, because A-Camp's content uses it.
+- **Vidyanagar is ported to full parity with A-Camp** — person, embed and real gallery rendering —
+  so the feature works identically on both subpages.
+- **The dead mp4 `video` block is deleted from both**, rather than ported, along with A-Camp's
+  orphaned `video` CONTENT key.
+- **`gallery: true` is migrated to `[]`** across both files, because a sentinel that is not a list
+  cannot be added to.
