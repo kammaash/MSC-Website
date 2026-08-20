@@ -105,8 +105,8 @@ test("every seeded string is visible placeholder text — a blank block matches 
 // LITERAL data-list binding the pages actually carry must map to an explicit, expected
 // family, and every expected binding must still be present — so an unrecognised binding
 // (silently defaulted to "news" by family()) fails this test instead of failing quietly
-// until Publish 400s. Interpolated ({{ }}) bindings are Task 8's markup and don't exist in
-// the pages yet, so they're out of scope here; they'll need the same treatment once landed.
+// until Publish 400s. Interpolated ({{ }}) bindings are intentionally excluded here — they
+// are covered instead by the route-walking tests in page-list-invariants.test.js.
 const EXPECTED_BINDINGS = {
   "shared:news.acamp": "news",
   "shared:news.vidyanagar": "news",
