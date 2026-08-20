@@ -246,7 +246,11 @@
               </sc-for>
             </div>
           </sc-if>
-          <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ false }}">
+          <!-- b.noImages, not b.hasImages: this is the empty-grid branch, and
+               hint-placeholder-val stays false on purpose — the hint only
+               tells a design tool what to preview, and false keeps its
+               preview on the real-grid branch above. -->
+          <sc-if value="{{ b.noImages }}" hint-placeholder-val="{{ false }}">
             <div class="g g-3" style="margin:20px 0 0" data-list="{{ b.p }}.gallery">
               <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
               <div style="aspect-ratio:4/3;border-radius:12px;background:repeating-linear-gradient(45deg,#f1e6e4 0 13px,#eaddd9 13px 26px);border:1px solid #f0e0dc"></div>
@@ -883,7 +887,7 @@ class Component extends DCLogic {
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, p, items: b.list.map(([h, d], j) => ({ h, sep: " — ", d, p: p + ".list." + j })) });
       else if (b.gallery) {
         const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption], j) => ({ src, caption, p: p + ".gallery." + j })) : [];
-        blocks.push({ key: "b" + (k++), isGallery: true, p, hasImages: imgs.length > 0, images: imgs });
+        blocks.push({ key: "b" + (k++), isGallery: true, p, hasImages: imgs.length > 0, noImages: imgs.length === 0, images: imgs });
       }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, p, text: b.note, sub: b.sub || "" });
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, p, person: b.person });

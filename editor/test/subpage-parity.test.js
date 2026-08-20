@@ -43,6 +43,27 @@ test("both subpages instantiate hasImages both ways (real grid + placeholder gri
   for (const f of FILES) {
     const src = read(f);
     assert.match(src, /sc-if value="\{\{ b\.hasImages \}\}" hint-placeholder-val="\{\{ true \}\}"/);
-    assert.match(src, /sc-if value="\{\{ b\.hasImages \}\}" hint-placeholder-val="\{\{ false \}\}"/);
+    assert.match(src, /sc-if value="\{\{ b\.noImages \}\}" hint-placeholder-val="\{\{ false \}\}"/);
+  }
+});
+
+// Pins the defect class fixed here: the real-grid and placeholder-grid gallery
+// branches used to both test `b.hasImages`, so hint-placeholder-val (a preview
+// hint for a design tool, with no effect at runtime) was the only thing that
+// looked different between them. A grid with photos rendered both branches; a
+// grid without photos rendered neither. The two sc-if conditions must be
+// genuinely different flags, and the placeholder branch specifically must not
+// re-test hasImages.
+test("both subpages: the gallery's two branches test different flags", () => {
+  for (const f of FILES) {
+    const src = read(f);
+    const m = src.match(
+      /<sc-if value="\{\{ b\.isGallery \}\}"[^>]*>\s*<sc-if value="\{\{ b\.(\w+) \}\}"[^>]*>[\s\S]*?<\/sc-if>\s*(?:<!--[\s\S]*?-->\s*)*<sc-if value="\{\{ b\.(\w+) \}\}"[^>]*>[\s\S]*?<\/sc-if>\s*<\/sc-if>/
+    );
+    assert.ok(m, f + ": could not locate the gallery's nested sc-if branches");
+    const [, firstFlag, secondFlag] = m;
+    assert.notEqual(secondFlag, firstFlag, f + ": placeholder branch re-tests the real-grid branch's flag " + firstFlag);
+    assert.notEqual(secondFlag, "hasImages", f + ": placeholder branch must not test hasImages");
+    assert.equal(secondFlag, "noImages", f + ": placeholder branch should test noImages");
   }
 });
