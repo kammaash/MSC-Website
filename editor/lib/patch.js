@@ -1,5 +1,6 @@
 "use strict";
 const { getPath, setPath, addItem, removeItem, moveItem } = require("./paths.js");
+const { parseVideoId } = require("./youtube.js");
 
 function validateText(value) {
   if (typeof value !== "string") throw new Error("Text value must be a string");
@@ -7,13 +8,81 @@ function validateText(value) {
   if (/CONTENT:BEGIN|CONTENT:END/i.test(value)) throw new Error("Text may not contain CONTENT:BEGIN or CONTENT:END markers");
 }
 
-function validateItem(item, template) {
-  if (item === null || typeof item !== "object" || Array.isArray(item)) throw new Error("Item must be an object");
-  const want = Object.keys(template).sort().join(",");
-  const got = Object.keys(item).sort().join(",");
-  if (want !== got) throw new Error("Item keys must be exactly: " + want);
-  for (const v of Object.values(item)) validateText(v);
-  if ("kind" in template && !["image", "video"].includes(item.kind)) throw new Error("kind must be image or video");
+// Judgement calls a JSON shape template cannot express, keyed by the field path
+// inside an item. Shape belongs in collections.json; these rules stay in code.
+//   kind      — the shared-gallery item's provider tag; anything else would make
+//               media-urls.js throw at render time on a published page.
+//   embed.src — written verbatim into an <iframe src> on a published page.
+//               validateText blocks <script, which is not the relevant threat here:
+//               the rule requires the one canonical embed form and re-derives the ID
+//               through lib/youtube.js, so nothing reaches the page that the YouTube
+//               helper cannot positively identify.
+const LEAF_RULES = {
+  "kind": {
+    ok: (v) => v === "image" || v === "video",
+    why: "kind must be image or video",
+  },
+  "embed.src": {
+    ok: (v) => /^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]{11}$/.test(v) && parseVideoId(v) !== null,
+    why: "embed.src must be exactly https://www.youtube.com/embed/<11-character video id>",
+  },
+};
+
+// Validates a newly added item against a declared template, recursing ON THE
+// TEMPLATE — depth and breadth are bounded by declarations we author, so a hostile
+// payload cannot drive the recursion. Four template forms:
+//   ""            a string (then validateText, then any LEAF_RULES entry)
+//   [a, b, ...]   an array of exactly that length, validated elementwise
+//   {k: v, ...}   a plain object with exactly those keys, validated per key
+//   {oneOf: [..]} a value matching one alternative, chosen BY KEY SET — every
+//                 alternative in this content model has a distinct key set, so the
+//                 choice is unambiguous and the matched alternative's inner failure
+//                 keeps its precise field path.
+// A template is only ever matched against a NEWLY ADDED item, never one the user
+// has since grown — so exact array lengths are correct: every seeded collection
+// starts with exactly one child.
+function validateShape(value, template, fieldPath) {
+  const at = fieldPath === "" ? "item" : fieldPath;
+  if (typeof template === "string") {
+    if (typeof value !== "string") throw new Error(at + " must be a string");
+    validateText(value);
+    const rule = LEAF_RULES[fieldPath];
+    if (rule && !rule.ok(value)) throw new Error(rule.why);
+    return;
+  }
+  if (Array.isArray(template)) {
+    if (!Array.isArray(value) || value.length !== template.length) {
+      throw new Error(at + " must be an array of exactly " + template.length + " entries");
+    }
+    template.forEach((t, i) => validateShape(value[i], t, fieldPath === "" ? String(i) : fieldPath + "." + i));
+    return;
+  }
+  if (template !== null && typeof template === "object") {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error(at + " must be an object");
+    }
+    const got = Object.keys(value).sort().join(",");
+    // The oneOf marker is checked before the plain-object rule; no item shape in
+    // this content model has oneOf as a key, so the marker cannot be shadowed.
+    if (Array.isArray(template.oneOf)) {
+      const alt = template.oneOf.find((t) =>
+        t !== null && typeof t === "object" && !Array.isArray(t) &&
+        Object.keys(t).sort().join(",") === got);
+      if (!alt) {
+        const kinds = template.oneOf.map((t) => "{" + Object.keys(t).sort().join(",") + "}").join(", ");
+        throw new Error(at + " keys must match one of: " + kinds);
+      }
+      validateShape(value, alt, fieldPath);
+      return;
+    }
+    const want = Object.keys(template).sort().join(",");
+    if (want !== got) throw new Error(at + " keys must be exactly: " + want);
+    for (const k of Object.keys(template)) {
+      validateShape(value[k], template[k], fieldPath === "" ? k : fieldPath + "." + k);
+    }
+    return;
+  }
+  throw new Error("Bad collection template at " + at);
 }
 
 function requireCollection(templates, path) {
@@ -35,7 +104,7 @@ function applyPatch(data, patch, templates) {
       if (typeof getPath(data, op.path) !== "string") throw new Error("Unknown or non-text path: " + op.path);
       setPath(data, op.path, op.value);
     } else if (op.type === "add") {
-      validateItem(op.item, requireCollection(templates, op.path));
+      validateShape(op.item, requireCollection(templates, op.path), "");
       addItem(data, op.path, op.item);
     } else if (op.type === "remove") {
       requireCollection(templates, op.path);
@@ -50,4 +119,4 @@ function applyPatch(data, patch, templates) {
   return data;
 }
 
-module.exports = { applyPatch, validateText, validateItem };
+module.exports = { applyPatch, validateText, validateShape, requireCollection };

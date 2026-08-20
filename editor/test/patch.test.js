@@ -1,7 +1,7 @@
 "use strict";
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { applyPatch, validateText } = require("../lib/patch.js");
+const { applyPatch, validateText, validateShape } = require("../lib/patch.js");
 const templates = require("../collections.json");
 
 const fix = () => ({
@@ -64,4 +64,74 @@ test("remove and unknown op types", () => {
   const d = applyPatch(base, { ops: [{ type: "remove", path: "news.acamp", index: 0 }] }, templates);
   assert.equal(d.news.acamp.length, 0);
   assert.throws(() => applyPatch(fix(), { ops: [{ type: "explode" }] }, templates), /Unknown op/);
+});
+
+// ---- validateShape: the recursive item contract (Task: repeated-widget add buttons) ----
+// Templates recurse ON THE TEMPLATE, so a hostile payload can never drive the
+// recursion deeper than a declaration we authored. Every rejection names the failing
+// field path — a seven-way oneOf failing as "item did not match" is undebuggable.
+
+const BLOCK_ONEOF = { oneOf: [
+  { p: "" }, { h: "" }, { note: "", sub: "" },
+  { list: [["", ""]] }, { gallery: [["", ""]] },
+  { person: { src: "", name: "", title: "" } },
+  { embed: { src: "", title: "" } },
+] };
+
+test("validateShape: tuple template accepts exactly-shaped rows and nothing else", () => {
+  validateShape(["Empathy", "understanding others"], ["", ""], ""); // no throw
+  assert.throws(() => validateShape(["only one"], ["", ""], ""), /exactly 2/);
+  assert.throws(() => validateShape(["a", "b", "c"], ["", ""], ""), /exactly 2/);
+  assert.throws(() => validateShape(["a", 2], ["", ""], ""), /must be a string/);
+  assert.throws(() => validateShape("not an array", ["", ""], ""), /array/);
+});
+
+test("validateShape: nested object template recurses and names the failing path", () => {
+  validateShape({ person: { src: "x.jpg", name: "N", title: "T" } },
+    { person: { src: "", name: "", title: "" } }, "");
+  assert.throws(() => validateShape({ person: { src: "x.jpg", name: "N" } },
+    { person: { src: "", name: "", title: "" } }, ""), /person keys must be exactly: name,src,title/);
+  assert.throws(() => validateShape({ list: [["a", 2]] }, { list: [["", ""]] }, ""),
+    /list\.0\.1/);
+});
+
+test("validateShape: oneOf selects the alternative by key set", () => {
+  validateShape({ p: "hello" }, BLOCK_ONEOF, "");
+  validateShape({ note: "N", sub: "S" }, BLOCK_ONEOF, "");
+  validateShape({ embed: { src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "T" } }, BLOCK_ONEOF, "");
+  // No alternative has these keys — the error lists what WOULD be accepted.
+  assert.throws(() => validateShape({ p: "x", h: "y" }, BLOCK_ONEOF, ""), /one of/);
+  assert.throws(() => validateShape("just text", BLOCK_ONEOF, ""), /object/);
+  // The matched alternative's INNER failure keeps its field path.
+  assert.throws(() => validateShape({ person: { src: 3, name: "N", title: "T" } }, BLOCK_ONEOF, ""),
+    /person\.src/);
+});
+
+test("validateShape: validateText still guards every nested leaf", () => {
+  assert.throws(() => validateShape({ list: [["a", "</script><script>alert(1)"]] },
+    { list: [["", ""]] }, ""), /script/);
+});
+
+test("validateShape: value nesting deeper than the template is rejected, not recursed", () => {
+  assert.throws(() => validateShape({ p: { deep: { deeper: "x" } } }, { p: "" }, ""),
+    /must be a string/);
+});
+
+test("leaf rule: embed.src accepts only the canonical YouTube embed form", () => {
+  const good = { embed: { src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "T" } };
+  validateShape(good, BLOCK_ONEOF, "");
+  const bad = (src) => assert.throws(
+    () => validateShape({ embed: { src, title: "T" } }, BLOCK_ONEOF, ""), /embed\.src/);
+  bad("https://vimeo.com/1");
+  bad("javascript:alert(1)");
+  bad("dQw4w9WgXcQ");
+  bad("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  bad("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+  bad("https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0");
+});
+
+test("leaf rule: the galleries kind check survives the validateItem replacement", () => {
+  validateShape({ kind: "image", id: "x", caption: "" }, templates["galleries.acamp"], "");
+  assert.throws(() => validateShape({ kind: "iframe", id: "x", caption: "" },
+    templates["galleries.acamp"], ""), /kind must be image or video/);
 });
