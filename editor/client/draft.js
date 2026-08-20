@@ -12,6 +12,28 @@
     if (/CONTENT:BEGIN|CONTENT:END/i.test(value)) return "Text may not contain CONTENT:BEGIN or CONTENT:END markers";
     return null;
   }
+  // Mirrors lib/patch.js's REQUIRES_TEXT / REQUIRES_TEXT_MESSAGE, and for the same
+  // reason rejectText mirrors validateText: the server remains the authority, this is
+  // the fast front door. A subpage block is dispatched on truthiness in renderVals()
+  // (`if (b.p) … else if (b.h) … else if (b.note) …`), so emptying one of those three
+  // keys makes the block render NOTHING — no element, so no data-edit to click back
+  // into and no data-item to carry a ✕. Refusing it here is what stops a collaborator
+  // watching a section disappear under their cursor with no way to bring it back.
+  // editor/test/draft.test.js runs both this and the server's rule over the same
+  // path/value matrix, so the two cannot drift apart.
+  var REQUIRES_TEXT = /^(?:pages\.[^.]+|fallback)\.blocks\.\d+\.(?:p|h|note)$/;
+  var REQUIRES_TEXT_MESSAGE = "A section needs some text. To remove the section entirely, use its ✕ button.";
+
+  // The whole rule for a `set`: the plain text rules, then the empty-section rule for
+  // the paths that have one. Returns null when the edit is fine, or a message naming
+  // the violated rule. Callers use this rather than rejectText, which is path-blind.
+  function rejectSet(path, value) {
+    var text = rejectText(value);
+    if (text !== null) return text;
+    if (REQUIRES_TEXT.test(path) && value.trim() === "") return REQUIRES_TEXT_MESSAGE;
+    return null;
+  }
+
   // Applies an add/move/remove op directly to an in-memory array — the single place
   // that encodes "what a list op means" on the client. Deliberately mirrors
   // editor/lib/paths.js's addItem/removeItem/moveItem exactly: same splice calls, same
@@ -201,6 +223,7 @@
   }
   exports.createDraft = createDraft;
   exports.rejectText = rejectText;
+  exports.rejectSet = rejectSet;
   exports.applyListOp = applyListOp;
   exports.classifyPublishResponse = classifyPublishResponse;
 })(typeof module !== "undefined" ? module.exports : (window.EditorDraft = {}));

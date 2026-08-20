@@ -212,11 +212,14 @@
     const path = el.getAttribute("data-edit");
     const value = el.textContent.trim();
     if (value === el.__edOrig) return;
-    const rejection = window.EditorDraft.rejectText(value);
+    const rejection = window.EditorDraft.rejectSet(path, value);
     if (rejection) {
-      // Same rule the server enforces (editor/lib/patch.js's validateText, mirrored in
-      // draft.js's rejectText) — reject here so the user finds out immediately, not
-      // after saveAll has already written an earlier file to disk.
+      // Same rules the server enforces (editor/lib/patch.js's validateText and its
+      // empty-section rule, both mirrored in draft.js's rejectSet) — reject here so the
+      // user finds out immediately, not after saveAll has already written an earlier
+      // file to disk. Path-aware, because whether an empty value is allowed depends on
+      // WHERE it is going: emptying a section's own text would make the whole block
+      // render nothing and leave nothing on screen to click or delete.
       el.textContent = el.__edOrig;
       alert("Can't save this edit:\n" + rejection);
       return;

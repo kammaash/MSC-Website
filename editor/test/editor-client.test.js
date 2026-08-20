@@ -126,10 +126,13 @@ test("I2: a stale/unknown path throws from applyLocal BEFORE the op is recorded,
 
 test("I3(a): a client-side validation rejection also restores text and returns before recording anything", () => {
   const blurBlock = extractBlockAfter(SRC, 'addEventListener("blur"');
-  assert.match(blurBlock, /EditorDraft\.rejectText\(value\)/);
-  const rejectIdx = blurBlock.indexOf("EditorDraft.rejectText(value)");
+  // rejectSet is rejectText plus the path-dependent rules (see draft.js); the property
+  // this test exists for — validate, restore, return, all before anything is recorded —
+  // is unchanged by that rename.
+  assert.match(blurBlock, /EditorDraft\.rejectSet\(path, value\)/);
+  const rejectIdx = blurBlock.indexOf("EditorDraft.rejectSet(path, value)");
   const draftSetIdx = blurBlock.indexOf("draft.set(path, value)");
-  assert.ok(rejectIdx < draftSetIdx, "rejectText check must run before the op is recorded");
+  assert.ok(rejectIdx < draftSetIdx, "the rejection check must run before the op is recorded");
 });
 
 test("I3(b): Discard warns honestly whenever anything is saved-but-uncommitted, and still has its plain path", () => {
@@ -555,4 +558,18 @@ test("the server injects attr-spec.js before editor-client.js, which needs it", 
   assert.ok(ui !== -1, "editor-client.js missing from INJECT");
   assert.ok(spec < ui, "attr-spec.js must load first — editor-client.js reads window.EditorAttrSpec");
   assert.doesNotMatch(server, /attr-edit\.js/, "the standalone attr-edit.js is no longer injected");
+});
+
+// ---- the empty-section rule at the point of edit (Task: empty-text block trap) ----
+test("the blur handler validates by PATH, so emptying a section's text is refused before it applies", () => {
+  const blurBlock = extractBlockAfter(SRC, 'addEventListener("blur"');
+  // rejectText is path-blind and cannot see the empty-section rule; rejectSet carries
+  // the path, which is the whole point.
+  assert.match(blurBlock, /rejectSet\(path, value\)/);
+  assert.ok(!/rejectText\(value\)/.test(blurBlock),
+    "the path-blind rejectText call must be gone from the blur handler");
+  // ...and it must still run BEFORE applyLocal, or a refused edit would already have
+  // mutated the in-memory content by the time the user is told it was refused.
+  assert.ok(blurBlock.indexOf("rejectSet(path, value)") < blurBlock.indexOf("applyLocal(path, value)"),
+    "validation must precede applyLocal");
 });

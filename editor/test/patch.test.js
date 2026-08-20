@@ -222,3 +222,94 @@ test("a new gallery category arrives with exactly one photo, satisfying the floo
   assert.throws(() => applyPatch({ galleryGroups: [] }, { ops: [{ type: "add", path: "galleryGroups",
     item: { label: "New category", photos: [] } }] }, templates), /exactly 1/);
 });
+
+// ---- a section's own text may not be emptied (Task: empty-text block trap) ----
+// The subpage normalisers dispatch on truthiness (`if (b.p) … else if (b.h) …`), so a
+// block whose dispatch key is emptied matches no branch, renders NOTHING, and is
+// therefore both un-editable and un-deletable — there is no element left to carry a
+// data-edit or a ✕. The only way back is hand-editing the page, which is the pain this
+// editor exists to remove. So emptying one of those three keys is refused.
+const { requiresText } = require("../lib/patch.js");
+
+const blockFix = () => ({
+  pages: { library: { blocks: [
+    { p: "text" },
+    { h: "heading" },
+    { note: "headline", sub: "supporting" },
+    { list: [["term", "desc"]] },
+    { gallery: [["u.jpg", "cap"]] },
+  ] } },
+  fallback: { blocks: [{ p: "text" }] },
+  galleryGroups: [{ label: "L", photos: [{ src: "u.jpg", caption: "c" }] }],
+  hero: { title: "T" },
+});
+
+test("emptying a block's dispatch key is refused on every route, including fallback", () => {
+  for (const path of [
+    "pages.library.blocks.0.p",
+    "pages.library.blocks.1.h",
+    "pages.library.blocks.2.note",
+    "fallback.blocks.0.p",
+  ]) {
+    assert.throws(
+      () => applyPatch(blockFix(), { ops: [{ type: "set", path, value: "" }] }, templates),
+      /section needs some text/,
+      path + " must refuse an empty value"
+    );
+    // Whitespace is not text either — validateText's trim rule already governs storage,
+    // and " " would leave exactly the same invisible block.
+    assert.throws(
+      () => applyPatch(blockFix(), { ops: [{ type: "set", path, value: "   " }] }, templates),
+      /section needs some text/,
+      path + " must refuse whitespace"
+    );
+  }
+});
+
+test("the refusal names the way out, so the message is actionable", () => {
+  assert.throws(
+    () => applyPatch(blockFix(), { ops: [{ type: "set", path: "pages.library.blocks.0.p", value: "" }] }, templates),
+    /✕/
+  );
+});
+
+test("a dispatch key still accepts ordinary text", () => {
+  const d = applyPatch(blockFix(), {
+    ops: [{ type: "set", path: "pages.library.blocks.0.p", value: "New copy" }],
+  }, templates);
+  assert.equal(d.pages.library.blocks[0].p, "New copy");
+});
+
+test("every other editable string may still be emptied — only dispatch keys are guarded", () => {
+  // Each of these sits inside a value that stays truthy when the string goes empty, so
+  // emptying it hides a field, never the whole block. Guarding them would be a
+  // restriction with no defect behind it.
+  const cases = [
+    ["pages.library.blocks.2.sub", (d) => d.pages.library.blocks[2].sub],
+    ["pages.library.blocks.3.list.0.1", (d) => d.pages.library.blocks[3].list[0][1]],
+    ["pages.library.blocks.4.gallery.0.1", (d) => d.pages.library.blocks[4].gallery[0][1]],
+    ["galleryGroups.0.photos.0.caption", (d) => d.galleryGroups[0].photos[0].caption],
+    ["hero.title", (d) => d.hero.title],
+  ];
+  for (const [path, read] of cases) {
+    const d = applyPatch(blockFix(), { ops: [{ type: "set", path, value: "" }] }, templates);
+    assert.equal(read(d), "", path + " must still accept an empty value");
+  }
+});
+
+test("requiresText matches the three dispatch keys and nothing else", () => {
+  for (const p of ["pages.x.blocks.0.p", "pages.a-b.blocks.12.h", "fallback.blocks.3.note"]) {
+    assert.equal(requiresText(p), true, p);
+  }
+  for (const p of [
+    "pages.x.blocks.0.sub",          // a note's supporting line — block survives without it
+    "pages.x.blocks.0.person.name",  // inside an object that stays truthy
+    "pages.x.blocks.0.list.0.0",     // inside an array that stays truthy
+    "pages.x.blocks.0",              // the block itself, not a text path
+    "pages.x.blocks.0.p.extra",      // deeper than a dispatch key
+    "hero.p",                        // right key, wrong shape
+    "fallback.p",
+  ]) {
+    assert.equal(requiresText(p), false, p);
+  }
+});

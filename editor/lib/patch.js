@@ -28,6 +28,24 @@ const LEAF_RULES = {
   },
 };
 
+// A subpage block is dispatched on truthiness — `if (b.p) … else if (b.h) … else if
+// (b.note) …` in each subpage's renderVals(). So a block whose dispatch key is emptied
+// matches no branch and renders NOTHING: no element, therefore no data-edit to click
+// back into and no data-item to carry a ✕. The block still exists in CONTENT but the
+// editor can no longer see or reach it, and the only way back is hand-editing the page —
+// the exact pain this editor exists to remove. Emptying one of those keys is therefore
+// refused outright; removing a section is what ✕ is for.
+//
+// Deliberately only these three. Every other editable string on a block sits inside a
+// value that stays truthy when the string goes empty — a note's `sub`, a list row, a
+// photo caption, a person's name — so emptying one hides a field, never the block.
+const REQUIRES_TEXT = /^(?:pages\.[^.]+|fallback)\.blocks\.\d+\.(?:p|h|note)$/;
+const REQUIRES_TEXT_MESSAGE = "A section needs some text. To remove the section entirely, use its ✕ button.";
+
+function requiresText(path) {
+  return typeof path === "string" && REQUIRES_TEXT.test(path);
+}
+
 // Validates a newly added item against a declared template, recursing ON THE
 // TEMPLATE — depth and breadth are bounded by declarations we author, so a hostile
 // payload cannot drive the recursion. Four template forms:
@@ -113,6 +131,7 @@ function applyPatch(data, patch, templates) {
   for (const op of (patch && patch.ops) || []) {
     if (op.type === "set") {
       validateText(op.value);
+      if (requiresText(op.path) && op.value.trim() === "") throw new Error(REQUIRES_TEXT_MESSAGE);
       if (typeof getPath(data, op.path) !== "string") throw new Error("Unknown or non-text path: " + op.path);
       setPath(data, op.path, op.value);
     } else if (op.type === "add") {
@@ -131,4 +150,4 @@ function applyPatch(data, patch, templates) {
   return data;
 }
 
-module.exports = { applyPatch, validateText, validateShape, requireCollection };
+module.exports = { applyPatch, validateText, validateShape, requireCollection, requiresText, REQUIRES_TEXT_MESSAGE };

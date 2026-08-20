@@ -412,3 +412,56 @@ test("item 2: end() is idempotent and releases even when the run threw", () => {
   assert.equal(next.patches["index.html"].ops.length, 1, "the failed run's ops are still pending, and sendable again");
   next.end();
 });
+
+// ---- the empty-section rule, mirrored client-side (Task: empty-text block trap) ----
+// Same discipline as rejectText above: the server stays the authority (lib/patch.js runs
+// on every /api/save regardless of what the client does), and this proves the client's
+// copy agrees with it rather than having invented a looser or stricter rule of its own.
+// The client half exists so a doomed edit is refused at the moment the collaborator
+// makes it, instead of surfacing at Publish against a file they have since kept editing.
+const { rejectSet } = require("../client/draft.js");
+const { applyPatch } = require("../lib/patch.js");
+const templates = require("../collections.json");
+
+test("rejectSet agrees with the server's set-op rules on every path/value pair", () => {
+  // Every path below exists in this fixture, so a rejection can only come from the text
+  // rules — never from "Unknown or non-text path".
+  const fixture = () => ({
+    pages: { library: { blocks: [
+      { p: "text" }, { h: "heading" }, { note: "n", sub: "s" }, { list: [["t", "d"]] },
+    ] } },
+    fallback: { blocks: [{ p: "text" }] },
+    hero: { title: "T" },
+  });
+  const paths = [
+    "pages.library.blocks.0.p",
+    "pages.library.blocks.1.h",
+    "pages.library.blocks.2.note",
+    "pages.library.blocks.2.sub",
+    "pages.library.blocks.3.list.0.1",
+    "fallback.blocks.0.p",
+    "hero.title",
+  ];
+  const values = ["ordinary text", "", "   ", "\t\n ", "<script>x</script>", "CONTENT:END"];
+  for (const path of paths) {
+    for (const value of values) {
+      let serverRejects = false;
+      try { applyPatch(fixture(), { ops: [{ type: "set", path, value }] }, templates); }
+      catch { serverRejects = true; }
+      assert.equal(
+        rejectSet(path, value) !== null, serverRejects,
+        "mismatch for " + path + " = " + JSON.stringify(value)
+      );
+    }
+  }
+});
+
+test("rejectSet names the way out when a section's text is emptied", () => {
+  assert.match(rejectSet("pages.library.blocks.0.p", ""), /section needs some text/);
+  assert.match(rejectSet("pages.library.blocks.0.p", ""), /✕/);
+});
+
+test("rejectSet still reports the plain text rules, so it replaces rejectText at the call site", () => {
+  assert.match(rejectSet("hero.title", "<script>x</script>"), /script/i);
+  assert.equal(rejectSet("hero.title", "ordinary"), null);
+});
