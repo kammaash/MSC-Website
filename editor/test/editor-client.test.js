@@ -387,7 +387,10 @@ test("list chrome delegates labels, floors and blank items to EditorCollections 
   // Nested lists are real now (a block CONTAINS rows/photos), so "every data-item
   // under me" would stamp menus with wrong indices onto nested rows. Only items
   // whose NEAREST list ancestor is this list belong to it.
-  assert.match(dec, /closest\("\[data-list\]"\) === listEl/);
+  // .parentElement. is load-bearing: it.closest() would include the element ITSELF,
+  // so a [data-item] that also carries data-list would resolve to itself and escape
+  // its real list's indices.
+  assert.match(dec, /it\.parentElement\.closest\("\[data-list\]"\) === listEl/);
   assert.match(dec, /EditorCollections\.addLabel\(listPath\)/);
   assert.ok(!/listPath\.includes\("galleries\."\)/.test(dec), "the hardcoded label test must be gone from decorate()");
   // Items that are ALSO media slots shift their menu top-left: the slot's hover
@@ -470,6 +473,9 @@ test("Exit also removes the panel, the chip and the attribute outlines", () => {
   assert.match(exitHandler, /closeAttrPanel\(\)/);
   assert.match(exitHandler, /ed-attr-hover/);
   assert.match(exitHandler, /chip\.style\.display = "none"/);
+  // The block chooser (Task: add buttons) is the same shape of bug: a popover left
+  // open on a page pretending to be the public site.
+  assert.match(exitHandler, /closeBlockChooser\(\)/);
 });
 
 test("the panel never writes the bound attribute onto the page element by hand", () => {
