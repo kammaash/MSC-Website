@@ -30,7 +30,7 @@ const TABLE = [
   ["pages.awards.blocks.2.gallery",        "blockGallery",  "+ Add photo",    1,     "image"],
   ["galleryGroups",                        "galleryGroups", "+ Add category", 1,     "image"],
   ["galleryGroups.0.photos",               "groupPhotos",   "+ Add photo",    1,     "image"],
-  ["shared:galleries.vidyanagar",          "sharedGallery", "+ Add photo",    1,     "image"],
+  ["shared:galleries.vidyanagar",          "sharedGallery", "+ Add photo",    0,     "image"],
   ["shared:news.acamp",                    "news",          "+ Add",          0,     null],
   ["shared:news.vidyanagar",               "news",          "+ Add",          0,     null],
 ];
@@ -106,7 +106,9 @@ test("every seeded string is visible placeholder text — a blank block matches 
 // family, and every expected binding must still be present — so an unrecognised binding
 // (silently defaulted to "news" by family()) fails this test instead of failing quietly
 // until Publish 400s. Interpolated ({{ }}) bindings are intentionally excluded here — they
-// are covered instead by the route-walking tests in page-list-invariants.test.js.
+// are covered instead by the route-walking loop in page-list-invariants.test.js, which
+// requires this same module and asserts family()/addLabel()/floorFor() for every
+// blocks/list/gallery path it instantiates from real subpage CONTENT.
 const EXPECTED_BINDINGS = {
   "shared:news.acamp": "news",
   "shared:news.vidyanagar": "news",

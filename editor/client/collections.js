@@ -40,10 +40,19 @@
   };
   function addLabel(listPath) { return LABELS[family(listPath)]; }
 
-  // The delete floor. 1 everywhere except news: both news lists ship empty and both
-  // school pages render a designed newsSection.empty line at zero posts — a floor
-  // there would make that line unreachable after the first post.
-  function floorFor(listPath) { return family(listPath) === "news" ? 0 : 1; }
+  // The delete floor. The rule is about the PAGE, not the family: a widget whose
+  // markup has a designed "nothing here yet" line gets floor 0, so that line stays
+  // reachable forever — everything else keeps a floor of 1, so a list, grid or
+  // gallery category can never be emptied to literally nothing. News ships empty on
+  // both school pages and both render newsSection.empty at zero posts. The shared
+  // gallery is the same shape: montessori-vidyanagar.html ships `galleries: {acamp:
+  // [], vidyanagar: []}` empty and renders gallerySection.empty via
+  // <sc-if value="{{ noGallery }}">. A floor of 1 there (the design spec's original
+  // call) would make that line permanently unreachable the moment a photo is added —
+  // exactly the bug a news floor of 1 would have been. This is a deliberate
+  // deviation from the spec, which didn't notice this page has an empty state.
+  var NO_FLOOR = { news: true, sharedGallery: true };
+  function floorFor(listPath) { return NO_FLOOR[family(listPath)] ? 0 : 1; }
 
   // Which media the Add flow must pick BEFORE an item can exist. An empty
   // <img src=""> paints a broken image and an empty iframe a black rectangle, so

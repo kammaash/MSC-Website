@@ -210,10 +210,13 @@
      authoring key holding the string it is about to render — ".p", ".h",
      ".note", ".sub" — and a list row goes one level deeper still, to
      "{{ li.p }}.0" for the term and ".1" for the description, because a row is
-     authored as a [term, description] pair. The gallery is the exception: its
-     tiles are placeholders with no copy, and the note beneath them is the same
-     sentence on every route, so it comes from CONTENT.gallery rather than from
-     the block. -->
+     authored as a [term, description] pair. The gallery works the same way one
+     level deeper still: once a route has photos, each one carries its own
+     path (im.p), so its caption is edited at "{{ im.p }}.1" just like a list
+     row's term or description. Only the placeholder grid shown before any
+     photo exists is the exception — its tiles are placeholders with no copy,
+     and the note beneath them is the same sentence on every route, so THAT
+     comes from CONTENT.gallery rather than from the block. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
   <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
     <div data-list="{{ blocksPath }}">
@@ -391,7 +394,8 @@
                   { "p": "..." }                    paragraph
                   { "h": "..." }                    sub-heading
                   { "list": [[term, desc], ...] }   bulleted term cards
-                  { "gallery": [] }               placeholder photo grid
+                  { "gallery": [] }                 placeholder photo grid
+                  { "gallery": [[src, caption], ...] }  populated photo grid, once photos are added
                   { "note": "...", "sub": "..." }   highlighted panel
 
   On content: many pages are written from the general Montessori material and

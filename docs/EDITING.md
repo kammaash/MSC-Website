@@ -13,7 +13,8 @@
 2. Click any outlined text to change it. Enter finishes, Escape cancels.
 3. **News:** open a school page and use "+ Add" under News. **Photos:** open Media → Photos, upload once, then click or drag the photo onto an outlined photo area. **Videos:** upload in YouTube Studio as **Unlisted**, then open Media → Videos → Add YouTube video and paste its Share link. The editor verifies the video before adding it.
 4. ↑ ↓ reorder items; ✕ deletes (asks first) — except on a widget's very last item,
-   where ✕ is disabled so the list can't end up empty (News is the exception; see below).
+   where ✕ is disabled so the list can't end up empty (unless the widget has a designed
+   empty state; see below).
 5. Press **Publish**. The live site updates in about a minute. **Discard** throws away unsaved changes.
 
 ### Adding, reordering and removing sections, rows and photos
@@ -48,9 +49,12 @@ category should never be left with literally nothing to show. To empty a photo g
 completely, go up a level instead: delete the whole gallery *section* (it has its own
 ✕), and add a fresh one whenever you have photos again.
 
-**News is the one exception.** A school really might have no announcements some weeks,
-so its ✕ keeps working even on the last post — clearing News back to its designed "no
-announcements yet" message is allowed.
+**The rule: does the page have a "nothing here yet" message for it?** News and the
+Vidyanagar gallery both do — a school really might have no announcements some weeks,
+or no gallery photos yet, and each page already shows a designed line for that ("no
+announcements yet", "no photos yet"). So their ✕ keeps working even on the last item,
+clearing the widget back to that message. Every other widget has no such line designed
+for it, so it always keeps at least one item.
 
 ### Some text is shared — one edit changes it everywhere
 A few things are stored once and reused, so they can never drift apart or contradict each other:

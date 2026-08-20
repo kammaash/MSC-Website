@@ -53,6 +53,16 @@ for (const f of SUBPAGES) {
 // a declared-key typo: without it Add works locally and Publish 400s.
 const { requireCollection } = require("../lib/patch.js");
 const templates = require("../collections.json");
+// collections-client.test.js's EXPECTED_BINDINGS table only covers LITERAL data-list
+// strings (the ones a plain grep over the markup can find) and says so: interpolated
+// ({{ }}) bindings — every blocks/list/gallery path on a subpage route, since the
+// path is built from the route's own key — are "covered instead by the route-walking
+// tests in page-list-invariants.test.js". This loop is that coverage: for every path
+// this file already instantiates from real CONTENT, also classify it and check the
+// chrome it would actually get. As a side effect, since `label`/`blocksPath` are built
+// from the SAME route keys collections.js's regexes anchor on, a route slug containing
+// a "." (which would desync the two) fails here instead of only mattering in theory.
+const C = require("../client/collections.js");
 
 for (const f of SUBPAGES) {
   test(`${f}: every instantiated blocks/list/gallery path resolves AND is a declared collection`, () => {
@@ -60,6 +70,9 @@ for (const f of SUBPAGES) {
     let lists = 0;
     for (const [label, blocksPath] of routes(data)) {
       assert.ok(requireCollection(templates, blocksPath), blocksPath + " must be declared");
+      assert.equal(C.family(blocksPath), "blocks", blocksPath + " must classify as blocks");
+      assert.equal(C.addLabel(blocksPath), "+ Add section", blocksPath);
+      assert.equal(C.floorFor(blocksPath), 1, blocksPath);
       const blocks = getPath(data, blocksPath);
       assert.ok(Array.isArray(blocks), label + ": " + blocksPath);
       blocks.forEach((b, i) => {
@@ -69,6 +82,11 @@ for (const f of SUBPAGES) {
             const p = blocksPath + "." + i + "." + kindKey;
             assert.ok(Array.isArray(getPath(data, p)), p + " must be an array");
             assert.ok(requireCollection(templates, p), p + " must be declared");
+            const wantFamily = kindKey === "list" ? "rows" : "blockGallery";
+            const wantLabel = kindKey === "list" ? "+ Add row" : "+ Add photo";
+            assert.equal(C.family(p), wantFamily, p + " must classify as " + wantFamily);
+            assert.equal(C.addLabel(p), wantLabel, p);
+            assert.equal(C.floorFor(p), 1, p);
           }
         }
       });

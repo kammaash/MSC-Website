@@ -125,9 +125,23 @@
     'body.ed-editing .ed-tile{cursor:grab!important}' +
     'body.ed-editing .ed-tile:active{cursor:grabbing!important}' +
     '.ed-hover{outline:2px dashed #e8541b !important;outline-offset:2px;cursor:text}' +
+    // justify-self:start only ever affects a grid ITEM's own sizing, so it's inert
+    // everywhere .ed-add sits as a flex/block sibling — but on the two subpages
+    // listEl.parentElement is a `grid-template-columns:1fr` container, so without it
+    // the button stretches to the full column width (measured 756px vs 99px
+    // everywhere else) instead of hugging its own text like every other Add button.
     '.ed-add{font:600 13px sans-serif;margin:10px 0;padding:8px 16px;border:2px dashed #e8541b;border-radius:8px;' +
-    'background:#fff;color:#e8541b;cursor:pointer}' +
+    'background:#fff;color:#e8541b;cursor:pointer;justify-self:start}' +
     '.ed-menu{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:9999}' +
+    // A section block (family "blocks") nests its own rows/photos, each with their
+    // OWN top-right menu one level down. On a subpage the block root and its first
+    // row both start position:relative at the same top-right corner (the rows
+    // container's top margin collapses through — position:relative alone doesn't
+    // create a block formatting context), so the section's menu painted directly on
+    // top of the row's, and the row's ↑ ↓ ✕ were entirely unreachable. Top-left
+    // rather than a negative top offset: a negative offset would instead overlap the
+    // page's section heading above the very first block.
+    '.ed-menu.ed-menu-block{right:auto;left:6px}' +
     '.ed-menu button{font:12px sans-serif;width:26px;height:26px;border-radius:6px;border:0;cursor:pointer;' +
     'background:#26201d;color:#fff}' +
     // ✕ matches the media overlay's remove action (#a51915 fill, white glyph) so the
@@ -904,6 +918,13 @@
         // A gallery photo is also a media slot, whose hover actions own the
         // top-right corner — shift this menu top-left so the two never overlap.
         if (it.hasAttribute("data-media-slot")) menu.classList.add("ed-menu-slot");
+        // A "blocks" item nests its own [data-list] of rows/photos, whose first
+        // item's menu sits at this same top-right corner (see .ed-menu-block above)
+        // — shift the SECTION's menu top-left so it never paints over the row's.
+        // Keyed on the family, not on "does this item happen to contain a nested
+        // list": every section menu lands in the same place, not only the ones
+        // whose first row would otherwise collide.
+        if (window.EditorCollections.family(listPath) === "blocks") menu.classList.add("ed-menu-block");
         it.appendChild(menu);
       });
       const add = document.createElement("button");
