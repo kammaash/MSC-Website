@@ -111,6 +111,7 @@ const EXPECTED_BINDINGS = {
   "shared:news.acamp": "news",
   "shared:news.vidyanagar": "news",
   "shared:galleries.vidyanagar": "sharedGallery",
+  "galleryGroups": "galleryGroups",
 };
 test("every literal data-list binding in the pages is classified by an explicit rule", () => {
   const found = new Set();

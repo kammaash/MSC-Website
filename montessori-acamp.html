@@ -528,15 +528,16 @@
       </div>
       <span data-edit="gallerySection.hint" style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">{{ gallerySection.hint }}</span>
     </div>
+    <div data-list="galleryGroups">
     <sc-for list="{{ galleryGroups }}" as="grp" hint-placeholder-count="2">
-      <div style="margin-top:42px">
+      <div style="margin-top:42px;position:relative" data-item="">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
           <span style="width:8px;height:8px;border-radius:50%;background:#e8541b;flex:none"></span>
           <h3 data-edit="{{ grp.p }}.label" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px;color:#a51915;margin:0">{{ grp.label }}</h3>
         </div>
         <div class="g g-4" data-list="{{ grp.p }}.photos">
           <sc-for list="{{ grp.photos }}" as="ph" hint-placeholder-count="4">
-            <div tabindex="0" class="flip" data-media-slot="{{ ph.p }}.src" data-media-kind="image" style="aspect-ratio:1;border-radius:12px">
+            <div tabindex="0" class="flip" data-item="" data-media-slot="{{ ph.p }}.src" data-media-kind="image" style="aspect-ratio:1;border-radius:12px">
               <div class="flip-in">
                 <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ ph.src }}" alt="{{ ph.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
                 <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;align-items:flex-start;justify-content:center;gap:8px">
@@ -549,6 +550,7 @@
         </div>
       </div>
     </sc-for>
+    </div>
   </div>
 </section>
 

@@ -43,3 +43,56 @@ for (const f of SUBPAGES) {
     assert.ok(galleries > 0, f + ": expected at least one gallery block");
   });
 }
+
+// ---- every list the pages render is declared, resolvable, and stamped ----
+// check-paths.js skips interpolated {{ }} paths by construction, so a wrong binding
+// inside an sc-for is invisible to it. This pass instantiates every list path each
+// route would render — the same arithmetic as the normalisers — and proves each one
+// (a) resolves to an array in CONTENT and (b) is accepted by the server's
+// requireCollection against the real collections.json. (b) is the half that catches
+// a declared-key typo: without it Add works locally and Publish 400s.
+const { requireCollection } = require("../lib/patch.js");
+const templates = require("../collections.json");
+
+for (const f of SUBPAGES) {
+  test(`${f}: every instantiated blocks/list/gallery path resolves AND is a declared collection`, () => {
+    const data = extractContent(read(f)).data;
+    let lists = 0;
+    for (const [label, blocksPath] of routes(data)) {
+      assert.ok(requireCollection(templates, blocksPath), blocksPath + " must be declared");
+      const blocks = getPath(data, blocksPath);
+      assert.ok(Array.isArray(blocks), label + ": " + blocksPath);
+      blocks.forEach((b, i) => {
+        for (const kindKey of ["list", "gallery"]) {
+          if (kindKey in b) {
+            lists++;
+            const p = blocksPath + "." + i + "." + kindKey;
+            assert.ok(Array.isArray(getPath(data, p)), p + " must be an array");
+            assert.ok(requireCollection(templates, p), p + " must be declared");
+          }
+        }
+      });
+    }
+    assert.ok(lists > 0, f + ": expected at least one nested list");
+  });
+
+  test(`${f}: the markup stamps the containers and items the chrome hangs on`, () => {
+    const src = read(f);
+    assert.match(src, /data-list="\{\{ blocksPath \}\}"/, "blocks wrapper");
+    assert.match(src, /<div key="\{\{ b\.key \}\}" data-item="" style="position:relative">/, "block item root");
+    assert.match(src, /data-list="\{\{ b\.p \}\}\.list"/, "rows container");
+    // BOTH gallery branches carry the list, so a school with zero photos still gets
+    // "+ Add photo" — the state all eleven Vidyanagar grids ship in.
+    assert.equal((src.match(/data-list="\{\{ b\.p \}\}\.gallery"/g) || []).length, 2, "both gallery grids");
+    assert.match(src, /blocksPath: base \+ "\.blocks"/, "normaliser exposes blocksPath");
+  });
+}
+
+test("montessori-acamp.html: gallery categories are an addable list with item chrome", () => {
+  const src = read("montessori-acamp.html");
+  assert.match(src, /data-list="galleryGroups"/);
+  // The group root and the photo tile each carry data-item; the tile is also a media
+  // slot, which is why decorate() shifts its menu top-left (ed-menu-slot).
+  assert.match(src, /<div style="margin-top:42px;position:relative" data-item="">/);
+  assert.match(src, /class="flip" data-item="" data-media-slot="\{\{ ph\.p \}\}\.src"/);
+});
