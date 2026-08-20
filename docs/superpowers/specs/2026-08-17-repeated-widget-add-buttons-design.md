@@ -1,7 +1,24 @@
 # Add buttons for repeated widgets
 
-Status: design, awaiting approval
+Status: implemented (2026-08-20)
 Base commit: `472db02` on `youtube-media-slots`
+Plan: `docs/superpowers/plans/2026-08-20-repeated-widget-add-buttons.md`
+
+> **Implementation note.** Shipped with two deliberate departures from this document,
+> both recorded here so the code and the spec do not disagree:
+>
+> - **`fallback.blocks` is declared too.** Both subpage normalisers compute
+>   `base = page ? "pages." + route : "fallback"`, so the fallback route renders the same
+>   blocks container. Without its own declarations, Add on that route would 400 at Publish.
+> - **`shared:galleries.*` ships with a floor of 0, not 1** (§7 asked for 1).
+>   `montessori-vidyanagar.html` renders a designed `gallerySection.empty` line at zero
+>   photos, exactly like `newsSection.empty` — so the argument §7 uses to exempt news
+>   applies here unchanged, and a floor of 1 would make that line permanently unreachable.
+>
+> One defect predating this work was found by render verification and fixed alongside it:
+> both gallery `sc-if` branches tested the same non-negated `b.hasImages`, so a populated
+> grid rendered *both* branches and an empty grid rendered *neither*. The placeholder
+> branch now tests a `noImages` companion flag.
 
 ## The problem
 
