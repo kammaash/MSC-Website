@@ -191,7 +191,7 @@
      serve every route, since the {{ }} language has no switch and cannot call
      a function to pick a renderer.
 
-     The five block types, all produced by the normaliser in renderVals():
+     The eight block types, all produced by the normaliser in renderVals():
        isHeading  a sub-heading within the page
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
@@ -200,7 +200,10 @@
                   placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
-     Adding a sixth type means adding a flag in the normaliser and an sc-if
+       isPerson   a staff portrait with a name and title
+       isEmbed    an iframe embed (a YouTube video, typically)
+       isLink     an outbound link card with a label and sub-line
+     Adding a ninth type means adding a flag in the normaliser and an sc-if
      here.
 
      Every block carries `p`, its own CONTENT path (e.g.
@@ -265,14 +268,6 @@
               <div data-edit="{{ b.p }}.person.name" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#a51915">{{ b.person.name }}</div>
               <div data-edit="{{ b.p }}.person.title" style="font-size:14px;color:#c2410f;font-weight:600;margin-top:3px">{{ b.person.title }}</div>
             </div>
-          </div>
-        </sc-if>
-        <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
-          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
-            <video controls playsinline preload="metadata" poster="{{ b.video.poster }}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
-              <source src="{{ b.video.src }}" type="video/mp4">
-              <span data-edit="video.fallback">{{ video.fallback }}</span> <a href="{{ b.video.src }}" data-edit="video.fallbackLink" style="color:#fff">{{ video.fallbackLink }}</a>.
-            </video>
           </div>
         </sc-if>
         <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
@@ -349,23 +344,21 @@
   Keep the block strict JSON: double-quoted keys AND values, no comments and
   no trailing commas inside the markers, or the editor cannot parse it.
 
-  breadcrumb / gallery / video / cta / footer
+  breadcrumb / gallery / cta / footer
             the fixed chrome that surrounds every route: the first breadcrumb
-            crumb, the note under the placeholder photo grid, the text a
-            browser too old for <video> falls back to, the two buttons at the
-            foot of the body, and the footer's own links. It is the same on all
-            thirty-odd routes, so it sits beside `pages` rather than being
-            repeated inside each entry. Anything that also appears on the
-            branch page or the landing page — the school's names, the tagline,
-            the "call us" prompt, the menu labels — is NOT here: it is read
-            from content.js instead, so renaming the school is one edit for the
-            whole site. `cta.back` is only the prefix; the section name after
-            it is current.parent, which changes per route. `footer.logoAlt` is
-            an alt attribute: the editor cannot click one, so it is here to be
-            single-sourced and hand-edited rather than to be clicked. The top
-            bar's logo alt has no key because it is already the school's
-            shared name. (The `video` group has no twin in
-            vidyanagar-subpage.html, which has no video blocks.)
+            crumb, the note under the placeholder photo grid, the two buttons
+            at the foot of the body, and the footer's own links. It is the
+            same on all thirty-odd routes, so it sits beside `pages` rather
+            than being repeated inside each entry. Anything that also appears
+            on the branch page or the landing page — the school's names, the
+            tagline, the "call us" prompt, the menu labels — is NOT here: it
+            is read from content.js instead, so renaming the school is one
+            edit for the whole site. `cta.back` is only the prefix; the
+            section name after it is current.parent, which changes per route.
+            `footer.logoAlt` is an alt attribute: the editor cannot click one,
+            so it is here to be single-sourced and hand-edited rather than to
+            be clicked. The top bar's logo alt has no key because it is
+            already the school's shared name.
 
   pages     one entry per route. A key here is exactly the hash that reaches
             it, so "library" is served at acamp-subpage.html#library and must
@@ -407,10 +400,6 @@ const CONTENT = {
   },
   "gallery": {
     "note": "photos coming soon — share your images and we'll add them"
-  },
-  "video": {
-    "fallback": "Your browser doesn't support embedded video.",
-    "fallbackLink": "Watch/download it directly"
   },
   "cta": {
     "enquire": "Enquire about admission →",
@@ -1550,7 +1539,6 @@ class Component extends DCLogic {
       }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, p, text: b.note, sub: b.sub || "" });
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, p, person: b.person });
-      else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, p, video: b.video });
       else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, p, embed: b.embed });
       else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, p, link: b.link });
     });
@@ -1569,7 +1557,6 @@ class Component extends DCLogic {
       // The fixed chrome around the routed body.
       breadcrumb: CONTENT.breadcrumb,
       gallery: CONTENT.gallery,
-      video: CONTENT.video,
       cta: CONTENT.cta,
       footer: CONTENT.footer,
       // Only the four fields the banner and CTA display, plus the CONTENT
