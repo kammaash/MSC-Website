@@ -169,3 +169,56 @@ test("the numeric-substitution behaviour is a strict subset: galleryGroups.*.pho
   assert.ok(requireCollection(templates, "galleryGroups.0.photos"));
   assert.throws(() => requireCollection(templates, "galleryGroups.0.nope"), /Unknown collection/);
 });
+
+// ---- the real declarations end-to-end through applyPatch ----
+const subpageFix = () => ({
+  pages: { library: { blocks: [
+    { p: "text" },
+    { list: [["a", "b"]] },
+    { gallery: [] },
+  ] } },
+  fallback: { blocks: [{ p: "text" }] },
+});
+
+test("every block kind the chooser offers is addable through the real templates", () => {
+  const items = [
+    { p: "Write this section here." },
+    { h: "New heading" },
+    { note: "Something to highlight", sub: "A supporting line." },
+    { list: [["New item", "Describe it here."]] },
+    { gallery: [["https://res.cloudinary.com/demo/image/upload/x.jpg", "New photo"]] },
+    { person: { src: "https://res.cloudinary.com/demo/image/upload/x.jpg", name: "Name", title: "Role" } },
+    { embed: { src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "T" } },
+  ];
+  for (const item of items) {
+    const d = applyPatch(subpageFix(), { ops: [{ type: "add", path: "pages.library.blocks", item }] }, templates);
+    assert.equal(d.pages.library.blocks.length, 4);
+  }
+  // link is deliberately NOT addable: its href cannot be edited in the editor.
+  assert.throws(() => applyPatch(subpageFix(), {
+    ops: [{ type: "add", path: "pages.library.blocks", item: { link: { href: "x", label: "L", sub: "S" } } }],
+  }, templates), /one of/);
+});
+
+test("rows and gallery photos are addable on any route through one declaration", () => {
+  let d = applyPatch(subpageFix(), { ops: [{ type: "add", path: "pages.library.blocks.1.list", item: ["T", "D"] }] }, templates);
+  assert.equal(d.pages.library.blocks[1].list.length, 2);
+  d = applyPatch(subpageFix(), { ops: [{ type: "add", path: "pages.library.blocks.2.gallery", item: ["u.jpg", "C"] }] }, templates);
+  assert.equal(d.pages.library.blocks[2].gallery.length, 1);
+});
+
+test("the fallback route is addable and its template cannot drift from pages.*.blocks", () => {
+  assert.deepEqual(templates["fallback.blocks"], templates["pages.*.blocks"]);
+  assert.deepEqual(templates["fallback.blocks.*.list"], templates["pages.*.blocks.*.list"]);
+  assert.deepEqual(templates["fallback.blocks.*.gallery"], templates["pages.*.blocks.*.gallery"]);
+  const d = applyPatch(subpageFix(), { ops: [{ type: "add", path: "fallback.blocks", item: { p: "x" } }] }, templates);
+  assert.equal(d.fallback.blocks.length, 2);
+});
+
+test("a new gallery category arrives with exactly one photo, satisfying the floor from birth", () => {
+  const d = applyPatch({ galleryGroups: [] }, { ops: [{ type: "add", path: "galleryGroups",
+    item: { label: "New category", photos: [{ src: "u.jpg", caption: "" }] } }] }, templates);
+  assert.equal(d.galleryGroups[0].photos.length, 1);
+  assert.throws(() => applyPatch({ galleryGroups: [] }, { ops: [{ type: "add", path: "galleryGroups",
+    item: { label: "New category", photos: [] } }] }, templates), /exactly 1/);
+});

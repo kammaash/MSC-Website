@@ -3,5 +3,28 @@
   "news.vidyanagar": { "date": "", "title": "", "body": "" },
   "galleries.acamp": { "kind": "image", "id": "", "caption": "" },
   "galleries.vidyanagar": { "kind": "image", "id": "", "caption": "" },
-  "galleryGroups.*.photos": { "src": "", "caption": "" }
+  "galleryGroups": { "label": "", "photos": [{ "src": "", "caption": "" }] },
+  "galleryGroups.*.photos": { "src": "", "caption": "" },
+  "pages.*.blocks": { "oneOf": [
+    { "p": "" },
+    { "h": "" },
+    { "note": "", "sub": "" },
+    { "list": [["", ""]] },
+    { "gallery": [["", ""]] },
+    { "person": { "src": "", "name": "", "title": "" } },
+    { "embed": { "src": "", "title": "" } }
+  ] },
+  "pages.*.blocks.*.list": ["", ""],
+  "pages.*.blocks.*.gallery": ["", ""],
+  "fallback.blocks": { "oneOf": [
+    { "p": "" },
+    { "h": "" },
+    { "note": "", "sub": "" },
+    { "list": [["", ""]] },
+    { "gallery": [["", ""]] },
+    { "person": { "src": "", "name": "", "title": "" } },
+    { "embed": { "src": "", "title": "" } }
+  ] },
+  "fallback.blocks.*.list": ["", ""],
+  "fallback.blocks.*.gallery": ["", ""]
 }
