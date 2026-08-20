@@ -573,3 +573,39 @@ test("the blur handler validates by PATH, so emptying a section's text is refuse
   assert.ok(blurBlock.indexOf("rejectSet(path, value)") < blurBlock.indexOf("applyLocal(path, value)"),
     "validation must precede applyLocal");
 });
+
+// ---- empty fields advertise themselves (Task: empty-text block trap, part 2) ----
+// An emptied [data-edit] has no text node, so there is no glyph on screen to aim at and
+// no way back into the field. Same failure the media slots already solve by marking an
+// empty slot (markEmpties in media-slots.js); same treatment here, by class rather than
+// by CSS :empty, since whether an emptied node leaves a zero-length text node behind is
+// a renderer detail we should not depend on.
+test("decorate marks empty editable fields, and clears the marks when edit mode ends", () => {
+  const dec = extractBlockAfter(SRC, "function decorate(");
+  assert.match(dec, /ed-empty-text/);
+  const mark = extractBlockAfter(SRC, "function markEmptyFields(");
+  assert.match(mark, /\[data-edit\]/);
+  assert.match(mark, /textContent\.trim\(\) === ""/);
+  assert.match(mark, /classList\.add\("ed-empty-text"\)/);
+  // The marks must be stripped in the same pass that strips the chrome, BEFORE the
+  // !editing early return — otherwise Exit would leave placeholder text sitting on a
+  // page that is pretending to be the public site.
+  const clearIdx = dec.indexOf('classList.remove("ed-empty-text")');
+  const bailIdx = dec.indexOf("if (!editing) return");
+  assert.ok(clearIdx !== -1 && clearIdx < bailIdx,
+    "empty marks must be cleared before decorate's !editing early return");
+});
+
+test("opening a field drops its empty mark immediately, so the placeholder cannot sit under the caret", () => {
+  // decorate() deliberately bails while a field is focused, so it cannot be what
+  // removes the mark once the user starts typing — the click handler must.
+  const click = extractBlockAfter(SRC, "el.__edOrig = el.textContent.trim()");
+  assert.match(click, /classList\.remove\("ed-empty-text"\)/);
+});
+
+test("the empty-field placeholder is edit-mode-only and cannot be mistaken for content", () => {
+  // Scoped to body.ed-editing so the published page never shows it, and delivered via
+  // ::before so it is not part of textContent and can never be saved as the value.
+  assert.match(SRC, /body\.ed-editing \[data-edit\]\.ed-empty-text::before\{content:/);
+  assert.match(SRC, /body\.ed-editing \[data-edit\]\.ed-empty-text\{/);
+});

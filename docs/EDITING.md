@@ -57,6 +57,28 @@ for the gallery. So their ✕ keeps working even on the last item, clearing the 
 back to that message. Every other widget has no such line designed for it, so it always
 keeps at least one item.
 
+### Clearing a section's text won't delete it — ✕ does that
+Delete all the words out of a **Paragraph**, a **Heading** or a **Note**'s headline and
+the editor refuses the change, puts the old words back, and reminds you that ✕ is how
+you remove a section. This is not fussiness: a section with no words in it would vanish
+from the page completely — not blank, *gone* — and with nothing left on screen there
+would be no ✕ to click and nothing to type into. Getting it back would mean asking
+someone to edit the page's file by hand.
+
+So: to reword a section, type over it. To get rid of it, use ✕.
+
+Everything else can be emptied freely — a note's supporting line, a row's description, a
+photo's caption. Those live inside a section that stays put, so clearing one leaves a
+blank you can still find and fill in later.
+
+### Empty spaces tell you they're empty
+Any blank piece of text shows a dashed outline and the words *click to write…* while you
+are editing. That includes blanks that arrive that way — a photo you just added has no
+caption yet, so its caption space says *click to write…* until you give it one.
+
+It is only a prompt, never real text: it disappears the moment you click, it is never
+saved, and nobody visiting the site ever sees it.
+
 ### Some text is shared — one edit changes it everywhere
 A few things are stored once and reused, so they can never drift apart or contradict each other:
 

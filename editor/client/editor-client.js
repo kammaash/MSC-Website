@@ -125,6 +125,13 @@
     'body.ed-editing .ed-tile{cursor:grab!important}' +
     'body.ed-editing .ed-tile:active{cursor:grabbing!important}' +
     '.ed-hover{outline:2px dashed #e8541b !important;outline-offset:2px;cursor:text}' +
+    // An empty editable field, marked by markEmptyFields(). The label comes from
+    // ::before so it is not part of textContent and can never be committed as the
+    // field's value; scoping to body.ed-editing keeps it off the published page.
+    // The label is also what gives the element a line box, which is what makes an
+    // otherwise zero-sized field clickable again.
+    'body.ed-editing [data-edit].ed-empty-text{outline:2px dashed #e8541b;outline-offset:2px}' +
+    'body.ed-editing [data-edit].ed-empty-text::before{content:"click to write…";opacity:.55;font-style:italic}' +
     // justify-self:start only ever affects a grid ITEM's own sizing, so it's inert
     // everywhere .ed-add sits as a flex/block sibling — but on the two subpages
     // listEl.parentElement is a `grid-template-columns:1fr` container, so without it
@@ -195,6 +202,10 @@
     // commit would treat every edit as "changed" (harmless) but comparing two untrimmed
     // values would let the padding itself compound on every round trip.
     el.__edOrig = el.textContent.trim();
+    // Drop the empty-field placeholder before the caret lands, not on the next
+    // decorate() — decorate deliberately bails while a field is focused, so it would
+    // leave "click to write…" sitting in front of whatever the user types.
+    el.classList.remove("ed-empty-text");
     try { el.contentEditable = "plaintext-only"; } catch { el.contentEditable = "true"; }
     el.focus();
   }, true);
@@ -891,6 +902,28 @@
     else mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }); }, "ed-del");
     return m;
   }
+  // An emptied [data-edit] renders no text node, so there is no glyph on screen to aim
+  // at: the field becomes invisible AND unclickable, and a collaborator who clears one
+  // by accident has no way back into it. That is the same "nothing to aim at" problem
+  // the media slots solve by marking an empty slot (markEmpties in media-slots.js), so
+  // it gets the same treatment — a class, and edit-mode-only CSS that gives the element
+  // a visible, clickable box.
+  //
+  // By class rather than by CSS :empty on purpose: whether clearing a field leaves a
+  // zero-length text node behind is a renderer detail, and :empty's answer changes
+  // depending on it. textContent.trim() gives the same answer either way.
+  //
+  // NOTE: this makes decorate() touch nodes outside .ed-add/.ed-menu for the first time.
+  // It is still safe to run at any moment because the class is cosmetic — it is never
+  // read back, never part of textContent, and never reaches CONTENT. The one case that
+  // WOULD be wrong, marking the field the user is mid-way through clearing, cannot
+  // happen: decorate() bails while a data-edit field is focused (see below), and the
+  // click handler drops the mark the moment a field is opened.
+  function markEmptyFields() {
+    document.querySelectorAll("[data-edit]").forEach((el) => {
+      if (el.textContent.trim() === "") el.classList.add("ed-empty-text");
+    });
+  }
   function decorate() {
     // Bail out while a data-edit field is genuinely being typed into. This wouldn't by
     // itself corrupt that field's text (decorate only ever touches .ed-add/.ed-menu
@@ -908,7 +941,9 @@
     const active = document.activeElement;
     if (active instanceof HTMLElement && isEditableNow(active)) return;
     document.querySelectorAll(".ed-add,.ed-menu").forEach((n) => n.remove()); // rebuild fresh — never stale indices
+    document.querySelectorAll(".ed-empty-text").forEach((n) => n.classList.remove("ed-empty-text"));
     if (!editing) return;
+    markEmptyFields();
     document.querySelectorAll("[data-list]").forEach((listEl) => {
       const listPath = listEl.getAttribute("data-list");
       // Lists nest now (a section block CONTAINS its rows/photos), and :scope
