@@ -156,6 +156,15 @@ test("an exact declaration beats a wildcard one", () => {
   assert.equal(requireCollection(t, "a.z.c"), "wild");
 });
 
+test("among wildcard keys that both match, the one with fewer wildcards wins", () => {
+  const t = { "a.*.*": "two-wild", "a.*.c": "one-wild" };
+  // Both keys match "a.b.c" segment-wise; "a.*.c" has fewer *s.
+  assert.equal(requireCollection(t, "a.b.c"), "one-wild");
+  // Declaration order in the object must not matter.
+  const reversed = { "a.*.c": "one-wild", "a.*.*": "two-wild" };
+  assert.equal(requireCollection(reversed, "a.b.c"), "one-wild");
+});
+
 test("the numeric-substitution behaviour is a strict subset: galleryGroups.*.photos still matches", () => {
   assert.ok(requireCollection(templates, "galleryGroups.0.photos"));
   assert.throws(() => requireCollection(templates, "galleryGroups.0.nope"), /Unknown collection/);
