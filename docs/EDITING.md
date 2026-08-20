@@ -51,10 +51,11 @@ completely, go up a level instead: delete the whole gallery *section* (it has it
 
 **The rule: does the page have a "nothing here yet" message for it?** News and the
 Vidyanagar gallery both do — a school really might have no announcements some weeks,
-or no gallery photos yet, and each page already shows a designed line for that ("no
-announcements yet", "no photos yet"). So their ✕ keeps working even on the last item,
-clearing the widget back to that message. Every other widget has no such line designed
-for it, so it always keeps at least one item.
+or no gallery photos yet, and each page already shows a designed line for that:
+"News and announcements coming soon." for News, and "Photos and videos coming soon."
+for the gallery. So their ✕ keeps working even on the last item, clearing the widget
+back to that message. Every other widget has no such line designed for it, so it always
+keeps at least one item.
 
 ### Some text is shared — one edit changes it everywhere
 A few things are stored once and reused, so they can never drift apart or contradict each other:
