@@ -135,3 +135,28 @@ test("leaf rule: the galleries kind check survives the validateItem replacement"
   assert.throws(() => validateShape({ kind: "iframe", id: "x", caption: "" },
     templates["galleries.acamp"], ""), /kind must be image or video/);
 });
+
+// ---- requireCollection: segment-wise wildcards (Task: repeated-widget add buttons) ----
+const { requireCollection } = require("../lib/patch.js");
+
+test("wildcards in the DECLARED key match any one segment; the shape of the path stays fixed", () => {
+  const t = { "pages.*.blocks.*.list": ["", ""] };
+  assert.deepEqual(requireCollection(t, "pages.awards.blocks.1.list"), ["", ""]);
+  assert.deepEqual(requireCollection(t, "pages.events-news.blocks.0.list"), ["", ""]);
+  // Wrong number of segments never matches.
+  assert.throws(() => requireCollection(t, "pages.awards.blocks"), /Unknown collection/);
+  assert.throws(() => requireCollection(t, "pages.awards.blocks.1.list.0"), /Unknown collection/);
+  // The literal segments stay literal.
+  assert.throws(() => requireCollection(t, "nav.awards.blocks.1.list"), /Unknown collection/);
+});
+
+test("an exact declaration beats a wildcard one", () => {
+  const t = { "a.*.c": "wild", "a.b.c": "exact" };
+  assert.equal(requireCollection(t, "a.b.c"), "exact");
+  assert.equal(requireCollection(t, "a.z.c"), "wild");
+});
+
+test("the numeric-substitution behaviour is a strict subset: galleryGroups.*.photos still matches", () => {
+  assert.ok(requireCollection(templates, "galleryGroups.0.photos"));
+  assert.throws(() => requireCollection(templates, "galleryGroups.0.nope"), /Unknown collection/);
+});

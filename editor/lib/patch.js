@@ -85,16 +85,28 @@ function validateShape(value, template, fieldPath) {
   throw new Error("Bad collection template at " + at);
 }
 
+// True when `declared` (a collections.json key, where `*` matches any ONE segment)
+// covers `path`. Segment-wise, same length only — the SHAPE of a path is fixed by
+// its declaration; only the wildcarded segments (route names, indices) are free.
+function collectionKeyMatches(declared, path) {
+  const d = declared.split(".");
+  const p = path.split(".");
+  if (d.length !== p.length) return false;
+  return d.every((seg, i) => seg === "*" || seg === p[i]);
+}
+
+// Resolves the template for a requested collection path. An exact key always wins,
+// so a specific declaration can override a general one; among wildcard keys the one
+// with the fewest wildcards wins (deterministic, and "most specific" by any reading).
+// This does not weaken the allowlist: addItem still resolves the path through
+// getList, so a fabricated route fails there even if its shape matches a wildcard.
 function requireCollection(templates, path) {
-  let t = templates[path];
-  if (!t) {
-    // Nested page-authored collections use numeric indices at runtime, while their
-    // safe item shape is declared once with `*` in collections.json.
-    const wildcard = path.split(".").map((part) => /^\d+$/.test(part) ? "*" : part).join(".");
-    t = templates[wildcard];
-  }
-  if (!t) throw new Error("Unknown collection: " + path);
-  return t;
+  if (Object.prototype.hasOwnProperty.call(templates, path)) return templates[path];
+  const keys = Object.keys(templates)
+    .filter((k) => k.includes("*") && collectionKeyMatches(k, path))
+    .sort((a, b) => a.split("*").length - b.split("*").length);
+  if (keys.length === 0) throw new Error("Unknown collection: " + path);
+  return templates[keys[0]];
 }
 
 function applyPatch(data, patch, templates) {
