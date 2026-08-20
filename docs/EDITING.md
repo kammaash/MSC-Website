@@ -12,8 +12,45 @@
 1. In Terminal, from the MSC-Website folder: `npm run edit` — your browser opens the site in editing mode.
 2. Click any outlined text to change it. Enter finishes, Escape cancels.
 3. **News:** open a school page and use "+ Add" under News. **Photos:** open Media → Photos, upload once, then click or drag the photo onto an outlined photo area. **Videos:** upload in YouTube Studio as **Unlisted**, then open Media → Videos → Add YouTube video and paste its Share link. The editor verifies the video before adding it.
-4. ↑ ↓ reorder items; ✕ deletes (asks first).
+4. ↑ ↓ reorder items; ✕ deletes (asks first) — except on a widget's very last item,
+   where ✕ is disabled so the list can't end up empty (News is the exception; see below).
 5. Press **Publish**. The live site updates in about a minute. **Discard** throws away unsaved changes.
+
+### Adding, reordering and removing sections, rows and photos
+Every repeating thing on the two subpages — the content sections themselves, the rows
+inside a list, the photos in a grid — and the gallery categories on the A-Camp page
+carry the same **+ Add**, **↑**, **↓**, **✕** controls the news cards have always had.
+
+**+ Add section** opens a chooser of seven kinds:
+- **Paragraph**, **Heading**, **Note** — plain text, added with placeholder copy you
+  click and overwrite.
+- **List** — a row of bold term plus description; each row is separately editable, and
+  its own **+ Add row** button underneath adds more.
+- **Photo grid**, **Person** and **Video** all open the media library first — pick a
+  photo, a portrait, or a video, and the block arrives already filled in. Cancel the
+  picker and nothing gets added.
+  - **Photo grid** arrives holding the photo you picked; **+ Add photo** under the grid
+    adds more.
+  - **Person** arrives with the portrait already in place; click the name and role
+    afterward to fill them in.
+  - **Video** opens the media library's Videos tab and adds **two** blocks together — a
+    heading seeded from the video's title, and the player underneath it — because
+    that's how the video pages are built. If you ever remove one, remove both.
+
+One limitation worth knowing: a portrait, a grid photo or a video added this way has no
+outline to click for swapping it later, unlike the photo areas that were already on the
+page. To change one, delete the block and add a fresh one instead.
+
+**Deleting the last one.** Delete rows one at a time and ✕ eventually runs out: on the
+last remaining item it turns grey, with a tooltip explaining why — "At least one must
+remain — this is the last one." That's deliberate — a list, a photo grid or a gallery
+category should never be left with literally nothing to show. To empty a photo grid
+completely, go up a level instead: delete the whole gallery *section* (it has its own
+✕), and add a fresh one whenever you have photos again.
+
+**News is the one exception.** A school really might have no announcements some weeks,
+so its ✕ keeps working even on the last post — clearing News back to its designed "no
+announcements yet" message is allowed.
 
 ### Some text is shared — one edit changes it everywhere
 A few things are stored once and reused, so they can never drift apart or contradict each other:
