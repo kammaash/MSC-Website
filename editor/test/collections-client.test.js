@@ -7,9 +7,14 @@
 // whole Publish 400s — the feature's one silent failure mode.
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const { validateShape, requireCollection } = require("../lib/patch.js");
 const templates = require("../collections.json");
+const { PAGES } = require("../check-paths.js");
 const C = require("../client/collections.js");
+
+const ROOT = path.join(__dirname, "..", "..");
 
 const MEDIA = {
   image: { id: "gallery/campus 1", url: "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,w_1600/gallery/campus%201", title: "Campus" },
@@ -92,4 +97,33 @@ test("every seeded string is visible placeholder text — a blank block matches 
   assert.notEqual(C.blankItem("pages.x.blocks", "h", null).h, "");
   assert.notEqual(C.blankItem("pages.x.blocks", "note", null).note, "");
   assert.notEqual(C.blankItem("galleryGroups", null, MEDIA.image).label, "");
+});
+
+// family() stays total (decorate() in editor-client.js calls it, via addLabel()/floorFor(),
+// for every [data-list] element on every chrome rebuild — a throw there would abort the
+// whole loop and take down all editor chrome). Its safety net is here instead: every
+// LITERAL data-list binding the pages actually carry must map to an explicit, expected
+// family, and every expected binding must still be present — so an unrecognised binding
+// (silently defaulted to "news" by family()) fails this test instead of failing quietly
+// until Publish 400s. Interpolated ({{ }}) bindings are Task 8's markup and don't exist in
+// the pages yet, so they're out of scope here; they'll need the same treatment once landed.
+const EXPECTED_BINDINGS = {
+  "shared:news.acamp": "news",
+  "shared:news.vidyanagar": "news",
+  "shared:galleries.vidyanagar": "sharedGallery",
+};
+test("every literal data-list binding in the pages is classified by an explicit rule", () => {
+  const found = new Set();
+  for (const page of PAGES) {
+    const src = fs.readFileSync(path.join(ROOT, page), "utf8");
+    for (const m of src.matchAll(/data-list="([^"{]+)"/g)) found.add(m[1]);
+  }
+  assert.deepEqual(
+    [...found].sort(),
+    Object.keys(EXPECTED_BINDINGS).sort(),
+    "a data-list binding exists with no entry here — add it to collections.js AND to EXPECTED_BINDINGS"
+  );
+  for (const [listPath, fam] of Object.entries(EXPECTED_BINDINGS)) {
+    assert.equal(C.family(listPath), fam);
+  }
 });
