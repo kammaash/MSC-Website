@@ -382,12 +382,46 @@ test("inline gallery upload is photos-only — videos are YouTube links added in
   assert.ok(!/resource_type === "video" \? "video" : "image"/.test(SRC), "the video-kind branch must be gone");
 });
 
-test("gallery Add controls open the photo library and build the correct item shape", () => {
+test("list chrome delegates labels, floors and blank items to EditorCollections (Task: add buttons)", () => {
+  const dec = extractBlockAfter(SRC, "function decorate(");
+  // Nested lists are real now (a block CONTAINS rows/photos), so "every data-item
+  // under me" would stamp menus with wrong indices onto nested rows. Only items
+  // whose NEAREST list ancestor is this list belong to it.
+  assert.match(dec, /closest\("\[data-list\]"\) === listEl/);
+  assert.match(dec, /EditorCollections\.addLabel\(listPath\)/);
+  assert.ok(!/listPath\.includes\("galleries\."\)/.test(dec), "the hardcoded label test must be gone from decorate()");
+  // Items that are ALSO media slots shift their menu top-left: the slot's hover
+  // actions own the top-right corner.
+  assert.match(dec, /ed-menu-slot/);
+});
+
+test("delete respects the floor: disabled-with-tooltip on the last item, never hidden", () => {
+  const menu = extractBlockAfter(SRC, "function menuFor(");
+  assert.match(menu, /EditorCollections\.floorFor\(listPath\)/);
+  assert.match(menu, /length <= floor/);
+  assert.match(menu, /At least one must remain — this is the last one/);
+  assert.match(menu, /ed-del/);
+});
+
+test("onAdd dispatches through EditorCollections; media-first families pick before any op is recorded", () => {
   const onAdd = extractBlockAfter(SRC, "function onAdd(");
-  assert.match(onAdd, /EditorMedia\.openPicker\("image"/);
-  assert.match(onAdd, /\{ kind: "image", id: record\.id, caption: "" \}/);
-  assert.match(onAdd, /\{ src: window\.EditorMediaUrls\.deliveryUrl\(selectedCloudName, record\), caption: "" \}/);
-  assert.match(SRC, /"\+ Add photo"/);
+  assert.match(onAdd, /openBlockChooser\(listPath/);
+  assert.match(onAdd, /EditorCollections\.mediaFor\(listPath\)/);
+  assert.match(onAdd, /EditorCollections\.blankItem\(listPath, null/);
+  const pick = extractBlockAfter(SRC, "function pickMediaThen(");
+  assert.match(pick, /EditorMedia\.openPicker\(kind/);
+  assert.match(pick, /deliveryUrl\(selectedCloudName, record\)/);
+  assert.match(pick, /record\.name \|\| ""/);
+});
+
+test("the block chooser offers the seven kinds and adds video as heading+player, two ops in sequence", () => {
+  const ch = extractBlockAfter(SRC, "function openBlockChooser(");
+  assert.match(ch, /EditorCollections\.blockKinds\(\)/);
+  // Two add ops, first the heading, then the embed; if the second fails the first
+  // stays and the failure is reported — consistent with doOp's apply-then-record.
+  assert.match(ch, /doOp\(\{ type: "add", path: listPath, item: items\[0\] \}\)/);
+  assert.match(ch, /doOp\(\{ type: "add", path: listPath, item: items\[1\] \}\)/);
+  assert.match(SRC, /#ed-block-chooser/);
 });
 
 // ---- the attribute / <option> panel (text that can't take a caret) ----
@@ -445,9 +479,11 @@ test("the panel never writes the bound attribute onto the page element by hand",
   assert.doesNotMatch(SRC, /setAttribute\(\s*pair\.attr/);
 });
 
-test("the popover and its chip are fixed-position, so opening one cannot shift the page", () => {
+test("the popover, its chip and the block chooser are fixed-position, so opening one cannot shift the page", () => {
+  // The block chooser (Task: add buttons) deliberately shares this same string —
+  // "#ed-attr-panel's visual language" — so it must be fixed for the same reason.
   const style = SRC.slice(SRC.indexOf("attrStyle.textContent"), SRC.indexOf("document.head.appendChild(attrStyle)"));
-  assert.equal((style.match(/position:fixed/g) || []).length, 2, "both #ed-attr-panel and #ed-attr-chip must be fixed");
+  assert.equal((style.match(/position:fixed/g) || []).length, 3, "#ed-attr-panel, #ed-attr-chip and #ed-block-chooser must all be fixed");
 });
 
 test("every attribute-panel listener is gated on edit mode", () => {

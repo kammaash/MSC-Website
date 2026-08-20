@@ -130,6 +130,11 @@
     '.ed-menu{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:9999}' +
     '.ed-menu button{font:12px sans-serif;width:26px;height:26px;border-radius:6px;border:0;cursor:pointer;' +
     'background:#26201d;color:#fff}' +
+    // ✕ matches the media overlay's remove action (#a51915 fill, white glyph) so the
+    // editor's two destructive controls look like one idea. Disabled = at the floor.
+    '.ed-menu button.ed-del{background:#a51915;border-radius:999px;border:2px solid rgba(255,255,255,.82)}' +
+    '.ed-menu button.ed-del:disabled{opacity:.45;cursor:not-allowed}' +
+    '.ed-menu.ed-menu-slot{right:auto;left:6px}' +
     '</style>' +
     '<strong>✏️ Editing</strong><span id="ed-count">0 changes</span><span style="flex:1"></span>' +
     '<button id="ed-publish">Publish</button><button id="ed-discard">Discard</button><button id="ed-exit">Exit</button>';
@@ -277,7 +282,16 @@
     "#ed-attr-panel .ed-attr-fixed b{display:block;color:#26201d;font-size:13.5px;font-weight:600;margin-bottom:2px}" +
     "#ed-attr-panel .ed-attr-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}" +
     "#ed-attr-panel button{font:inherit;padding:7px 14px;border-radius:7px;border:0;cursor:pointer;background:#eee7e1;color:#26201d}" +
-    "#ed-attr-panel button.ed-attr-save{background:#a51915;color:#fff;font-weight:600}";
+    "#ed-attr-panel button.ed-attr-save{background:#a51915;color:#fff;font-weight:600}" +
+    // The block chooser reuses the attribute panel's visual language on purpose —
+    // same radius, shadow and type scale — so it reads as the same editor.
+    "#ed-block-chooser{position:fixed;z-index:2147483002;width:200px;background:#fff;color:#26201d;border-radius:12px;" +
+    "border:1px solid rgba(38,32,29,.16);box-shadow:0 18px 44px rgba(0,0,0,.28);padding:10px;" +
+    "font:13px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}" +
+    "#ed-block-chooser h3{margin:2px 4px 8px;font:600 12px/1.3 inherit;color:#6b615b;text-transform:uppercase;letter-spacing:.06em}" +
+    "#ed-block-chooser button{display:block;width:100%;text-align:left;font:inherit;padding:8px 10px;border-radius:7px;" +
+    "border:0;cursor:pointer;background:transparent;color:#26201d}" +
+    "#ed-block-chooser button:hover{background:#f6f1ed}";
   document.head.appendChild(attrStyle);
 
   const chip = document.createElement("div");
@@ -704,6 +718,7 @@
       // `editing` is false, but leaving a dead dialog on a page pretending to be the
       // public site is its own bug).
       closeAttrPanel();
+      closeBlockChooser();
       chip.style.display = "none";
       document.querySelectorAll(".ed-attr-hover").forEach((n) => n.classList.remove("ed-attr-hover"));
     }
@@ -762,37 +777,101 @@
     // reading a stale index during the ~1 frame before the observer's 120ms pass.
     requestAnimationFrame(decorate);
   }
-  function onAdd(listPath) {
-    const isSharedGallery = listPath.includes("galleries.");
-    const isGroupedGallery = /^galleryGroups\.\d+\.photos$/.test(listPath);
-    if (isSharedGallery || isGroupedGallery) {
-      if (!window.EditorMedia || !window.EditorMediaUrls) {
-        alert("The media library isn't ready yet. Close and reopen the editor, then try again.");
-        return;
-      }
-      window.EditorMedia.openPicker("image", (record, selectedCloudName) => {
-        const item = isSharedGallery
-          ? { kind: "image", id: record.id, caption: "" }
-          : { src: window.EditorMediaUrls.deliveryUrl(selectedCloudName, record), caption: "" };
-        doOp({ type: "add", path: listPath, item });
-      }, null, listPath);
+  // One place that opens the drawer in pick mode and normalises what every Add flow
+  // needs from a record: its id, its full-size delivery URL and a human name. The
+  // picker opens BEFORE anything is recorded — a cancelled pick calls back nobody,
+  // so no op ever exists to clean up.
+  function pickMediaThen(kind, listPath, cb) {
+    if (!window.EditorMedia || !window.EditorMediaUrls) {
+      alert("The media library isn't ready yet. Close and reopen the editor, then try again.");
       return;
     }
-    const item = { date: new Date().toISOString().slice(0, 10), title: "New post", body: "Write the announcement here." };
-    doOp({ type: "add", path: listPath, item });
+    window.EditorMedia.openPicker(kind, (record, selectedCloudName) => {
+      cb({ id: record.id, url: window.EditorMediaUrls.deliveryUrl(selectedCloudName, record), title: record.name || "" });
+    }, null, listPath);
   }
+  function onAdd(listPath, anchorEl) {
+    if (window.EditorCollections.family(listPath) === "blocks") { openBlockChooser(listPath, anchorEl); return; }
+    const mediaKind = window.EditorCollections.mediaFor(listPath);
+    if (mediaKind) {
+      pickMediaThen(mediaKind, listPath, (media) => {
+        doOp({ type: "add", path: listPath, item: window.EditorCollections.blankItem(listPath, null, media) });
+      });
+      return;
+    }
+    doOp({ type: "add", path: listPath, item: window.EditorCollections.blankItem(listPath, null, null) });
+  }
+
+  // ---- the block chooser: which kind of section does "+ Add section" add? ----
+  // A popover in #ed-attr-panel's visual language (same radius, shadow, type scale)
+  // so it reads as the same editor rather than a third UI. Escape or any outside
+  // click dismisses it without recording anything.
+  function closeBlockChooser() {
+    const el = document.getElementById("ed-block-chooser");
+    if (el) { el.remove(); document.removeEventListener("pointerdown", onChooserOutside, true); document.removeEventListener("keydown", onChooserEscape, true); }
+  }
+  function onChooserOutside(e) { if (!e.target.closest("#ed-block-chooser")) closeBlockChooser(); }
+  function onChooserEscape(e) { if (e.key === "Escape") { e.stopPropagation(); closeBlockChooser(); } }
+  function openBlockChooser(listPath, anchorEl) {
+    closeBlockChooser();
+    const panel = document.createElement("div");
+    panel.id = "ed-block-chooser";
+    const h = document.createElement("h3");
+    h.textContent = "Add a section";
+    panel.appendChild(h);
+    window.EditorCollections.blockKinds().forEach((k) => {
+      const b = document.createElement("button");
+      b.textContent = k.label;
+      b.onclick = () => {
+        closeBlockChooser();
+        if (k.kind === "video") {
+          // Two blocks — the heading seeded from the video's title, then the player.
+          // Two ops in sequence; if the second fails the first is left in place and
+          // the failure reported, consistent with doOp's apply-then-record rule.
+          pickMediaThen("video", listPath, (media) => {
+            const items = window.EditorCollections.blankItem(listPath, "video", media);
+            doOp({ type: "add", path: listPath, item: items[0] });
+            doOp({ type: "add", path: listPath, item: items[1] });
+          });
+        } else if (k.media) {
+          pickMediaThen(k.media, listPath, (media) => {
+            doOp({ type: "add", path: listPath, item: window.EditorCollections.blankItem(listPath, k.kind, media) });
+          });
+        } else {
+          doOp({ type: "add", path: listPath, item: window.EditorCollections.blankItem(listPath, k.kind, null) });
+        }
+      };
+      panel.appendChild(b);
+    });
+    document.body.appendChild(panel);
+    // Fixed positioning beside the Add button, clamped to the viewport.
+    const r = anchorEl.getBoundingClientRect();
+    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + "px";
+    panel.style.top = Math.max(8, Math.min(r.bottom + 6, window.innerHeight - panel.offsetHeight - 8)) + "px";
+    document.addEventListener("pointerdown", onChooserOutside, true);
+    document.addEventListener("keydown", onChooserEscape, true);
+  }
+
   function menuFor(listPath, index, length) {
     const m = document.createElement("span");
     m.className = "ed-menu";
-    const mk = (label, title, fn) => {
+    const mk = (label, title, fn, className, disabled) => {
       const b = document.createElement("button");
       b.textContent = label; b.title = title;
-      b.onclick = (e) => { e.stopPropagation(); e.preventDefault(); fn(); };
+      if (className) b.className = className;
+      if (disabled) b.disabled = true;
+      else b.onclick = (e) => { e.stopPropagation(); e.preventDefault(); fn(); };
       m.appendChild(b);
     };
     if (index > 0) mk("↑", "Move up", () => doOp({ type: "move", path: listPath, from: index, to: index - 1 }));
     if (index < length - 1) mk("↓", "Move down", () => doOp({ type: "move", path: listPath, from: index, to: index + 1 }));
-    mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }); });
+    // The floor forbids deleting the LAST item (news excepted — see collections.js).
+    // At the floor the button renders disabled with a tooltip rather than hidden: a
+    // control that silently fails to appear reads as a bug, and the user retries
+    // instead of understanding.
+    const floor = window.EditorCollections.floorFor(listPath);
+    if (length <= floor) mk("✕", "At least one must remain — this is the last one", null, "ed-del", true);
+    else mk("✕", "Delete", () => { if (confirm("Delete this item?")) doOp({ type: "remove", path: listPath, index }); }, "ed-del");
     return m;
   }
   function decorate() {
@@ -815,13 +894,22 @@
     if (!editing) return;
     document.querySelectorAll("[data-list]").forEach((listEl) => {
       const listPath = listEl.getAttribute("data-list");
-      const items = listEl.querySelectorAll(":scope [data-item]");
-      items.forEach((it, i) => it.appendChild(menuFor(listPath, i, items.length))); // position:relative is already on this element in the page's own markup
+      // Lists nest now (a section block CONTAINS its rows/photos), and :scope
+      // [data-item] is a DESCENDANT query — without this filter the outer list
+      // would stamp a second menu, with its own indices, onto every nested row.
+      const items = Array.from(listEl.querySelectorAll(":scope [data-item]"))
+        .filter((it) => it.parentElement && it.parentElement.closest("[data-list]") === listEl);
+      items.forEach((it, i) => {
+        const menu = menuFor(listPath, i, items.length); // position:relative is already on this element in the page's own markup
+        // A gallery photo is also a media slot, whose hover actions own the
+        // top-right corner — shift this menu top-left so the two never overlap.
+        if (it.hasAttribute("data-media-slot")) menu.classList.add("ed-menu-slot");
+        it.appendChild(menu);
+      });
       const add = document.createElement("button");
       add.className = "ed-add";
-      add.textContent = (listPath.includes("galleries.") || /^galleryGroups\.\d+\.photos$/.test(listPath))
-        ? "+ Add photo" : "+ Add";
-      add.onclick = () => onAdd(listPath);
+      add.textContent = window.EditorCollections.addLabel(listPath);
+      add.onclick = (e) => onAdd(listPath, e.currentTarget);
       listEl.parentElement.insertBefore(add, listEl.nextSibling); // sibling, not child: React owns the list's children
     });
   }
