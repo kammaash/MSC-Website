@@ -117,7 +117,7 @@ test("validateShape: value nesting deeper than the template is rejected, not rec
     /must be a string/);
 });
 
-test("leaf rule: embed.src accepts only the canonical YouTube embed form", () => {
+test("leaf rule: embed.src accepts the two forms this codebase produces, and nothing else", () => {
   const good = { embed: { src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "T" } };
   validateShape(good, BLOCK_ONEOF, "");
   const bad = (src) => assert.throws(
@@ -126,8 +126,11 @@ test("leaf rule: embed.src accepts only the canonical YouTube embed form", () =>
   bad("javascript:alert(1)");
   bad("dQw4w9WgXcQ");
   bad("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-  bad("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
-  bad("https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0");
+  // The nocookie form is what media-urls.js builds for a slot placement, and the ?rel=0
+  // suffix comes with it — both were rejected until embed.src had to serve the slot path
+  // as well as the chooser, which would have made the two routes disagree.
+  validateShape({ embed: { src: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0", title: "T" } }, BLOCK_ONEOF, "");
+  bad("https://www.youtube.com/embed/dQw4w9WgXcQ&rel=0");
 });
 
 test("leaf rule: the galleries kind check survives the validateItem replacement", () => {
@@ -312,4 +315,54 @@ test("requiresText matches the three dispatch keys and nothing else", () => {
   ]) {
     assert.equal(requiresText(p), false, p);
   }
+});
+
+// ---- embed.src: same rule whichever way a video arrives (Task: subpage media slots) ----
+// A video block added through the chooser gets its src from collections.js, which builds
+// the canonical youtube.com/embed/<id>. A video DROPPED on the block's slot gets it from
+// media-urls.js, which builds the privacy-enhanced youtube-nocookie.com/embed/<id>?rel=0.
+// Both are produced by our own code from a positively-identified video id, so both must
+// be acceptable — and the rule has to run on `set` too, since that is the op a slot uses.
+const { isEmbedSrc } = require("../lib/patch.js");
+
+test("isEmbedSrc accepts both forms this codebase produces, and nothing else", () => {
+  for (const good of [
+    "https://www.youtube.com/embed/dQw4w9WgXcQ",                     // collections.js
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0",      // media-urls.js
+    "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+  ]) assert.equal(isEmbedSrc(good), true, good);
+
+  for (const bad of [
+    "https://vimeo.com/1",
+    "javascript:alert(1)",
+    "dQw4w9WgXcQ",                                       // bare id
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",       // watch page, not embeddable
+    "https://www.youtube.com/embed/short",               // not an 11-char id
+    "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&evil",
+    "",
+  ]) assert.equal(isEmbedSrc(bad), false, bad);
+});
+
+test("a set op on a block's embed.src is held to the same rule as an add", () => {
+  const fix = () => ({ pages: { library: { blocks: [{ embed: { src: "https://www.youtube.com/embed/dQw4w9WgXcQ", title: "T" } }] } } });
+  const set = (value) => applyPatch(fix(), {
+    ops: [{ type: "set", path: "pages.library.blocks.0.embed.src", value }],
+  }, templates);
+
+  // What a slot placement writes.
+  assert.equal(set("https://www.youtube-nocookie.com/embed/aaaaaaaaaaa?rel=0")
+    .pages.library.blocks[0].embed.src, "https://www.youtube-nocookie.com/embed/aaaaaaaaaaa?rel=0");
+  // Blanking is how a video is removed from a non-required slot; the page maps "" to
+  // about:blank, so it must stay allowed.
+  assert.equal(set("").pages.library.blocks[0].embed.src, "");
+  // Anything else must not reach an <iframe src> on a published page.
+  assert.throws(() => set("https://vimeo.com/1"), /YouTube/);
+  assert.throws(() => set("javascript:alert(1)"), /YouTube/);
+});
+
+test("the same guard does not apply to unrelated src-ish paths", () => {
+  const d = applyPatch({ pages: { library: { blocks: [{ person: { src: "x.jpg", name: "N", title: "R" } }] } } }, {
+    ops: [{ type: "set", path: "pages.library.blocks.0.person.src", value: "anything.jpg" }],
+  }, templates);
+  assert.equal(d.pages.library.blocks[0].person.src, "anything.jpg");
 });

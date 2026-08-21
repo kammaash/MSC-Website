@@ -114,6 +114,11 @@
     if (!UI.isEditing()) return;
     var path = slotEl.getAttribute("data-media-slot");
     var kind = slotEl.getAttribute("data-media-kind");
+    // A required slot may be replaced but never blanked — a photo grid tile with no
+    // photo in it is exactly the state the grid must never reach. decorateSlotActions
+    // already withholds the button; this is the rule itself, so a drop, a keyboard
+    // path, or an overlay left over from a previous render cannot get round it.
+    if (slotEl.hasAttribute("data-media-required")) return;
     if ((kind !== "image" && kind !== "video") || slotValue(slotEl) === "") return;
     var noun = kind === "image" ? "photo" : "video";
     if (!confirm("Remove this " + noun + " from the page?\n\nIt will stay in the Media library so you can add it again later.")) return;
@@ -199,7 +204,11 @@
         actions.appendChild(mediaAction("add", "+", slotEl.getAttribute("data-media-kind") === "image" ? "Add photo" : "Add video", slotEl));
       } else {
         actions.appendChild(mediaAction("replace", "↻", "Replace", slotEl));
-        actions.appendChild(mediaAction("remove", "×", "Remove", slotEl));
+        // Withheld on a required slot: there is no blank state for it to go to. Removing
+        // a photo grid tile is the tile's own ✕, one level up in the list chrome.
+        if (!slotEl.hasAttribute("data-media-required")) {
+          actions.appendChild(mediaAction("remove", "×", "Remove", slotEl));
+        }
       }
       // Offered in both states: the description belongs to the spot on the page, not
       // to whichever photo currently fills it, and writing it before choosing a photo

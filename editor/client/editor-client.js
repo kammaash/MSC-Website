@@ -955,7 +955,12 @@
         const menu = menuFor(listPath, i, items.length); // position:relative is already on this element in the page's own markup
         // A gallery photo is also a media slot, whose hover actions own the
         // top-right corner — shift this menu top-left so the two never overlap.
-        if (it.hasAttribute("data-media-slot")) menu.classList.add("ed-menu-slot");
+        // Only the flip cards. Their slot overlay is pinned to the TOP-RIGHT corner
+        // (see .flip.ed-context-slot>.ed-slot-actions in media-slots.js), so the item's
+        // own menu has to move. Every other slot centres its overlay, and top-left is
+        // where the section's ed-menu-block sits — shifting those would stack the two
+        // menus on the same pixels.
+        if (it.classList.contains("flip")) menu.classList.add("ed-menu-slot");
         // A "blocks" item nests its own [data-list] of rows/photos, whose first
         // item's menu sits at this same top-right corner (see .ed-menu-block above)
         // — shift the SECTION's menu top-left so it never paints over the row's.

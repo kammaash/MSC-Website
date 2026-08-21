@@ -198,3 +198,22 @@ test("a click on a bound element inside a slot is left to the attribute panel, n
   assert.ok(selector, "the interactive-exclusion selector was not found");
   assert.match(selector[1], /\[data-edit-attr\]/);
 });
+
+// ---- required slots: replaceable, never blankable (Task: subpage media slots) ----
+// A photo grid tile must always hold a photo. Blanking one would leave a tile with no
+// image in a grid that is otherwise full — the tile's own ✕ is how you get rid of it,
+// and the list's floor of one already stops the grid being emptied entirely. Slots that
+// may legitimately sit empty (a hero photo, a portrait, a video frame) are unaffected.
+test("a required slot offers Replace but no Remove", () => {
+  const dec = extractBlockAfter(SRC, "function decorateSlotActions(");
+  assert.match(dec, /data-media-required/,
+    "the actions overlay must consult the required flag when deciding to offer Remove");
+  // The button's absence is presentation. The refusal has to live in the action itself,
+  // or a drop, a keyboard path, or a stale overlay could still blank a required slot.
+  const rm = extractBlockAfter(SRC, "function removeFromSlot(");
+  assert.match(rm, /hasAttribute\("data-media-required"\)/);
+  const guardIdx = rm.indexOf('hasAttribute("data-media-required")');
+  const applyIdx = rm.indexOf('UI.applyLocal(path, "")');
+  assert.ok(guardIdx !== -1 && guardIdx < applyIdx,
+    "the required check must run before anything is applied");
+});

@@ -609,3 +609,16 @@ test("the empty-field placeholder is edit-mode-only and cannot be mistaken for c
   assert.match(SRC, /body\.ed-editing \[data-edit\]\.ed-empty-text::before\{content:/);
   assert.match(SRC, /body\.ed-editing \[data-edit\]\.ed-empty-text\{/);
 });
+
+test("the top-left menu shift is for flip-card slots only, not every slot-backed item", () => {
+  const dec = extractBlockAfter(SRC, "function decorate(");
+  // ed-menu-slot exists because montessori-acamp's flip tiles put their slot overlay in
+  // the TOP-RIGHT corner, so the item's own menu has to move out of the way. A subpage
+  // grid tile's overlay is CENTRED, and top-left is where the section's own
+  // ed-menu-block now sits — shifting those would stack the two menus on each other,
+  // which is the collision the previous review caught. So the shift keys on the flip
+  // card it was written for, not on "has a slot".
+  assert.match(dec, /classList\.contains\("flip"\)/);
+  assert.ok(!/it\.hasAttribute\("data-media-slot"\)\) menu\.classList\.add\("ed-menu-slot"\)/.test(dec),
+    "the shift must no longer trigger on every slot-backed item");
+});

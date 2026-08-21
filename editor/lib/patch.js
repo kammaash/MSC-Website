@@ -8,23 +8,41 @@ function validateText(value) {
   if (/CONTENT:BEGIN|CONTENT:END/i.test(value)) throw new Error("Text may not contain CONTENT:BEGIN or CONTENT:END markers");
 }
 
+// A video reaches a block's embed.src by two routes, and both are our own code:
+// collections.js builds the canonical youtube.com/embed/<id> when the block chooser adds
+// a video, and media-urls.js builds the privacy-enhanced youtube-nocookie.com form with
+// ?rel=0 when one is dropped on the block's media slot. Both must be acceptable — a rule
+// that took only one would let the two routes disagree — but nothing else may reach an
+// <iframe src> on a published page. validateText is not the relevant guard here: it
+// blocks "<script", which is not the threat. The id is re-derived through lib/youtube.js
+// so only a positively-identified video gets through.
+const EMBED_SRC = /^https:\/\/www\.youtube(?:-nocookie)?\.com\/embed\/[A-Za-z0-9_-]{11}(?:\?rel=0)?$/;
+const EMBED_SRC_MESSAGE = "embed.src must be a YouTube embed link for a real video id.";
+
+function isEmbedSrc(value) {
+  return typeof value === "string" && EMBED_SRC.test(value) && parseVideoId(value) !== null;
+}
+
+// The same rule again, as a content path rather than a field inside an added item —
+// because a media slot writes through `set`, which never touches LEAF_RULES. Without
+// this, a value the `add` path refuses could still be written by a drop.
+const EMBED_SRC_PATH = /^(?:pages\.[^.]+|fallback)\.blocks\.\d+\.embed\.src$/;
+
 // Judgement calls a JSON shape template cannot express, keyed by the field path
 // inside an item. Shape belongs in collections.json; these rules stay in code.
 //   kind      — the shared-gallery item's provider tag; anything else would make
 //               media-urls.js throw at render time on a published page.
-//   embed.src — written verbatim into an <iframe src> on a published page.
-//               validateText blocks <script, which is not the relevant threat here:
-//               the rule requires the one canonical embed form and re-derives the ID
-//               through lib/youtube.js, so nothing reaches the page that the YouTube
-//               helper cannot positively identify.
+//   embed.src — written verbatim into an <iframe src> on a published page; see
+//               isEmbedSrc above for which forms are accepted and why. The same rule
+//               runs on `set` (EMBED_SRC_PATH), because a media slot writes that way.
 const LEAF_RULES = {
   "kind": {
     ok: (v) => v === "image" || v === "video",
     why: "kind must be image or video",
   },
   "embed.src": {
-    ok: (v) => /^https:\/\/www\.youtube\.com\/embed\/[A-Za-z0-9_-]{11}$/.test(v) && parseVideoId(v) !== null,
-    why: "embed.src must be exactly https://www.youtube.com/embed/<11-character video id>",
+    ok: (v) => isEmbedSrc(v),
+    why: EMBED_SRC_MESSAGE,
   },
 };
 
@@ -132,6 +150,8 @@ function applyPatch(data, patch, templates) {
     if (op.type === "set") {
       validateText(op.value);
       if (requiresText(op.path) && op.value.trim() === "") throw new Error(REQUIRES_TEXT_MESSAGE);
+      // "" is how a video is taken off the page; the subpage maps it to about:blank.
+      if (EMBED_SRC_PATH.test(op.path) && op.value !== "" && !isEmbedSrc(op.value)) throw new Error(EMBED_SRC_MESSAGE);
       if (typeof getPath(data, op.path) !== "string") throw new Error("Unknown or non-text path: " + op.path);
       setPath(data, op.path, op.value);
     } else if (op.type === "add") {
@@ -150,4 +170,4 @@ function applyPatch(data, patch, templates) {
   return data;
 }
 
-module.exports = { applyPatch, validateText, validateShape, requireCollection, requiresText, REQUIRES_TEXT_MESSAGE };
+module.exports = { applyPatch, validateText, validateShape, requireCollection, requiresText, isEmbedSrc, REQUIRES_TEXT_MESSAGE };
