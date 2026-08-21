@@ -14,9 +14,22 @@
     ".ed-slot-hover{outline:2px dashed #e8541b!important;outline-offset:2px;cursor:pointer!important}" +
     ".ed-slot-selected{outline:3px solid #e8541b!important;outline-offset:2px}" +
     ".ed-media-empty{outline:2px dashed #c2410f!important;outline-offset:-2px}" +
+    // An emptied photo slot renders a 1x1 transparent GIF, so a slot whose height comes
+    // from its image collapses to nothing — Vidyanagar's empty hero measured 700x0, an
+    // outline drawn around a box with no area, impossible to click or drop a photo onto.
+    // A floor gives every empty slot something to aim at. Slots that size themselves
+    // some other way (a fixed-height portrait, a video frame held open by padding-top)
+    // are already taller than this, so it changes nothing for them.
+    "body.ed-editing .ed-media-empty{min-height:140px}" +
     // Contextual media actions exist only in local edit mode. The whole slot becomes
     // a hover/focus surface; each action keeps its icon circular with its label below.
-    ".ed-context-slot{position:relative!important}" +
+    // Deliberately NOT !important. The overlay is absolutely positioned, so the slot has
+    // to be a containing block — but ANY positioned value does that, and a slot authored
+    // position:absolute already is one. Forcing relative over an inline `absolute;inset:0`
+    // stripped its insets in edit mode and collapsed it onto its content: Vidyanagar's
+    // empty hero measured 700x0 and could not be clicked or dropped on. Without the
+    // override, an inline position wins and only genuinely static slots become relative.
+    ".ed-context-slot{position:relative}" +
     ".ed-slot-actions{display:none}" +
     "body.ed-editing .ed-slot-actions{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;gap:22px;" +
     "background:rgba(24,17,14,.68);opacity:0;pointer-events:none;transition:opacity .16s ease}" +

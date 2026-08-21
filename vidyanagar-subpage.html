@@ -242,7 +242,7 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0" data-list="{{ b.p }}.gallery">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div data-item="" style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                <div data-item="" data-media-slot="{{ im.p }}.0" data-media-kind="image" data-media-required style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
                   <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
                   <span data-edit="{{ im.p }}.1" style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
                 </div>
@@ -273,7 +273,9 @@
         </sc-if>
         <sc-if value="{{ b.isPerson }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;gap:24px;align-items:center;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:16px;padding:24px;margin:20px 0 0;flex-wrap:wrap">
-            <img src="{{ b.person.src }}" alt="{{ b.person.name }}" style="width:150px;height:150px;border-radius:12px;object-fit:cover;flex:none;border:1px solid #f0e0dc">
+            <div data-media-slot="{{ b.p }}.person.src" data-media-kind="image" style="position:relative;width:150px;height:150px;border-radius:12px;overflow:hidden;flex:none;border:1px solid #f0e0dc">
+              <img src="{{ b.person.src }}" alt="{{ b.person.name }}" style="width:100%;height:100%;object-fit:cover;display:block">
+            </div>
             <div>
               <div data-edit="{{ b.p }}.person.name" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#a51915">{{ b.person.name }}</div>
               <div data-edit="{{ b.p }}.person.title" style="font-size:14px;color:#c2410f;font-weight:600;margin-top:3px">{{ b.person.title }}</div>
@@ -281,7 +283,7 @@
           </div>
         </sc-if>
         <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
-          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
+          <div data-media-slot="{{ b.p }}.embed.src" data-media-kind="video" style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
             <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </sc-if>
@@ -882,6 +884,9 @@ class Component extends DCLogic {
     // level deeper and the template addresses the two halves by array index,
     // "{{ li.p }}.0" and ".1" — the separator between them stays punctuation
     // the markup renders, not something either half owns.
+    // A 1x1 transparent GIF: what an emptied photo slot renders, so the spot keeps its
+    // box (and stays droppable) instead of collapsing or showing a broken image.
+    const EMPTY_IMAGE = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     let k = 0;
     const blocks = [];
     current.blocks.forEach((b, i) => {
@@ -890,12 +895,16 @@ class Component extends DCLogic {
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h, p });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, p, items: b.list.map(([h, d], j) => ({ h, sep: " — ", d, p: p + ".list." + j })) });
       else if (b.gallery) {
-        const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption], j) => ({ src, caption, p: p + ".gallery." + j })) : [];
+        const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption], j) => ({ src: src || EMPTY_IMAGE, caption, p: p + ".gallery." + j })) : [];
         blocks.push({ key: "b" + (k++), isGallery: true, p, hasImages: imgs.length > 0, noImages: imgs.length === 0, images: imgs });
       }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, p, text: b.note, sub: b.sub || "" });
-      else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, p, person: b.person });
-      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, p, embed: b.embed });
+      // A media slot can be emptied, so both of these need somewhere safe to land: an
+      // <img src=""> paints a broken-image icon, and an <iframe src=""> loads THIS page
+      // into itself. Same two sentinels the branch pages already use for their hero
+      // photo and showcase video.
+      else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, p, person: { ...b.person, src: b.person.src || EMPTY_IMAGE } });
+      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, p, embed: { ...b.embed, src: b.embed.src || "about:blank" } });
       else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, p, link: b.link });
     });
 

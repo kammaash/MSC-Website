@@ -217,3 +217,22 @@ test("a required slot offers Replace but no Remove", () => {
   assert.ok(guardIdx !== -1 && guardIdx < applyIdx,
     "the required check must run before anything is applied");
 });
+
+test("an empty slot keeps a box big enough to click and drop onto", () => {
+  // An emptied photo slot renders a 1x1 transparent GIF, so the slot collapses to zero
+  // height: measured 700x0 on Vidyanagar's empty hero. The dashed outline was drawn
+  // around nothing, and there was no target to click or drop a photo onto — the slot
+  // was, in practice, not editable at all. Measured again after this rule, it is 700x140.
+  assert.match(SRC, /body\.ed-editing \.ed-media-empty\{[^}]*min-height:/);
+});
+
+test("making a slot a containing block must not override a position it already has", () => {
+  // .ed-context-slot exists so a slot can host the absolutely-positioned action overlay,
+  // which needs the slot to be a containing block. ANY positioned value does that — so
+  // forcing `relative` is only needed when the slot is static. With !important it also
+  // beat inline styles, which broke the one slot authored `position:absolute;inset:0`:
+  // in edit mode only, it lost its insets and collapsed to the height of its content,
+  // a 1x1 transparent GIF. Measured on Vidyanagar's hero: 700x0, unclickable.
+  assert.match(SRC, /\.ed-context-slot\{position:relative\}/);
+  assert.doesNotMatch(SRC, /\.ed-context-slot\{position:relative!important\}/);
+});
