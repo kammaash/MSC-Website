@@ -241,10 +241,27 @@
         </sc-if>
         <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
-            <video controls playsinline style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
+            <video controls playsinline preload="metadata" poster="{{ b.video.poster }}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
               <source src="{{ b.video.src }}" type="video/mp4">
+              Your browser doesn't support embedded video. <a href="{{ b.video.src }}" style="color:#fff">Watch/download it directly</a>.
             </video>
           </div>
+        </sc-if>
+        <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ b.link.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:20px 0 0;text-decoration:none;background:#fff7f4">
+            <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+            <span>
+              <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ b.link.label }}</span>
+              <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ b.link.sub }}</span>
+            </span>
+          </a>
         </sc-if>
       </div>
     </sc-for>
@@ -326,7 +343,13 @@ class Component extends DCLogic {
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
         ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
-        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
+        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"] ] },
+      { label: "Mandatory Public Disclosure", href: MI + "#disclosure", items: [
+        ["Upgradation Letter", "mpd-upgradation"], ["MSC Society", "mpd-society"], ["State NOC", "mpd-noc"],
+        ["Montessori State Recognition", "mpd-recognition"], ["Building Safety Certificate", "mpd-building-safety"],
+        ["A-Camp Fire Certificate", "mpd-fire"], ["Water, Health & Sanitary Certificate", "mpd-water-health"],
+        ["Fee Structure", "mpd-fee"], ["Academic Calendar", "mpd-calendar"], ["SMC 26-27", "mpd-smc"],
+        ["PTA 26-27", "mpd-pta"], ["3 Years Result", "mpd-3years"] ] },
       { label: "School Life", href: "#house", items: [] },
       { label: "Academics", href: MI + "#academics", items: [
         ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
@@ -399,8 +422,10 @@ class Component extends DCLogic {
         { p: "\"My work is my relaxation.\"" },
       ]),
       "principals-desk": P("About", "#about", "From the Principal's Desk", "Leadership notes on learning, character and community at Montessori.", [
+        { person: { src: "assets/people/principal.jpg", name: "Smt. B. Sri Jyothi, M.A., B.Ed.", title: "Principal, Montessori School, A-Camp" } },
         { p: "At Montessori, academic rigour and genuine care go hand in hand. Our role is to create a happy, progressive journey where children are actively involved in their own learning and connected to the world outside the classroom." },
-        { note: "Principal's message & photo", sub: "Share the principal's note and portrait to complete this page." },
+        { p: "Our professional teachers love learning and pass that love and excitement to the children." },
+        { p: "We truly value continuity of care and know how important consistency is in a young child's life." },
       ]),
       "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
         { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
@@ -410,9 +435,54 @@ class Component extends DCLogic {
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
         { note: "Affiliation details", sub: "Affiliation details will be added here." },
       ]),
-      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
-        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
-        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
+      // ===== Mandatory Public Disclosure =====
+      "mpd-upgradation": P("Mandatory Public Disclosure", "#disclosure", "Upgradation Letter", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/upgradation-letter.pdf", label: "Download PDF", sub: "Upgradation Letter" } },
+      ]),
+      "mpd-society": P("Mandatory Public Disclosure", "#disclosure", "MSC Society", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/msc-society.pdf", label: "Download PDF", sub: "MSC Society" } },
+      ]),
+      "mpd-noc": P("Mandatory Public Disclosure", "#disclosure", "State NOC", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-noc.pdf", label: "Download PDF", sub: "State NOC" } },
+      ]),
+      "mpd-recognition": P("Mandatory Public Disclosure", "#disclosure", "Montessori State Recognition", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-recognition.pdf", label: "Download PDF", sub: "Montessori State Recognition" } },
+      ]),
+      "mpd-building-safety": P("Mandatory Public Disclosure", "#disclosure", "Building Safety Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/building-safety-certificate.pdf", label: "Download PDF", sub: "Building Safety Certificate" } },
+      ]),
+      "mpd-fire": P("Mandatory Public Disclosure", "#disclosure", "A-Camp Fire Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fire-certificate.pdf", label: "Download PDF", sub: "A-Camp Fire Certificate" } },
+      ]),
+      "mpd-water-health": P("Mandatory Public Disclosure", "#disclosure", "Water, Health & Sanitary Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/water-health-sanitary-certificate.pdf", label: "Download PDF", sub: "Water, Health & Sanitary Certificate" } },
+      ]),
+      "mpd-fee": P("Mandatory Public Disclosure", "#disclosure", "Fee Structure", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fee-structure.pdf", label: "Download PDF", sub: "Fee Structure" } },
+      ]),
+      "mpd-calendar": P("Mandatory Public Disclosure", "#disclosure", "Academic Calendar", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/academic-calendar.pdf", label: "Download PDF", sub: "Academic Calendar" } },
+      ]),
+      "mpd-smc": P("Mandatory Public Disclosure", "#disclosure", "SMC 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/smc-2026-27.pdf", label: "Download PDF", sub: "SMC 26-27" } },
+      ]),
+      "mpd-pta": P("Mandatory Public Disclosure", "#disclosure", "PTA 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/pta-2026-27.pdf", label: "Download PDF", sub: "PTA 26-27" } },
+      ]),
+      "mpd-3years": P("Mandatory Public Disclosure", "#disclosure", "3 Years Result", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/3-years-result.pdf", label: "Download PDF", sub: "3 Years Result" } },
       ]),
       // ===== School Life =====
       "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
@@ -541,18 +611,86 @@ class Component extends DCLogic {
         ["assets/gallery/biology-lab.jpg", "Biology Lab"],
       ] }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
-        { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
-        { video: { src: "http://www.montessoritechnoschool.com/wp-content/uploads/2022/03/MONTESSORI-SCHOOL.mp4" } },
+        { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
+        { h: "Teachers' Training on Karuna Clubs" },
+        { embed: { src: "https://www.youtube.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
+        { h: "State Aquatic Championship" },
+        { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
+        { h: "Startup Club — Classroom to Boardroom" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
+        { h: "Freshers' Day — \"Srikaram\"" },
+        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { h: "Monsoon Seed Ball Drive" },
+        { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
+        { h: "Flavours of Creativity" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
-      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [{ gallery: true }]),
+      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
+        { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
+        { list: [
+          ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
+          ["Founder's Day Blood Donation Camp", "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."],
+          ["Freshers' Day — \"Srikaram\"", "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."],
+          ["Teachers' Training on Karuna Clubs", "Run with Karuna International, Kurnool Kendra, the programme equipped teachers with activity-based approaches to strengthen Karuna Clubs and nurture compassion and social service."],
+          ["Startup Club — Classroom to Boardroom", "Senior secondary students pitched real business ideas to professional investors, blending Montessori self-direction with entrepreneurial practice."],
+          ["Monsoon Seed Ball Drive", "Classes VI and VII marked the start of the monsoon with a \"Roll a Ball… Grow a Forest\" seed-ball activity across the campus."],
+          ["World Zoonoses Day Awareness", "A veterinary surgeon, an animal-welfare volunteer and a Brahma Kumaris speaker led sessions on public health, animal welfare and responsible living."],
+          ["BMI Health Awareness Activity", "Classes VI and VII ran a peer-led Body Mass Index assessment, pairing practical maths with health education."],
+          ["Pre-Primary Orientation Programme", "New Pre-Primary parents were introduced to the Montessori philosophy and school routines ahead of their child's first year."],
+          ["International Yoga Day", "Students marked June 21st with yoga sessions promoting health, mindfulness and physical fitness."],
+          ["Flavours of Creativity", "Classes 8 and 9 explored nutrition and creativity at a culinary event themed \"Tasty bites, Healthy lives.\""],
+          ["Oxford University Press Teacher Workshop", "Faculty took part in a training session with an OUP Master Trainer on classroom methods aligned with the latest NEP guidelines."],
+        ] },
+        { gallery: [
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg", "Teachers' Training Programme"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg", "National Parents' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg", "Founder's Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg", "Blood Donation Camp"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg", "Freshers' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/12-scaled.jpg", "Freshers' Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/SEED-scaled.jpg", "Seed Ball Drive"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/zoo-scaled.jpg", "World Zoonoses Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/BMI-scaled.jpg", "BMI Activity"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/PP-scaled.jpg", "Pre-Primary Orientation"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/YOGA-scaled.jpg", "International Yoga Day"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
+        ] },
+      ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
         { note: "News feed", sub: "Share announcements and we'll build out the news list." },
       ]),
       "awards": P("News Room", "#news", "Awards & Achievements", "Celebrating our students and staff.", [
         { p: "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
-        { gallery: true },
+        { list: [
+          ["Science Olympiad Foundation Awards", "Students earned Medals of Appreciation across the International English (IEO), Science (NSO) and Computer Science (ICSO) Olympiads; three faculty members received Best District Teacher Awards for NSO, IMO and ICSO."],
+          ["State Aquatic Championship — 3 Medals", "Shruti won gold (100m Butterfly), silver (200m Backstroke) and bronze (50m Butterfly) at the Inter-District Aquatic Championship in Visakhapatnam."],
+          ["Chess: State & District Champions", "Thanvika (Class III) placed 1st at the State Level Chess Competition; Sushanth (Class IV) topped the Nandyal District Rapid Chess Selections and advanced to state level."],
+          ["International English Olympiad — Bronze", "Class 7 student Jessie Elena Giripogu won an international bronze medal and a ₹10,000 prize, presented by former CBSE Secretary Mr. Himanshu Gupta, IAS."],
+          ["State Karate Championship", "P. Adharva Dhev of Class II earned recognition at the 6th AP State Karate Championship."],
+          ["Olympic Day Association Tournament", "Pride Montessorians were Throwball (Girls) Champions, Handball (Girls) Runners-up and Softball (Boys) Runners-up."],
+          ["\"Best Karuna Club\" Award — Karunostav 2023", "Recognised at Karunostav 2023 in Chennai for outstanding Karuna Club activities conducted through the year."],
+          ["Top 100 Women Achievers in Education", "India Today magazine named a Montessori Indus Schools correspondent among the top 100 women achievers in education for 2023-24."],
+          ["World Teachers' Day — Best Teacher Awards", "Montessori teachers were honoured with Best Teacher Awards organised by APUSMA to mark World Teachers' Day."],
+          ["Rayalaseema Zonal Lawn Tennis — Multiple Medals", "A student won Under-14 and Under-16 titles and Mixed Doubles runner-up, going on to qualify for the State Level Tournament."],
+        ] },
+        { gallery: [
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Aquatic Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/15-scaled.jpg", "Aquatic Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w3-scaled.jpg", "Best Karuna Club Award, Karunostav 2023"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/WhatsApp-Image-2023-12-30-at-3.41.05-PM-1.jpeg", "Top 100 Women Achievers in Education"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w2.jpg", "Brainfeed School Excellence Award"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2023/03/WhatsApp-Image-2023-03-20-at-3.35.25-PM.jpeg", "Eenadu Quiz Competition"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/09/TEACHERS-DAY.jpg", "Teachers' Day Honours"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/08/NCC-CUP.jpg", "NCC Annual Training Camp"],
+        ] },
       ]),
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
         { note: "Circulars", sub: "Upload circulars and forms and we'll add download links." },
@@ -606,6 +744,8 @@ class Component extends DCLogic {
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
+      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
+      else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
     return {
