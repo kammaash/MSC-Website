@@ -18,8 +18,8 @@
   PAGE STRUCTURE
   ==============
   As with every page in this project (see index.html for the full explanation
-  of the runtime): <helmet> is lifted into <head>, <x-dc> is the markup
-  template with {{ }} holes, sc-for loops and sc-if conditionals, and the
+  of the runtime): helmet is lifted into head, x-dc is the markup
+  template with curly-brace holes, sc-for loops and sc-if conditionals, and the
   data-dc-script block at the bottom holds the `Component` class whose
   renderVals() supplies every value the template reads.
 
@@ -41,7 +41,7 @@
 <title>Montessori School, Vidyanagar, Kurnool | Montessori Schools</title>
 <meta name="description" content="Montessori School, Vidyanagar, Kurnool — a branch of the Montessori Schools, Kurnool. Academics, school life, campus, transport and admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
-<!-- The template runtime: finds the <x-dc> block below and renders it. -->
+<!-- The template runtime: finds the x-dc block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -195,7 +195,7 @@
      its own list of dropdown links. Menus open on hover (onMouseEnter sets
      openMenu to that index) and there is no click or keyboard affordance, so
      the dropdowns are effectively desktop-only.
-     The bar sticks to the top of the viewport; ref="{{ navRef }}" hands the
+     The bar sticks to the top of the viewport; its ref hands the
      element to the logic block, which measures it to decide when to show the
      floating pill below. -->
 <header ref="{{ navRef }}" style="{{ navHeaderStyle }}">
@@ -353,7 +353,7 @@
 
 <!-- STUDENT SHOWCASE / VIDEO
      The <video> has no src yet, so it currently renders as an empty black
-     player. ref="{{ videoRef }}" gives the logic block the element so it can
+     player. Its ref gives the logic block the element so it can
      save and restore the playback position across visits. Add the film by
      giving this element a src (or a <source> child). -->
 <section style="background:#a51915;color:#fff">

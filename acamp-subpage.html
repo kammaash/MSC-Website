@@ -31,7 +31,7 @@
   school name and the page it links back to differ. Content changes usually
   need to be made in both.
 
-  See index.html for the explanation of the <helmet> / <x-dc> / data-dc-script
+  See index.html for the explanation of the helmet / x-dc / data-dc-script
   structure that every page in this project shares.
 -->
 <html lang="en">
@@ -41,7 +41,7 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
-<!-- The template runtime: finds the <x-dc> block below and renders it. -->
+<!-- The template runtime: finds the x-dc block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -167,7 +167,7 @@
 <!-- CONTENT
      The generic page body: loop over `blocks` and render each according to its
      type flag. This chain of sc-if tests is what lets one piece of markup
-     serve every route, since the {{ }} language has no switch and cannot call
+     serve every route, since the curly-brace hole language has no switch and cannot call
      a function to pick a renderer.
 
      The five block types, all produced by the normaliser in renderVals():
