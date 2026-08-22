@@ -31,7 +31,7 @@
   school name and the page it links back to differ. Content changes usually
   need to be made in both.
 
-  See index.html for the explanation of the <helmet> / <x-dc> / data-dc-script
+  See index.html for the explanation of the helmet / x-dc / data-dc-script
   structure that every page in this project shares.
 -->
 <html lang="en">
@@ -41,7 +41,7 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
-<!-- The template runtime: finds the <x-dc> block below and renders it. -->
+<!-- The template runtime: finds the x-dc block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -50,7 +50,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;family=Nunito:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* Base reset and defaults, identical to the branch page's: shared MSC red
      palette, Nunito body copy, Quicksand headings. riseIn is unused on this
@@ -75,18 +75,6 @@
 
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
-
-  /* ===== Flip cards (real-photo gallery blocks) =====
-     Same mechanism as montessori-acamp.html: .flip is the 3D scene, .flip-in
-     is what rotates, .flip-f/.flip-b are the two faces. Every isGallery
-     block on this page (Events, Awards, Latest News, Photo Gallery, Team,
-     Pre-Primary, Physical Education, …) renders through one shared template
-     further down, so this one ruleset covers all of them. */
-  .flip{perspective:1400px}
-  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d}
-  .flip:hover .flip-in,.flip:focus-within .flip-in{transform:rotateY(180deg)}
-  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:inherit;overflow:hidden}
-  .flip-b{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
 
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
@@ -179,7 +167,7 @@
 <!-- CONTENT
      The generic page body: loop over `blocks` and render each according to its
      type flag. This chain of sc-if tests is what lets one piece of markup
-     serve every route, since the {{ }} language has no switch and cannot call
+     serve every route, since the curly-brace hole language has no switch and cannot call
      a function to pick a renderer.
 
      The five block types, all produced by the normaliser in renderVals():
@@ -187,9 +175,8 @@
        isPara     a paragraph (the common case)
        isList     bulleted cards, each a bold term followed by a description
        isGallery  real photos when a page's { gallery: [[src,caption],...] }
-                  entry supplies them, shown as flip cards (hover/focus to
-                  read the caption on the back); otherwise the original
-                  6-tile placeholder grid with a "photos coming soon" note
+                  entry supplies them; otherwise the original 6-tile
+                  placeholder grid with a "photos coming soon" note
        isNote     a highlighted panel, used to mark exactly what content is
                   still missing and what the school needs to supply
      Adding a sixth type means adding a flag in the normaliser and an sc-if
@@ -218,13 +205,9 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div tabindex="0" class="flip" style="aspect-ratio:4/3;border-radius:12px">
-                  <div class="flip-in">
-                    <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
-                    <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;justify-content:center;align-items:flex-start">
-                      <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:14.5px;color:#fff;line-height:1.35">{{ im.caption }}</span>
-                    </div>
-                  </div>
+                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
                 </div>
               </sc-for>
             </div>
@@ -263,6 +246,22 @@
               Your browser doesn't support embedded video. <a href="{{ b.video.src }}" style="color:#fff">Watch/download it directly</a>.
             </video>
           </div>
+        </sc-if>
+        <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
+          <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+        </sc-if>
+        <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
+          <a href="{{ b.link.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:20px 0 0;text-decoration:none;background:#fff7f4">
+            <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+            <span>
+              <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ b.link.label }}</span>
+              <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ b.link.sub }}</span>
+            </span>
+          </a>
         </sc-if>
       </div>
     </sc-for>
@@ -344,7 +343,13 @@ class Component extends DCLogic {
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
         ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
-        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
+        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"] ] },
+      { label: "Mandatory Public Disclosure", href: MI + "#disclosure", items: [
+        ["Upgradation Letter", "mpd-upgradation"], ["MSC Society", "mpd-society"], ["State NOC", "mpd-noc"],
+        ["Montessori State Recognition", "mpd-recognition"], ["Building Safety Certificate", "mpd-building-safety"],
+        ["A-Camp Fire Certificate", "mpd-fire"], ["Water, Health & Sanitary Certificate", "mpd-water-health"],
+        ["Fee Structure", "mpd-fee"], ["Academic Calendar", "mpd-calendar"], ["SMC 26-27", "mpd-smc"],
+        ["PTA 26-27", "mpd-pta"], ["3 Years Result", "mpd-3years"] ] },
       { label: "School Life", href: "#house", items: [] },
       { label: "Academics", href: MI + "#academics", items: [
         ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
@@ -430,9 +435,54 @@ class Component extends DCLogic {
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
         { note: "Affiliation details", sub: "Affiliation details will be added here." },
       ]),
-      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
-        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
-        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
+      // ===== Mandatory Public Disclosure =====
+      "mpd-upgradation": P("Mandatory Public Disclosure", "#disclosure", "Upgradation Letter", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/upgradation-letter.pdf", label: "Download PDF", sub: "Upgradation Letter" } },
+      ]),
+      "mpd-society": P("Mandatory Public Disclosure", "#disclosure", "MSC Society", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/msc-society.pdf", label: "Download PDF", sub: "MSC Society" } },
+      ]),
+      "mpd-noc": P("Mandatory Public Disclosure", "#disclosure", "State NOC", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-noc.pdf", label: "Download PDF", sub: "State NOC" } },
+      ]),
+      "mpd-recognition": P("Mandatory Public Disclosure", "#disclosure", "Montessori State Recognition", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-recognition.pdf", label: "Download PDF", sub: "Montessori State Recognition" } },
+      ]),
+      "mpd-building-safety": P("Mandatory Public Disclosure", "#disclosure", "Building Safety Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/building-safety-certificate.pdf", label: "Download PDF", sub: "Building Safety Certificate" } },
+      ]),
+      "mpd-fire": P("Mandatory Public Disclosure", "#disclosure", "A-Camp Fire Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fire-certificate.pdf", label: "Download PDF", sub: "A-Camp Fire Certificate" } },
+      ]),
+      "mpd-water-health": P("Mandatory Public Disclosure", "#disclosure", "Water, Health & Sanitary Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/water-health-sanitary-certificate.pdf", label: "Download PDF", sub: "Water, Health & Sanitary Certificate" } },
+      ]),
+      "mpd-fee": P("Mandatory Public Disclosure", "#disclosure", "Fee Structure", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fee-structure.pdf", label: "Download PDF", sub: "Fee Structure" } },
+      ]),
+      "mpd-calendar": P("Mandatory Public Disclosure", "#disclosure", "Academic Calendar", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/academic-calendar.pdf", label: "Download PDF", sub: "Academic Calendar" } },
+      ]),
+      "mpd-smc": P("Mandatory Public Disclosure", "#disclosure", "SMC 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/smc-2026-27.pdf", label: "Download PDF", sub: "SMC 26-27" } },
+      ]),
+      "mpd-pta": P("Mandatory Public Disclosure", "#disclosure", "PTA 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/pta-2026-27.pdf", label: "Download PDF", sub: "PTA 26-27" } },
+      ]),
+      "mpd-3years": P("Mandatory Public Disclosure", "#disclosure", "3 Years Result", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/3-years-result.pdf", label: "Download PDF", sub: "3 Years Result" } },
       ]),
       // ===== School Life =====
       "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
@@ -562,22 +612,20 @@ class Component extends DCLogic {
       ] }]),
       "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
-        { note: "Why these show a placeholder for now", sub: "The school's WordPress host blocks video requests that don't come from its own domain (\"hotlink protection\") — that's why the .mp4 files won't play from this local page. Each video below now points at a local file under assets/videos/. Download each source file (right-click the link on the school site — or open it in a new tab and use Ctrl+S) and save it with the exact filename listed, and it will start playing here with no further changes." },
-        { h: "Founder's Day — Blood Donation Camp" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/BIG-MAM.mp4 → save as assets/videos/founders-day.mp4" },
-        { video: { src: "assets/videos/founders-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg" } },
+        { h: "Teachers' Training on Karuna Clubs" },
+        { embed: { src: "https://www.youtube.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
+        { h: "State Aquatic Championship" },
+        { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
+        { h: "Startup Club — Classroom to Boardroom" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
         { h: "Freshers' Day — \"Srikaram\"" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/FRESHERS-DAY.mp4 → save as assets/videos/freshers-day.mp4" },
-        { video: { src: "assets/videos/freshers-day.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/11-scaled.jpg" } },
-        { h: "Campus Moments" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2026/07/WhatsApp-Video-2026-07-13-at-10.09.40-AM.mp4 → save as assets/videos/campus-moments.mp4" },
-        { video: { src: "assets/videos/campus-moments.mp4", poster: "https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/14-scaled.jpg" } },
-        { h: "Children's Day Celebrations" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2022/11/CHILDRENS-DAY-22.mp4 → save as assets/videos/childrens-day.mp4" },
-        { video: { src: "assets/videos/childrens-day.mp4", poster: "assets/gallery/campus-life.jpg" } },
-        { h: "Krishna Janmashtami" },
-        { p: "Source: montessoricbseacamp.com/wp-content/uploads/2023/09/KRISHNASTAMI.mp4 → save as assets/videos/janmashtami.mp4" },
-        { video: { src: "assets/videos/janmashtami.mp4", poster: "assets/gallery/campus-1.jpg" } },
+        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { h: "Monsoon Seed Ball Drive" },
+        { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
+        { h: "Flavours of Creativity" },
+        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
+        { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
@@ -636,6 +684,12 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w3-scaled.jpg", "Best Karuna Club Award, Karunostav 2023"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/WhatsApp-Image-2023-12-30-at-3.41.05-PM-1.jpeg", "Top 100 Women Achievers in Education"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w2.jpg", "Brainfeed School Excellence Award"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2023/03/WhatsApp-Image-2023-03-20-at-3.35.25-PM.jpeg", "Eenadu Quiz Competition"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/09/TEACHERS-DAY.jpg", "Teachers' Day Honours"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/08/NCC-CUP.jpg", "NCC Annual Training Camp"],
         ] },
       ]),
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
@@ -690,6 +744,8 @@ class Component extends DCLogic {
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
+      else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
+      else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
     return {

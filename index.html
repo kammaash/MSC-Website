@@ -11,23 +11,23 @@
   There is no build step and no server. Each page is one self-contained file
   rendered in the browser by support.js, and always has the same three parts:
 
-    1. <helmet>   Google Fonts, the page stylesheet and cursor.js. Its children
-                  are lifted into <head> when the runtime boots.
+    1. helmet     Google Fonts, the page stylesheet and cursor.js. Its children
+                  are lifted into head when the runtime boots.
 
-    2. <x-dc>     the markup template. Ordinary HTML plus four extras:
-                    {{ expr }}    a hole, filled from renderVals() in part 3
-                    <sc-for>      repeat the children once per array element
-                    <sc-if>       render the children only if value is truthy
-                    style-hover   a genuine :hover rule (inline style cannot
+    2. x-dc       the markup template. Ordinary HTML plus four extras:
+                    curly-brace holes -- a hole, filled from renderVals() in part 3
+                    sc-for        repeat the children once per array element
+                    sc-if         render the children only if value is truthy
+                    style-hover   a genuine hover rule (inline style cannot
                                   express one, so the runtime compiles this
                                   attribute into a real generated CSS class)
 
-    3. <script type="text/x-dc" data-dc-script>
-                  the page logic: a single `class Component extends DCLogic`
-                  whose renderVals() returns the flat object that every
-                  {{ hole }} above is resolved against.
+    3. script      type="text/x-dc" data-dc-script -- the page logic: a single
+                  `class Component extends DCLogic` whose renderVals() returns
+                  the flat object that every curly-brace hole above is resolved
+                  against.
 
-  The {{ }} language is deliberately tiny: property paths, string / number /
+  The curly-brace hole language is deliberately tiny: property paths, string / number /
   boolean literals, `!`, and the equality operators. No function calls, no
   arithmetic. Anything more involved is computed in renderVals() and exposed
   under a single name.
@@ -46,12 +46,12 @@
 <meta name="description" content="Montessori School Committee runs two branches in Kurnool, Andhra Pradesh — Montessori School A-Camp and Montessori School Vidyanagar. Admissions open.">
 <link rel="icon" type="image/png" href="assets/group-logo.png">
 <!-- The template runtime. Must load before the page renders: it finds the
-     <x-dc> block below, compiles it, and swaps it for the live markup. -->
+     x-dc block below, compiles it, and swaps it for the live markup. -->
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
-<!-- Everything in <helmet> is moved into <head> at boot: fonts first, then
+<!-- Everything in helmet is moved into head at boot: fonts first, then
      the page stylesheet, then the shared custom-cursor script. -->
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -185,7 +185,7 @@
 </div>
 
 <!-- ============ NAV ============
-     Sticky translucent header. ref="{{ navRef }}" hands the real DOM node to
+     Sticky translucent header. Its ref hands the real DOM node to
      the logic block, which adds a drop shadow once the page is scrolled.
      The nav links are in-page anchors; the two branch sites are reached from
      the cards further down and from the footer. -->
