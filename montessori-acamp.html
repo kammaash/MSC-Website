@@ -214,7 +214,7 @@
     <div style="{{ menuRowStyle }}">
       <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
         <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+          <a href="{{ m.href }}" target="{{ m.target }}" rel="noopener" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
           <sc-if value="{{ m.showDropdown }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
               <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
@@ -594,6 +594,7 @@
           <a href="#gallery" style-hover="color:#fff">Gallery</a>
           <a href="#news" style-hover="color:#fff">News Room</a>
           <a href="#admissions" style-hover="color:#fff">Admission</a>
+          <a href="https://library.msceducation.net" target="_blank" rel="noopener" style-hover="color:#fff">Digital Library</a>
           <a href="acamp-subpage.html#house" style-hover="color:#fff">School Life</a>
         </div>
       </div>
@@ -777,6 +778,7 @@ class Component extends DCLogic {
       { label: "Admission", href: "#admissions", items: [
         { label: "Admission Procedure", href: SUB + "procedure" }, { label: "Admission Form", href: SUB + "form" },
         { label: "Brochure", href: SUB + "brochure" }, { label: "School Fee", href: SUB + "fee" } ] },
+      { label: "Digital Library", href: "https://library.msceducation.net", items: [], external: true },
     ];
     // Flatten the tree into exactly what the template needs. The {{ }} language
     // cannot compare or compute, so every decision is resolved to a plain
@@ -789,6 +791,7 @@ class Component extends DCLogic {
       showDropdown: open === i && m.items.length > 0,
       color: i === 0 ? "#fff" : "#a51915",
       bg: i === 0 ? "#a51915" : "transparent",
+      target: m.external ? "_blank" : "_self",
       open: () => this.setState({ openMenu: i }),
     }));
 
