@@ -205,9 +205,20 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
-                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                <!-- Flip card: perspective on the outer box, the inner box
+                     rotates 180deg on hover (style-hover compiles this into a
+                     real :hover rule). Front and back are both absolutely
+                     positioned, each hidden from view when facing away via
+                     backface-visibility, so only one is ever visible at a time. -->
+                <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                  <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                      <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                    </div>
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
+                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
+                    </div>
+                  </div>
                 </div>
               </sc-for>
             </div>
