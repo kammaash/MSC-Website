@@ -31,7 +31,7 @@
   school name and the page it links back to differ. Content changes usually
   need to be made in both.
 
-  See index.html for the explanation of the <helmet> / <x-dc> / data-dc-script
+  See index.html for the explanation of the helmet / x-dc / data-dc-script
   structure that every page in this project shares.
 -->
 <html lang="en">
@@ -41,7 +41,7 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
-<!-- The template runtime: finds the <x-dc> block below and renders it. -->
+<!-- The template runtime: finds the x-dc block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -167,7 +167,7 @@
 <!-- CONTENT
      The generic page body: loop over `blocks` and render each according to its
      type flag. This chain of sc-if tests is what lets one piece of markup
-     serve every route, since the {{ }} language has no switch and cannot call
+     serve every route, since the curly-brace hole language has no switch and cannot call
      a function to pick a renderer.
 
      The five block types, all produced by the normaliser in renderVals():
@@ -205,9 +205,20 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
-                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                <!-- Flip card: perspective on the outer box, the inner box
+                     rotates 180deg on hover (style-hover compiles this into a
+                     real :hover rule). Front and back are both absolutely
+                     positioned, each hidden from view when facing away via
+                     backface-visibility, so only one is ever visible at a time. -->
+                <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                  <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                      <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                    </div>
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
+                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
+                    </div>
+                  </div>
                 </div>
               </sc-for>
             </div>
@@ -343,7 +354,13 @@ class Component extends DCLogic {
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
         ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
-        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
+        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"] ] },
+      { label: "Mandatory Public Disclosure", href: MI + "#disclosure", items: [
+        ["Upgradation Letter", "mpd-upgradation"], ["MSC Society", "mpd-society"], ["State NOC", "mpd-noc"],
+        ["Montessori State Recognition", "mpd-recognition"], ["Building Safety Certificate", "mpd-building-safety"],
+        ["A-Camp Fire Certificate", "mpd-fire"], ["Water, Health & Sanitary Certificate", "mpd-water-health"],
+        ["Fee Structure", "mpd-fee"], ["Academic Calendar", "mpd-calendar"], ["SMC 26-27", "mpd-smc"],
+        ["PTA 26-27", "mpd-pta"], ["3 Years Result", "mpd-3years"] ] },
       { label: "School Life", href: "#house", items: [] },
       { label: "Academics", href: MI + "#academics", items: [
         ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
@@ -429,9 +446,54 @@ class Component extends DCLogic {
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
         { note: "Affiliation details", sub: "Affiliation details will be added here." },
       ]),
-      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
-        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
-        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
+      // ===== Mandatory Public Disclosure =====
+      "mpd-upgradation": P("Mandatory Public Disclosure", "#disclosure", "Upgradation Letter", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/upgradation-letter.pdf", label: "Download PDF", sub: "Upgradation Letter" } },
+      ]),
+      "mpd-society": P("Mandatory Public Disclosure", "#disclosure", "MSC Society", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/msc-society.pdf", label: "Download PDF", sub: "MSC Society" } },
+      ]),
+      "mpd-noc": P("Mandatory Public Disclosure", "#disclosure", "State NOC", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-noc.pdf", label: "Download PDF", sub: "State NOC" } },
+      ]),
+      "mpd-recognition": P("Mandatory Public Disclosure", "#disclosure", "Montessori State Recognition", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/state-recognition.pdf", label: "Download PDF", sub: "Montessori State Recognition" } },
+      ]),
+      "mpd-building-safety": P("Mandatory Public Disclosure", "#disclosure", "Building Safety Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/building-safety-certificate.pdf", label: "Download PDF", sub: "Building Safety Certificate" } },
+      ]),
+      "mpd-fire": P("Mandatory Public Disclosure", "#disclosure", "A-Camp Fire Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fire-certificate.pdf", label: "Download PDF", sub: "A-Camp Fire Certificate" } },
+      ]),
+      "mpd-water-health": P("Mandatory Public Disclosure", "#disclosure", "Water, Health & Sanitary Certificate", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/water-health-sanitary-certificate.pdf", label: "Download PDF", sub: "Water, Health & Sanitary Certificate" } },
+      ]),
+      "mpd-fee": P("Mandatory Public Disclosure", "#disclosure", "Fee Structure", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/fee-structure.pdf", label: "Download PDF", sub: "Fee Structure" } },
+      ]),
+      "mpd-calendar": P("Mandatory Public Disclosure", "#disclosure", "Academic Calendar", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/academic-calendar.pdf", label: "Download PDF", sub: "Academic Calendar" } },
+      ]),
+      "mpd-smc": P("Mandatory Public Disclosure", "#disclosure", "SMC 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/smc-2026-27.pdf", label: "Download PDF", sub: "SMC 26-27" } },
+      ]),
+      "mpd-pta": P("Mandatory Public Disclosure", "#disclosure", "PTA 26-27", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/pta-2026-27.pdf", label: "Download PDF", sub: "PTA 26-27" } },
+      ]),
+      "mpd-3years": P("Mandatory Public Disclosure", "#disclosure", "3 Years Result", "Official document, available to view or download.", [
+        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
+        { link: { href: "assets/documents/3-years-result.pdf", label: "Download PDF", sub: "3 Years Result" } },
       ]),
       // ===== School Life =====
       "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
@@ -633,6 +695,12 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w3-scaled.jpg", "Best Karuna Club Award, Karunostav 2023"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/WhatsApp-Image-2023-12-30-at-3.41.05-PM-1.jpeg", "Top 100 Women Achievers in Education"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w2.jpg", "Brainfeed School Excellence Award"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2023/03/WhatsApp-Image-2023-03-20-at-3.35.25-PM.jpeg", "Eenadu Quiz Competition"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/09/TEACHERS-DAY.jpg", "Teachers' Day Honours"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/08/NCC-CUP.jpg", "NCC Annual Training Camp"],
         ] },
       ]),
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
