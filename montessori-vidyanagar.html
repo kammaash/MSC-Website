@@ -203,7 +203,7 @@
     <div style="{{ menuRowStyle }}">
       <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
         <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+          <a href="{{ m.href }}" target="{{ m.target }}" rel="noopener" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
           <sc-if value="{{ m.showDropdown }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
               <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
@@ -446,7 +446,7 @@
   <div class="wrap" style="padding-top:74px;padding-bottom:74px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:26px">
       <div>
-        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Gallery</div>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">gallery</div>
         <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;margin:12px 0 0">Life in pictures</h2>
       </div>
       <span style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f">more photos coming soon</span>
@@ -538,9 +538,10 @@
       <div>
         <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cf9c8f;margin-bottom:14px">Quick links</div>
         <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-          <a href="#gallery" style-hover="color:#fff">Gallery</a>
+          <a href="#gallery" style-hover="color:#fff">gallery</a>
           <a href="#news" style-hover="color:#fff">News Room</a>
           <a href="#admissions" style-hover="color:#fff">Admission</a>
+          <a href="https://library.msceducation.net" target="_blank" rel="noopener" style-hover="color:#fff">Digital Library</a>
           <a href="vidyanagar-subpage.html#house" style-hover="color:#fff">School Life</a>
         </div>
       </div>
@@ -642,7 +643,7 @@ class Component extends DCLogic {
       this._headerOffset = header.offsetTop;          // top-bar height, before it ever fixes
       this._navH = header.offsetHeight || 52;         // measured but currently unused
       // Section id -> the label the pill shows for it, in document order.
-      const SPY = [["top","Home"],["about","About"],["academics","Academics"],["life","School Life"],["campus","Campus & Facilities"],["transport","Transport"],["gallery","Gallery"],["news","News Room"],["admissions","Admission"]];
+      const SPY = [["top","Home"],["about","About"],["academics","Academics"],["life","School Life"],["campus","Campus & Facilities"],["transport","Transport"],["gallery","gallery"],["news","News Room"],["admissions","Admission"]];
       const apply = () => {
         const y = window.scrollY;
         const fixed = y > (this._headerOffset - 4);
@@ -716,14 +717,15 @@ class Component extends DCLogic {
         { label: "Swimming Pool", href: SUB + "swimming-pool" }, { label: "Sports", href: SUB + "sports-arena" },
         { label: "Music", href: SUB + "music" }, { label: "Infirmary", href: SUB + "infirmary" } ] },
       { label: "Transport", href: SUB + "transport", items: [] },
-      { label: "Gallery", href: "#gallery", items: [
-        { label: "Photo Gallery", href: SUB + "photo-gallery" }, { label: "Videos", href: SUB + "videos" } ] },
+      { label: "gallery", href: "#gallery", items: [
+        { label: "Photo gallery", href: SUB + "photo-gallery" }, { label: "Videos", href: SUB + "videos" } ] },
       { label: "News Room", href: "#news", items: [
         { label: "Events", href: SUB + "events-news" }, { label: "Latest News", href: SUB + "latest-news" },
         { label: "Awards & Achievements", href: SUB + "awards" }, { label: "Circulars & Downloads", href: SUB + "circulars" } ] },
       { label: "Admission", href: "#admissions", items: [
         { label: "Admission Procedure", href: SUB + "procedure" }, { label: "Admission Form", href: SUB + "form" },
         { label: "Brochure", href: SUB + "brochure" }, { label: "School Fee", href: SUB + "fee" } ] },
+      { label: "Digital Library", href: "https://library.msceducation.net", items: [], external: true },
     ];
     // Flatten the tree into exactly what the template needs. The {{ }} language
     // cannot compare or compute, so every decision is resolved to a plain
@@ -736,6 +738,7 @@ class Component extends DCLogic {
       showDropdown: open === i && m.items.length > 0,
       color: i === 0 ? "#fff" : "#a51915",
       bg: i === 0 ? "#a51915" : "transparent",
+      target: m.external ? "_blank" : "_self",
       open: () => this.setState({ openMenu: i }),
     }));
 

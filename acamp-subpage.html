@@ -76,6 +76,16 @@
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
 
+  /* ===== Flip cards (matches the homepage gallery) =====
+     .flip is the 3D scene (needs perspective); .flip-in is the piece that
+     actually rotates; .flip-f/.flip-b are the two faces, stacked on top of
+     each other and each hidden when facing away from the viewer. */
+  .flip{perspective:1400px}
+  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d}
+  .flip:hover .flip-in,.flip:focus-within .flip-in{transform:rotateY(180deg)}
+  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:inherit;overflow:hidden}
+  .flip-b{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
+
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
     .wrap{padding-left:22px;padding-right:22px}
@@ -217,6 +227,12 @@
                     </div>
                     <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
                       <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
+=======
+                <div tabindex="0" class="flip" style="aspect-ratio:4/3;border-radius:12px">
+                  <div class="flip-in">
+                    <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
+                    <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;align-items:flex-start;justify-content:center;gap:8px">
+                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
                     </div>
                   </div>
                 </div>
@@ -260,7 +276,7 @@
         </sc-if>
         <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
-            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </sc-if>
         <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
@@ -386,8 +402,8 @@ class Component extends DCLogic {
         ["The Campus", "the-campus"], ["Classrooms", "ac-classrooms"], ["Labs", "science-labs"], ["Library", "library"],
         ["Swimming Pool", "swimming-pool"], ["Sports", "sports-arena"], ["Music", "music"], ["Infirmary", "infirmary"] ] },
       { label: "Transport", href: "#transport", items: [] },
-      { label: "Gallery", href: MI + "#gallery", items: [
-        ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
+      { label: "gallery", href: MI + "#gallery", items: [
+        ["Photo gallery", "photo-gallery"], ["Videos", "videos"] ] },
       { label: "News Room", href: MI + "#news", items: [
         ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
       { label: "Admission", href: MI + "#admissions", items: [
@@ -618,7 +634,7 @@ class Component extends DCLogic {
         { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
       ]),
       // ===== Gallery =====
-      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: [
+      "photo-gallery": P("gallery", "#gallery", "Photo gallery", "Moments from life at Montessori.", [{ gallery: [
         ["assets/gallery/campus-1.jpg", "Campus"],
         ["assets/gallery/campus-2.jpg", "Campus"],
         ["assets/gallery/campus-life.jpg", "Campus Life"],
@@ -635,19 +651,25 @@ class Component extends DCLogic {
         ["assets/gallery/math-lab.jpg", "Math Lab"],
         ["assets/gallery/biology-lab.jpg", "Biology Lab"],
       ] }]),
-      "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
+      "videos": P("gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
+        { h: "The Aureate Quill — Golden Jubilee English Club Magazine Launch" },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/HWN4879wu7Y", title: "The Aureate Quill — Golden Jubilee English Club Magazine Launch" } },
+        { h: "Independence Day Celebrations" },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/sZSPKWXSxgE", title: "Independence Day Celebrations" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/XtKAUBGviZk", title: "Independence Day Celebrations" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/GYNW4YmMlYA", title: "Independence Day Celebrations" } },
         { h: "Teachers' Training on Karuna Clubs" },
-        { embed: { src: "https://www.youtube.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
         { h: "State Aquatic Championship" },
-        { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
         { h: "Startup Club — Classroom to Boardroom" },
         { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
         { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
         { h: "Freshers' Day — \"Srikaram\"" },
-        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
         { h: "Monsoon Seed Ball Drive" },
-        { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
+        { embed: { src: "https://www.youtube-nocookie.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
         { h: "Flavours of Creativity" },
         { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
         { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
@@ -656,6 +678,13 @@ class Component extends DCLogic {
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
         { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
         { list: [
+          ["The Aureate Quill — English Club Magazine Launch", "The Montessori English Club launched \"The Aureate Quill — From Golden Roots to Glorious Heights\", its first magazine edition, marking the institution's Golden Jubilee. Chief guests Mrs. Azra Javed (Secretary & Correspondent, Osmania College), Mr. Bankin (Retd. Professor in English, Gooty) and Mr. Viswanath Gopalan (Chrysalis) graced the occasion."],
+          ["\"Emote to Empower\" — A Platform to Feel, Deal & Heal", "A mental wellness initiative for students, parents and educators led by Dr. Kartika Lakshmi, focused on emotional guidance, counselling and building emotionally resilient individuals alongside academic growth."],
+          ["Independence Day Celebrations", "The campus marked Independence Day with flag hoisting by Director Mr. K. N. V. Rajasekhar, the National Anthem, patriotic dance performances, an NCC march-past, and — for the first time — teachers joining the march-past and performing a state-costume cultural dance celebrating unity in diversity."],
+          ["Science Olympiad Foundation (SOF) Awards", "Students earned Medals of Appreciation and Certificates across the International English, Science and Computer Science Olympiads (IEO, NSO, ICSO). Teachers Mr. Mohan Rao K, Mrs. Sirisha B and Mrs. Swetha K.M were honoured with Best District Teacher Awards for NSO, IMO and ICSO respectively."],
+          ["11th Sub-Junior & Junior Inter-District Aquatic Championship", "Shruti won three medals for Montessori at the state-level swimming championship in Visakhapatnam — Gold (100m Butterfly), Silver (200m Backstroke) and Bronze (50m Butterfly) in the Girls' Group 1-B category."],
+          ["Chess Champions — State & District Level", "Thanvika (Class III) placed 1st in the F-07 category at the State Level Chess Competition, and Sushanth (Class IV) placed 1st in the Nandyal District Rapid Chess Selections, qualifying for the state level."],
+          ["6th AP State Karate Championship 2026", "P. Adharva Dhev of Class II earned recognition at the state karate championship, with the school wishing him continued success at the national level."],
           ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
           ["Founder's Day Blood Donation Camp", "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."],
           ["Freshers' Day — \"Srikaram\"", "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."],
@@ -670,6 +699,10 @@ class Component extends DCLogic {
           ["Oxford University Press Teacher Workshop", "Faculty took part in a training session with an OUP Master Trainer on classroom methods aligned with the latest NEP guidelines."],
         ] },
         { gallery: [
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/emote-scaled.jpg", "Emote to Empower"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Science Olympiad Foundation Awards"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
+          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg", "Teachers' Training Programme"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg", "National Parents' Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg", "Founder's Day"],
