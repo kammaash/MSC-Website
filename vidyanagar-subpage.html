@@ -372,8 +372,8 @@ class Component extends DCLogic {
         ["The Campus", "the-campus"], ["Classrooms", "ac-classrooms"], ["Labs", "science-labs"], ["Library", "library"],
         ["Swimming Pool", "swimming-pool"], ["Sports", "sports-arena"], ["Music", "music"], ["Infirmary", "infirmary"] ] },
       { label: "Transport", href: "#transport", items: [] },
-      { label: "Gallery", href: MI + "#gallery", items: [
-        ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
+      { label: "gallery", href: MI + "#gallery", items: [
+        ["Photo gallery", "photo-gallery"], ["Videos", "videos"] ] },
       { label: "News Room", href: MI + "#news", items: [
         ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
       { label: "Admission", href: MI + "#admissions", items: [
@@ -519,9 +519,9 @@ class Component extends DCLogic {
         { p: "Routes cover Kurnool city and nearby areas. Detailed stop-by-stop routes and timings are available from the school office." },
         { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
       ]),
-      // ===== Gallery =====
-      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: true }]),
-      "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
+      // ===== gallery =====
+      "photo-gallery": P("gallery", "#gallery", "Photo gallery", "Moments from life at Montessori.", [{ gallery: true }]),
+      "videos": P("gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from classrooms and labs to the studio, stage and sports field." },
         { note: "Video embeds", sub: "Share YouTube links or files and we'll embed them here." },
       ]),
