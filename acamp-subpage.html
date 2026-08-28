@@ -322,7 +322,13 @@ class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
   //           means no hash, which resolves to the fallback page.
-  state = { openMenu: -1, route: "" };
+  // newEvents: content loaded from data/events.json (see componentDidMount).
+  //            Lets a non-technical operator add new events — each with a
+  //            title, message paragraphs, photos and YouTube videos — by
+  //            editing that one plain JSON file, without touching this page's
+  //            code at all. Starts empty so the page still works if the fetch
+  //            hasn't resolved yet or the file is temporarily unavailable.
+  state = { openMenu: -1, route: "", newEvents: [] };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -338,6 +344,14 @@ class Component extends DCLogic {
     // hashchange, not click handlers: this catches in-page links, the browser's
     // back and forward buttons, and hashes typed straight into the address bar.
     window.addEventListener("hashchange", this._apply);
+
+    // Load operator-added events. Fails silently (page just shows the
+    // historical hardcoded events below) if the file is missing or malformed,
+    // so a bad edit to the JSON can't take the whole page down.
+    fetch("data/events.json")
+      .then((r) => r.ok ? r.json() : [])
+      .then((events) => { if (Array.isArray(events)) this.setState({ newEvents: events }); })
+      .catch(() => {});
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
@@ -732,6 +746,30 @@ class Component extends DCLogic {
       { p: "Select any item from the dropdown navigation to open its dedicated page." },
     ]);
     const current = pages[route] || fallback;
+
+    // ---- Merge in operator-added events from data/events.json ----
+    // Only on the Events page. Each JSON event becomes a heading, its message
+    // paragraphs, a photo gallery (if any photos were given) and embedded
+    // YouTube videos (if any were given) — converted into the same compact
+    // shape ({ h }, { p }, { gallery }, { embed }) the hardcoded content below
+    // already uses, so it flows through the exact same rendering logic.
+    // New events are placed newest-first, right after the page's intro line.
+    if (route === "events-news" && this.state.newEvents && this.state.newEvents.length) {
+      const jsonBlocks = [];
+      this.state.newEvents.forEach((ev) => {
+        if (ev.title) jsonBlocks.push({ h: ev.title });
+        (ev.paragraphs || []).forEach((p) => jsonBlocks.push({ p }));
+        if (ev.photos && ev.photos.length) {
+          jsonBlocks.push({ gallery: ev.photos.map((ph) => [ph.src, ph.caption]) });
+        }
+        (ev.videos || []).forEach((v) => {
+          jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
+        });
+      });
+      // current.blocks[0] is the standing intro paragraph; new events go
+      // directly after it, ahead of the older hardcoded history below.
+      current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
+    }
 
     // ---- Normalise blocks into the flagged form the template renders ----
     // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
