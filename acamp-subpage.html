@@ -76,16 +76,6 @@
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
 
-  /* ===== Flip cards (matches the homepage gallery) =====
-     .flip is the 3D scene (needs perspective); .flip-in is the piece that
-     actually rotates; .flip-f/.flip-b are the two faces, stacked on top of
-     each other and each hidden when facing away from the viewer. */
-  .flip{perspective:1400px}
-  .flip-in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,.15,.2,1);transform-style:preserve-3d}
-  .flip:hover .flip-in,.flip:focus-within .flip-in{transform:rotateY(180deg)}
-  .flip-f,.flip-b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:inherit;overflow:hidden}
-  .flip-b{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:flex-end}
-
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
     .wrap{padding-left:22px;padding-right:22px}
@@ -227,12 +217,6 @@
                     </div>
                     <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
                       <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
-=======
-                <div tabindex="0" class="flip" style="aspect-ratio:4/3;border-radius:12px">
-                  <div class="flip-in">
-                    <div class="flip-f" style="border:1px solid #f0e0dc"><img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>
-                    <div class="flip-b" style="background:linear-gradient(160deg,#a51915,#7f120f);border:1px solid #f0e0dc;padding:16px;align-items:flex-start;justify-content:center;gap:8px">
-                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
                     </div>
                   </div>
                 </div>
@@ -276,7 +260,7 @@
         </sc-if>
         <sc-if value="{{ b.isEmbed }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
-            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" referrerpolicy="strict-origin-when-cross-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
         </sc-if>
         <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
@@ -334,17 +318,27 @@
   page on the A-Camp site. Editing content here is the normal way to work on
   these pages; the markup above almost never needs to change.
 */
+
+// Which routes load their content from a JSON file (see componentDidMount
+// and the merge step in renderVals below), and which file backs each one.
+// Add a new entry here whenever a new JSON-driven page is created.
+const JSON_CONTENT_FILES = {
+  "events-news": "data/events.json",
+  "year-2026-27": "data/year-2026-27.json",
+};
+
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
   //           means no hash, which resolves to the fallback page.
-  // newEvents: content loaded from data/events.json (see componentDidMount).
-  //            Lets a non-technical operator add new events — each with a
-  //            title, message paragraphs, photos and YouTube videos — by
-  //            editing that one plain JSON file, without touching this page's
-  //            code at all. Starts empty so the page still works if the fetch
-  //            hasn't resolved yet or the file is temporarily unavailable.
-  state = { openMenu: -1, route: "", newEvents: [] };
+  // jsonContent: content loaded from the files in JSON_CONTENT_FILES below
+  //              (see componentDidMount). Lets a non-technical operator add
+  //              new events/news — each with a title, message paragraphs,
+  //              photos and YouTube videos — by editing one plain JSON file
+  //              per page, without touching this page's code at all. Starts
+  //              empty per route so pages still work if a fetch hasn't
+  //              resolved yet or a file is temporarily unavailable.
+  state = { openMenu: -1, route: "", jsonContent: {} };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -358,16 +352,23 @@ class Component extends DCLogic {
     };
     this._apply();                                      // resolve the hash the page was opened with
     // hashchange, not click handlers: this catches in-page links, the browser's
-    // back and forward buttons, and hashes typed straight into the address bar.
+    // back and forward buttons, and hashes typed straight into the address cache.
     window.addEventListener("hashchange", this._apply);
 
-    // Load operator-added events. Fails silently (page just shows the
-    // historical hardcoded events below) if the file is missing or malformed,
-    // so a bad edit to the JSON can't take the whole page down.
-    fetch("data/events.json")
-      .then((r) => r.ok ? r.json() : [])
-      .then((events) => { if (Array.isArray(events)) this.setState({ newEvents: events }); })
-      .catch(() => {});
+    // Load operator-added content for every JSON-backed route. Each fetch
+    // fails silently (that route just shows its hardcoded content, if any)
+    // if its file is missing or malformed, so a bad edit to one JSON file
+    // can't take any other page down.
+    Object.entries(JSON_CONTENT_FILES).forEach(([route, file]) => {
+      fetch(file)
+        .then((r) => r.ok ? r.json() : [])
+        .then((entries) => {
+          if (Array.isArray(entries)) {
+            this.setState((s) => ({ jsonContent: { ...s.jsonContent, [route]: entries } }));
+          }
+        })
+        .catch(() => {});
+    });
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
@@ -402,10 +403,10 @@ class Component extends DCLogic {
         ["The Campus", "the-campus"], ["Classrooms", "ac-classrooms"], ["Labs", "science-labs"], ["Library", "library"],
         ["Swimming Pool", "swimming-pool"], ["Sports", "sports-arena"], ["Music", "music"], ["Infirmary", "infirmary"] ] },
       { label: "Transport", href: "#transport", items: [] },
-      { label: "gallery", href: MI + "#gallery", items: [
-        ["Photo gallery", "photo-gallery"], ["Videos", "videos"] ] },
+      { label: "Gallery", href: MI + "#gallery", items: [
+        ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
       { label: "News Room", href: MI + "#news", items: [
-        ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
+        ["Events", "events-news"], ["2026-27", "year-2026-27"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
       { label: "Admission", href: MI + "#admissions", items: [
         ["Admission Procedure", "procedure"], ["Admission Form", "form"], ["Brochure", "brochure"], ["School Fee", "fee"] ] },
     ];
@@ -634,7 +635,7 @@ class Component extends DCLogic {
         { note: "Route map & stop list", sub: "Share the current route list and we'll publish it here." },
       ]),
       // ===== Gallery =====
-      "photo-gallery": P("gallery", "#gallery", "Photo gallery", "Moments from life at Montessori.", [{ gallery: [
+      "photo-gallery": P("Gallery", "#gallery", "Photo Gallery", "Moments from life at Montessori.", [{ gallery: [
         ["assets/gallery/campus-1.jpg", "Campus"],
         ["assets/gallery/campus-2.jpg", "Campus"],
         ["assets/gallery/campus-life.jpg", "Campus Life"],
@@ -651,25 +652,19 @@ class Component extends DCLogic {
         ["assets/gallery/math-lab.jpg", "Math Lab"],
         ["assets/gallery/biology-lab.jpg", "Biology Lab"],
       ] }]),
-      "videos": P("gallery", "#gallery", "Videos", "See Montessori in motion.", [
+      "videos": P("Gallery", "#gallery", "Videos", "See Montessori in motion.", [
         { p: "Watch glimpses of a day at Montessori — from campus celebrations and freshers' day to festivals and events through the year." },
-        { h: "The Aureate Quill — Golden Jubilee English Club Magazine Launch" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/HWN4879wu7Y", title: "The Aureate Quill — Golden Jubilee English Club Magazine Launch" } },
-        { h: "Independence Day Celebrations" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/sZSPKWXSxgE", title: "Independence Day Celebrations" } },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/XtKAUBGviZk", title: "Independence Day Celebrations" } },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/GYNW4YmMlYA", title: "Independence Day Celebrations" } },
         { h: "Teachers' Training on Karuna Clubs" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
+        { embed: { src: "https://www.youtube.com/embed/pXRans1QcxQ", title: "Teachers' Training on Karuna Clubs" } },
         { h: "State Aquatic Championship" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
+        { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
         { h: "Startup Club — Classroom to Boardroom" },
         { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
         { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
         { h: "Freshers' Day — \"Srikaram\"" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
         { h: "Monsoon Seed Ball Drive" },
-        { embed: { src: "https://www.youtube-nocookie.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
+        { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
         { h: "Flavours of Creativity" },
         { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
         { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
@@ -678,13 +673,6 @@ class Component extends DCLogic {
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
         { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
         { list: [
-          ["The Aureate Quill — English Club Magazine Launch", "The Montessori English Club launched \"The Aureate Quill — From Golden Roots to Glorious Heights\", its first magazine edition, marking the institution's Golden Jubilee. Chief guests Mrs. Azra Javed (Secretary & Correspondent, Osmania College), Mr. Bankin (Retd. Professor in English, Gooty) and Mr. Viswanath Gopalan (Chrysalis) graced the occasion."],
-          ["\"Emote to Empower\" — A Platform to Feel, Deal & Heal", "A mental wellness initiative for students, parents and educators led by Dr. Kartika Lakshmi, focused on emotional guidance, counselling and building emotionally resilient individuals alongside academic growth."],
-          ["Independence Day Celebrations", "The campus marked Independence Day with flag hoisting by Director Mr. K. N. V. Rajasekhar, the National Anthem, patriotic dance performances, an NCC march-past, and — for the first time — teachers joining the march-past and performing a state-costume cultural dance celebrating unity in diversity."],
-          ["Science Olympiad Foundation (SOF) Awards", "Students earned Medals of Appreciation and Certificates across the International English, Science and Computer Science Olympiads (IEO, NSO, ICSO). Teachers Mr. Mohan Rao K, Mrs. Sirisha B and Mrs. Swetha K.M were honoured with Best District Teacher Awards for NSO, IMO and ICSO respectively."],
-          ["11th Sub-Junior & Junior Inter-District Aquatic Championship", "Shruti won three medals for Montessori at the state-level swimming championship in Visakhapatnam — Gold (100m Butterfly), Silver (200m Backstroke) and Bronze (50m Butterfly) in the Girls' Group 1-B category."],
-          ["Chess Champions — State & District Level", "Thanvika (Class III) placed 1st in the F-07 category at the State Level Chess Competition, and Sushanth (Class IV) placed 1st in the Nandyal District Rapid Chess Selections, qualifying for the state level."],
-          ["6th AP State Karate Championship 2026", "P. Adharva Dhev of Class II earned recognition at the state karate championship, with the school wishing him continued success at the national level."],
           ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
           ["Founder's Day Blood Donation Camp", "Over 500 volunteers took part in a mega blood donation drive on the founder's death anniversary, inaugurated by Kurnool MP Bastipadu Nagaraju."],
           ["Freshers' Day — \"Srikaram\"", "The Junior College welcomed its new intermediate batch with a lamp-lighting ceremony, dance and music performances, a ramp walk and a festive DJ evening."],
@@ -699,10 +687,6 @@ class Component extends DCLogic {
           ["Oxford University Press Teacher Workshop", "Faculty took part in a training session with an OUP Master Trainer on classroom methods aligned with the latest NEP guidelines."],
         ] },
         { gallery: [
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/emote-scaled.jpg", "Emote to Empower"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/12.jpg", "Science Olympiad Foundation Awards"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/CHESS-scaled.jpg", "Chess Champions"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/Picture1-2-scaled.jpg", "Teachers' Training Programme"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/08/134-scaled.jpg", "National Parents' Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/13-5-scaled.jpg", "Founder's Day"],
@@ -716,6 +700,9 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/YOGA-scaled.jpg", "International Yoga Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
         ] },
+      ]),
+      "year-2026-27": P("News Room", "#news", "2026-27", "News, events, photos and videos from the 2026-27 academic year.", [
+        { p: "A running record of the 2026-27 academic year — updated as content comes in." },
       ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
@@ -780,27 +767,35 @@ class Component extends DCLogic {
     ]);
     const current = pages[route] || fallback;
 
-    // ---- Merge in operator-added events from data/events.json ----
-    // Only on the Events page. Each JSON event becomes a heading, its message
-    // paragraphs, a photo gallery (if any photos were given) and embedded
-    // YouTube videos (if any were given) — converted into the same compact
-    // shape ({ h }, { p }, { gallery }, { embed }) the hardcoded content below
-    // already uses, so it flows through the exact same rendering logic.
-    // New events are placed newest-first, right after the page's intro line.
-    if (route === "events-news" && this.state.newEvents && this.state.newEvents.length) {
+    // ---- Merge in operator-added content from this route's JSON file ----
+    // (see JSON_CONTENT_FILES above). Each JSON entry becomes a heading, its
+    // message paragraphs, a photo gallery (if any photos were given) and
+    // videos (if any were given) — converted into the same compact shape
+    // ({ h }, { p }, { gallery }, { embed }/{ link }) the hardcoded content
+    // below already uses, so it flows through the exact same rendering logic.
+    // New entries are placed newest-first, right after the page's intro line.
+    const jsonEntries = this.state.jsonContent[route];
+    if (jsonEntries && jsonEntries.length) {
       const jsonBlocks = [];
-      this.state.newEvents.forEach((ev) => {
+      jsonEntries.forEach((ev) => {
         if (ev.title) jsonBlocks.push({ h: ev.title });
         (ev.paragraphs || []).forEach((p) => jsonBlocks.push({ p }));
         if (ev.photos && ev.photos.length) {
           jsonBlocks.push({ gallery: ev.photos.map((ph) => [ph.src, ph.caption]) });
         }
         (ev.videos || []).forEach((v) => {
-          jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
+          if (v.embeddable === false) {
+            // Some uploaders disable embedding on YouTube's side; there's no
+            // code workaround for that, so this falls back to a link card
+            // that opens the video on YouTube instead of playing inline.
+            jsonBlocks.push({ link: { href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" } });
+          } else {
+            jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
+          }
         });
       });
-      // current.blocks[0] is the standing intro paragraph; new events go
-      // directly after it, ahead of the older hardcoded history below.
+      // current.blocks[0] is the standing intro paragraph; new entries go
+      // directly after it, ahead of any older hardcoded content below.
       current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
     }
 
