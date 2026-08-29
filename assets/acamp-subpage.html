@@ -31,7 +31,7 @@
   school name and the page it links back to differ. Content changes usually
   need to be made in both.
 
-  See index.html for the explanation of the helmet / x-dc / data-dc-script
+  See index.html for the explanation of the <helmet> / <x-dc> / data-dc-script
   structure that every page in this project shares.
 -->
 <html lang="en">
@@ -41,7 +41,7 @@
 <title>Montessori School, A-Camp — Details</title>
 <meta name="description" content="Detail pages for Montessori School, A-Camp, Kurnool — academics, facilities, school life, admissions.">
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
-<!-- The template runtime: finds the x-dc block below and renders it. -->
+<!-- The template runtime: finds the <x-dc> block below and renders it. -->
 <script src="./support.js"></script>
 </head>
 <body>
@@ -167,7 +167,7 @@
 <!-- CONTENT
      The generic page body: loop over `blocks` and render each according to its
      type flag. This chain of sc-if tests is what lets one piece of markup
-     serve every route, since the curly-brace hole language has no switch and cannot call
+     serve every route, since the {{ }} language has no switch and cannot call
      a function to pick a renderer.
 
      The five block types, all produced by the normaliser in renderVals():
@@ -205,20 +205,9 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <!-- Flip card: perspective on the outer box, the inner box
-                     rotates 180deg on hover (style-hover compiles this into a
-                     real :hover rule). Front and back are both absolutely
-                     positioned, each hidden from view when facing away via
-                     backface-visibility, so only one is ever visible at a time. -->
-                <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
-                  <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
-                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
-                      <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                    </div>
-                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
-                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
-                    </div>
-                  </div>
+                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
                 </div>
               </sc-for>
             </div>
@@ -262,17 +251,6 @@
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0;position:relative;padding-top:56.25%">
             <iframe src="{{ b.embed.src }}" title="{{ b.embed.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
-        </sc-if>
-        <sc-if value="{{ b.isLink }}" hint-placeholder-val="{{ false }}">
-          <a href="{{ b.link.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:20px 0 0;text-decoration:none;background:#fff7f4">
-            <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
-            </span>
-            <span>
-              <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ b.link.label }}</span>
-              <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ b.link.sub }}</span>
-            </span>
-          </a>
         </sc-if>
       </div>
     </sc-for>
@@ -318,27 +296,11 @@
   page on the A-Camp site. Editing content here is the normal way to work on
   these pages; the markup above almost never needs to change.
 */
-
-// Which routes load their content from a JSON file (see componentDidMount
-// and the merge step in renderVals below), and which file backs each one.
-// Add a new entry here whenever a new JSON-driven page is created.
-const JSON_CONTENT_FILES = {
-  "events-news": "data/events.json",
-  "year-2026-27": "data/year-2026-27.json",
-};
-
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
   //           means no hash, which resolves to the fallback page.
-  // jsonContent: content loaded from the files in JSON_CONTENT_FILES below
-  //              (see componentDidMount). Lets a non-technical operator add
-  //              new events/news — each with a title, message paragraphs,
-  //              photos and YouTube videos — by editing one plain JSON file
-  //              per page, without touching this page's code at all. Starts
-  //              empty per route so pages still work if a fetch hasn't
-  //              resolved yet or a file is temporarily unavailable.
-  state = { openMenu: -1, route: "", jsonContent: {} };
+  state = { openMenu: -1, route: "" };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -352,23 +314,8 @@ class Component extends DCLogic {
     };
     this._apply();                                      // resolve the hash the page was opened with
     // hashchange, not click handlers: this catches in-page links, the browser's
-    // back and forward buttons, and hashes typed straight into the address cache.
+    // back and forward buttons, and hashes typed straight into the address bar.
     window.addEventListener("hashchange", this._apply);
-
-    // Load operator-added content for every JSON-backed route. Each fetch
-    // fails silently (that route just shows its hardcoded content, if any)
-    // if its file is missing or malformed, so a bad edit to one JSON file
-    // can't take any other page down.
-    Object.entries(JSON_CONTENT_FILES).forEach(([route, file]) => {
-      fetch(file)
-        .then((r) => r.ok ? r.json() : [])
-        .then((entries) => {
-          if (Array.isArray(entries)) {
-            this.setState((s) => ({ jsonContent: { ...s.jsonContent, [route]: entries } }));
-          }
-        })
-        .catch(() => {});
-    });
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
@@ -385,13 +332,7 @@ class Component extends DCLogic {
       { label: "Home", href: MI + "#top", items: [] },
       { label: "About", href: MI + "#about", items: [
         ["Core Values", "core-values"], ["Founder's Message", "founders-message"], ["From Principal's Desk", "principals-desk"],
-        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"] ] },
-      { label: "Mandatory Public Disclosure", href: MI + "#disclosure", items: [
-        ["Upgradation Letter", "mpd-upgradation"], ["MSC Society", "mpd-society"], ["State NOC", "mpd-noc"],
-        ["Montessori State Recognition", "mpd-recognition"], ["Building Safety Certificate", "mpd-building-safety"],
-        ["A-Camp Fire Certificate", "mpd-fire"], ["Water, Health & Sanitary Certificate", "mpd-water-health"],
-        ["Fee Structure", "mpd-fee"], ["Academic Calendar", "mpd-calendar"], ["SMC 26-27", "mpd-smc"],
-        ["PTA 26-27", "mpd-pta"], ["3 Years Result", "mpd-3years"] ] },
+        ["Team Montessori", "team-monte"], ["Affiliations", "affiliations"], ["Documents", "documents"] ] },
       { label: "School Life", href: "#house", items: [] },
       { label: "Academics", href: MI + "#academics", items: [
         ["Pre-Primary Program", "pre-primary"], ["Primary School", "primary"],
@@ -406,7 +347,7 @@ class Component extends DCLogic {
       { label: "Gallery", href: MI + "#gallery", items: [
         ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
       { label: "News Room", href: MI + "#news", items: [
-        ["Events", "events-news"], ["2026-27", "year-2026-27"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
+        ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
       { label: "Admission", href: MI + "#admissions", items: [
         ["Admission Procedure", "procedure"], ["Admission Form", "form"], ["Brochure", "brochure"], ["School Fee", "fee"] ] },
     ];
@@ -477,54 +418,9 @@ class Component extends DCLogic {
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
         { note: "Affiliation details", sub: "Affiliation details will be added here." },
       ]),
-      // ===== Mandatory Public Disclosure =====
-      "mpd-upgradation": P("Mandatory Public Disclosure", "#disclosure", "Upgradation Letter", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/upgradation-letter.pdf", label: "Download PDF", sub: "Upgradation Letter" } },
-      ]),
-      "mpd-society": P("Mandatory Public Disclosure", "#disclosure", "MSC Society", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/msc-society.pdf", label: "Download PDF", sub: "MSC Society" } },
-      ]),
-      "mpd-noc": P("Mandatory Public Disclosure", "#disclosure", "State NOC", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/state-noc.pdf", label: "Download PDF", sub: "State NOC" } },
-      ]),
-      "mpd-recognition": P("Mandatory Public Disclosure", "#disclosure", "Montessori State Recognition", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/state-recognition.pdf", label: "Download PDF", sub: "Montessori State Recognition" } },
-      ]),
-      "mpd-building-safety": P("Mandatory Public Disclosure", "#disclosure", "Building Safety Certificate", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/building-safety-certificate.pdf", label: "Download PDF", sub: "Building Safety Certificate" } },
-      ]),
-      "mpd-fire": P("Mandatory Public Disclosure", "#disclosure", "A-Camp Fire Certificate", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/fire-certificate.pdf", label: "Download PDF", sub: "A-Camp Fire Certificate" } },
-      ]),
-      "mpd-water-health": P("Mandatory Public Disclosure", "#disclosure", "Water, Health & Sanitary Certificate", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/water-health-sanitary-certificate.pdf", label: "Download PDF", sub: "Water, Health & Sanitary Certificate" } },
-      ]),
-      "mpd-fee": P("Mandatory Public Disclosure", "#disclosure", "Fee Structure", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/fee-structure.pdf", label: "Download PDF", sub: "Fee Structure" } },
-      ]),
-      "mpd-calendar": P("Mandatory Public Disclosure", "#disclosure", "Academic Calendar", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/academic-calendar.pdf", label: "Download PDF", sub: "Academic Calendar" } },
-      ]),
-      "mpd-smc": P("Mandatory Public Disclosure", "#disclosure", "SMC 26-27", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/smc-2026-27.pdf", label: "Download PDF", sub: "SMC 26-27" } },
-      ]),
-      "mpd-pta": P("Mandatory Public Disclosure", "#disclosure", "PTA 26-27", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/pta-2026-27.pdf", label: "Download PDF", sub: "PTA 26-27" } },
-      ]),
-      "mpd-3years": P("Mandatory Public Disclosure", "#disclosure", "3 Years Result", "Official document, available to view or download.", [
-        { p: "As part of mandatory public disclosure norms, the school makes this document available below." },
-        { link: { href: "assets/documents/3-years-result.pdf", label: "Download PDF", sub: "3 Years Result" } },
+      "documents": P("About", "#about", "Documents", "Mandatory public disclosure and school documents.", [
+        { p: "This section holds the school's mandatory public disclosure, class-strength details and other official documents required by the affiliating boards." },
+        { note: "Document downloads", sub: "Provide the PDFs (disclosure, class strength, etc.) and we'll add download links." },
       ]),
       // ===== School Life =====
       "house": P("School Life", "#house", "The House System", "Every Montessori student belongs to a house — building belonging and healthy competition.", [
@@ -659,15 +555,13 @@ class Component extends DCLogic {
         { h: "State Aquatic Championship" },
         { embed: { src: "https://www.youtube.com/embed/lUqBxmTw3KE", title: "State Aquatic Championship" } },
         { h: "Startup Club — Classroom to Boardroom" },
-        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
-        { link: { href: "https://www.youtube.com/watch?v=Q1k_Rvw-rJ0", label: "Watch on YouTube", sub: "Startup Club — Classroom to Boardroom" } },
-        { h: "Freshers' Day — \"Srikaram\"" },
-        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Freshers' Day — Srikaram" } },
+        { embed: { src: "https://www.youtube.com/embed/Q1k_Rvw-rJ0", title: "Startup Club" } },
+        { h: "Founder's Day — Blood Donation Camp" },
+        { embed: { src: "https://www.youtube.com/embed/CpffIJ9yprA", title: "Founder's Day Blood Donation Camp" } },
         { h: "Monsoon Seed Ball Drive" },
         { embed: { src: "https://www.youtube.com/embed/knW7B4cFgOg", title: "Monsoon Seed Ball Drive" } },
         { h: "Flavours of Creativity" },
-        { p: "The uploader has disabled embedding for this one, so it opens directly on YouTube instead." },
-        { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
+        { embed: { src: "https://www.youtube.com/embed/cZIK5A0y0dA", title: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
       "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
@@ -701,9 +595,6 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
         ] },
       ]),
-      "year-2026-27": P("News Room", "#news", "2026-27", "News, events, photos and videos from the 2026-27 academic year.", [
-        { p: "A running record of the 2026-27 academic year — updated as content comes in." },
-      ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
         { note: "News feed", sub: "Share announcements and we'll build out the news list." },
@@ -729,12 +620,6 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/JESSI-scaled.jpg", "English Olympiad"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/KARATE-scaled.jpg", "Karate Championship"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/OLYMPIC-scaled.jpg", "Olympic Day Tournament"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w3-scaled.jpg", "Best Karuna Club Award, Karunostav 2023"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/WhatsApp-Image-2023-12-30-at-3.41.05-PM-1.jpeg", "Top 100 Women Achievers in Education"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2024/01/w2.jpg", "Brainfeed School Excellence Award"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2023/03/WhatsApp-Image-2023-03-20-at-3.35.25-PM.jpeg", "Eenadu Quiz Competition"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/09/TEACHERS-DAY.jpg", "Teachers' Day Honours"],
-          ["https://www.montessoricbseacamp.com/wp-content/uploads/2022/08/NCC-CUP.jpg", "NCC Annual Training Camp"],
         ] },
       ]),
       "circulars": P("News Room", "#news", "Circulars & Downloads", "Official notices and downloadable resources.", [
@@ -767,38 +652,6 @@ class Component extends DCLogic {
     ]);
     const current = pages[route] || fallback;
 
-    // ---- Merge in operator-added content from this route's JSON file ----
-    // (see JSON_CONTENT_FILES above). Each JSON entry becomes a heading, its
-    // message paragraphs, a photo gallery (if any photos were given) and
-    // videos (if any were given) — converted into the same compact shape
-    // ({ h }, { p }, { gallery }, { embed }/{ link }) the hardcoded content
-    // below already uses, so it flows through the exact same rendering logic.
-    // New entries are placed newest-first, right after the page's intro line.
-    const jsonEntries = this.state.jsonContent[route];
-    if (jsonEntries && jsonEntries.length) {
-      const jsonBlocks = [];
-      jsonEntries.forEach((ev) => {
-        if (ev.title) jsonBlocks.push({ h: ev.title });
-        (ev.paragraphs || []).forEach((p) => jsonBlocks.push({ p }));
-        if (ev.photos && ev.photos.length) {
-          jsonBlocks.push({ gallery: ev.photos.map((ph) => [ph.src, ph.caption]) });
-        }
-        (ev.videos || []).forEach((v) => {
-          if (v.embeddable === false) {
-            // Some uploaders disable embedding on YouTube's side; there's no
-            // code workaround for that, so this falls back to a link card
-            // that opens the video on YouTube instead of playing inline.
-            jsonBlocks.push({ link: { href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" } });
-          } else {
-            jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
-          }
-        });
-      });
-      // current.blocks[0] is the standing intro paragraph; new entries go
-      // directly after it, ahead of any older hardcoded content below.
-      current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
-    }
-
     // ---- Normalise blocks into the flagged form the template renders ----
     // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
     // flags ({ isPara: true, text: "..." }), because the template can only test
@@ -822,7 +675,6 @@ class Component extends DCLogic {
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
       else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
-      else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
     return {

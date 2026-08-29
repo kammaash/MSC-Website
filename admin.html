@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<!--
+  LOCAL EVENT-UPLOAD TOOL — admin.html
+  =====================================
+  Not part of the public site. This is an offline helper for whoever manages
+  content on the A-Camp Events page (see acamp-subpage.html, "events-news").
+
+  WHY THIS EXISTS
+  There's no backend and no login system here — the site is plain static
+  files on GitHub Pages. Editing data/events.json by hand on github.com works,
+  but a stray missing comma or quote is an easy mistake to make. This page
+  turns that into a form: fill in fields, click one button, and it hands back
+  ready-to-upload files with no hand-written JSON involved.
+
+  WHAT IT DOES
+  1. Loads the site's current data/events.json (must be served over http,
+     see the warning banner if that fails).
+  2. Lets the operator fill in one new event: a title, one or more message
+     paragraphs, photos (resized/compressed automatically), and YouTube
+     videos (paste a normal watch link — the video ID is extracted
+     automatically).
+  3. On "Generate files", downloads:
+       - the new photo(s), already resized and renamed
+       - a complete, updated events.json with the new event added at the top
+  4. The operator still has to put those downloaded files in place on GitHub
+     (drag-and-drop upload — GitHub replaces a same-named file automatically)
+     and commit. This tool only removes the error-prone hand-editing step; it
+     doesn't reach into git on its own, since that needs real credentials.
+
+  WHAT IT DOES NOT DO
+  No authentication, no write access to anything. It only ever reads the
+  public events.json and produces files for the operator to download. Safe to
+  leave sitting in the repo — worst case someone generates files and never
+  uploads them.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add an Event — Montessori School, A-Camp (internal tool)</title>
+<link rel="icon" type="image/png" href="assets/monte-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#fbf3f2;color:#332c28;font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:80px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  h1{font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;font-size:26px;margin:0}
+  h2{font-family:'Quicksand',sans-serif;font-weight:700;color:#a51915;font-size:16px;margin:0 0 10px}
+  p.lead{color:#6b615b;font-size:14.5px;line-height:1.6;margin:8px 0 0}
+  header{background:#fff;border-bottom:1px solid #f0e0dc;padding:22px 0}
+  .card{background:#fff;border:1px solid #f0e0dc;border-radius:14px;padding:22px;margin-top:20px}
+  label{display:block;font-weight:700;font-size:13.5px;color:#332c28;margin-bottom:6px}
+  input[type=text],textarea{width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28;outline:none}
+  input[type=text]:focus,textarea:focus{border-color:#a51915}
+  textarea{resize:vertical;min-height:64px}
+  .field{margin-bottom:16px}
+  .hint{font-size:12.5px;color:#8a7d75;margin-top:5px}
+  .row{display:flex;gap:10px;align-items:flex-start}
+  .row>div{flex:1}
+  button{font-family:inherit;cursor:pointer;border:none}
+  .btn-add{background:#fdeadf;color:#a51915;font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px}
+  .btn-add:hover{background:#f6dcc9}
+  .btn-remove{background:none;color:#b23b2f;font-weight:700;font-size:12.5px;padding:6px 4px}
+  .item-box{border:1px dashed #e2d3ce;border-radius:10px;padding:14px;margin-bottom:12px;background:#fffdfc}
+  .item-box img.thumb{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;border:1px solid #f0e0dc}
+  .btn-generate{width:100%;background:#a51915;color:#fff;font-weight:700;font-size:15.5px;padding:15px;border-radius:10px;margin-top:6px}
+  .btn-generate:hover{background:#7f120f}
+  .btn-generate:disabled{background:#d8b9b6;cursor:not-allowed}
+  #status{margin-top:20px}
+  .banner{border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.55}
+  .banner.warn{background:#fdeadf;border:1px solid #f6c8ae;color:#8a4a1c}
+  .banner.ok{background:#eaf6ea;border:1px solid #b9dfb9;color:#2c5e2c}
+  .banner.err{background:#fbe7e6;border:1px solid #f0b8b4;color:#8a2a22}
+  .steps{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.7}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#6b615b;font-weight:600}
+  .checkbox-row input{width:auto}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Add an Event</h1>
+    <p class="lead">Internal tool for Montessori School, A-Camp — fill this in, click "Generate files", then upload what it gives you to GitHub. This page never sends anything anywhere by itself.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="fetchWarning"></div>
+
+  <div class="card">
+    <h2>1. Which page is this for?</h2>
+    <div class="field" style="margin-bottom:0">
+      <select id="targetPage" style="width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28">
+        <option value="events.json">News Room → Events</option>
+        <option value="year-2026-27.json">News Room → 2026-27</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Event details</h2>
+    <div class="field">
+      <label for="title">Title</label>
+      <input type="text" id="title" placeholder="e.g. Sports Day 2026">
+    </div>
+    <div class="field">
+      <label>Message</label>
+      <div id="paragraphList"></div>
+      <button type="button" class="btn-add" id="addParagraph">+ Add paragraph</button>
+      <div class="hint">Each paragraph is a separate block of text on the page. Add as many as you need.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Photos</h2>
+    <div id="photoList"></div>
+    <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
+    <button type="button" class="btn-add" id="addPhotoBtn">+ Add photo(s)</button>
+    <div class="hint">Photos are automatically resized and compressed for the web — upload the original file straight from your camera or phone, no need to edit it first.</div>
+  </div>
+
+  <div class="card">
+    <h2>4. Videos (optional)</h2>
+    <div id="videoList"></div>
+    <button type="button" class="btn-add" id="addVideoBtn">+ Add video</button>
+    <div class="hint">Paste a normal YouTube link (youtube.com/watch?v=... or youtu.be/...). If a video shows blank/refuses to play once it's live, come back and tick "opens on YouTube instead" for it.</div>
+  </div>
+
+  <div class="card">
+    <h2>5. Generate</h2>
+    <p class="lead" style="margin-top:0">This creates files on your computer — it does not upload or publish anything by itself.</p>
+    <button type="button" class="btn-generate" id="generateBtn">Generate files to upload</button>
+    <div id="status"></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// ---------- state ----------
+let existingEvents = [];
+let fetchOk = false;
+let paragraphs = [];   // array of strings
+let photos = [];       // array of { file, caption, previewUrl }
+let videos = [];       // array of { url, title, embeddable }
+
+// ---------- load whichever page's content file is selected, so new entries merge with the old ones ----------
+function loadTargetFile() {
+  const file = $("targetPage").value;
+  fetchOk = false;
+  existingEvents = [];
+  $("fetchWarning").innerHTML = '<div class="banner warn">Loading data/' + file + '…</div>';
+  fetch("data/" + file)
+    .then((r) => { if (!r.ok) throw new Error("not ok"); return r.json(); })
+    .then((data) => {
+      existingEvents = Array.isArray(data) ? data : [];
+      fetchOk = true;
+      $("fetchWarning").innerHTML = '<div class="banner ok">Loaded ' + existingEvents.length + ' existing entr' + (existingEvents.length === 1 ? "y" : "ies") + ' from data/' + file + '. Your new entry will be added above them.</div>';
+    })
+    .catch(() => {
+      $("fetchWarning").innerHTML = '<div class="banner warn"><strong>Couldn\'t load data/' + file + '.</strong> This usually means this page was opened directly as a file (double-clicked) instead of through Live Server. Open it as <code>http://127.0.0.1:5500/admin.html</code> instead — otherwise this tool can only create a new entry on its own, without merging in the existing ones (not recommended, since it would overwrite them).</div>';
+    });
+}
+$("targetPage").addEventListener("change", loadTargetFile);
+loadTargetFile();
+
+// ---------- paragraphs ----------
+function renderParagraphs() {
+  $("paragraphList").innerHTML = "";
+  paragraphs.forEach((text, i) => {
+    const box = document.createElement("div");
+    box.className = "item-box";
+    box.innerHTML = '<textarea data-i="' + i + '" placeholder="Paragraph text">' + text.replace(/</g, "&lt;") + '</textarea>' +
+      '<button type="button" class="btn-remove" data-remove="' + i + '">Remove paragraph</button>';
+    $("paragraphList").appendChild(box);
+  });
+  $("paragraphList").querySelectorAll("textarea").forEach((el) => {
+    el.addEventListener("input", (e) => { paragraphs[+e.target.dataset.i] = e.target.value; });
+  });
+  $("paragraphList").querySelectorAll("[data-remove]").forEach((el) => {
+    el.addEventListener("click", (e) => { paragraphs.splice(+e.target.dataset.remove, 1); renderParagraphs(); });
+  });
+}
+$("addParagraph").addEventListener("click", () => { paragraphs.push(""); renderParagraphs(); });
+renderParagraphs();
+
+// ---------- photos ----------
+$("addPhotoBtn").addEventListener("click", () => $("photoInput").click());
+$("photoInput").addEventListener("change", (e) => {
+  Array.from(e.target.files).forEach((file) => {
+    photos.push({ file, caption: "", previewUrl: URL.createObjectURL(file) });
+  });
+  e.target.value = "";
+  renderPhotos();
+});
+function renderPhotos() {
+  $("photoList").innerHTML = "";
+  photos.forEach((p, i) => {
+    const box = document.createElement("div");
+    box.className = "item-box";
+    box.innerHTML =
+      '<img class="thumb" src="' + p.previewUrl + '">' +
+      '<div style="margin-top:8px"><input type="text" data-i="' + i + '" placeholder="Caption for this photo" value="' + p.caption.replace(/"/g, "&quot;") + '"></div>' +
+      '<button type="button" class="btn-remove" data-remove="' + i + '">Remove photo</button>';
+    $("photoList").appendChild(box);
+  });
+  $("photoList").querySelectorAll("input[type=text]").forEach((el) => {
+    el.addEventListener("input", (e) => { photos[+e.target.dataset.i].caption = e.target.value; });
+  });
+  $("photoList").querySelectorAll("[data-remove]").forEach((el) => {
+    el.addEventListener("click", (e) => { photos.splice(+e.target.dataset.remove, 1); renderPhotos(); });
+  });
+}
+
+// ---------- videos ----------
+$("addVideoBtn").addEventListener("click", () => { videos.push({ url: "", title: "", embeddable: true }); renderVideos(); });
+function extractYouTubeId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function renderVideos() {
+  $("videoList").innerHTML = "";
+  videos.forEach((v, i) => {
+    const id = extractYouTubeId(v.url);
+    const box = document.createElement("div");
+    box.className = "item-box";
+    box.innerHTML =
+      '<div class="field" style="margin-bottom:8px"><input type="text" data-field="url" data-i="' + i + '" placeholder="Paste YouTube link" value="' + v.url.replace(/"/g, "&quot;") + '"></div>' +
+      '<div class="field" style="margin-bottom:0"><input type="text" data-field="title" data-i="' + i + '" placeholder="Video title" value="' + v.title.replace(/"/g, "&quot;") + '"></div>' +
+      (id ? '<img class="thumb" src="https://img.youtube.com/vi/' + id + '/mqdefault.jpg">' : '<div class="hint">Paste a link above to preview the thumbnail.</div>') +
+      '<label class="checkbox-row"><input type="checkbox" data-field="embeddable" data-i="' + i + '" ' + (v.embeddable === false ? "checked" : "") + '> This video won\'t play on the page — opens on YouTube instead</label>' +
+      '<div style="margin-top:8px"><button type="button" class="btn-remove" data-remove="' + i + '">Remove video</button></div>';
+    $("videoList").appendChild(box);
+  });
+  $("videoList").querySelectorAll("input[data-field=url], input[data-field=title]").forEach((el) => {
+    el.addEventListener("input", (e) => { videos[+e.target.dataset.i][e.target.dataset.field] = e.target.value; renderVideos(); });
+  });
+  $("videoList").querySelectorAll("input[data-field=embeddable]").forEach((el) => {
+    el.addEventListener("change", (e) => { videos[+e.target.dataset.i].embeddable = !e.target.checked; });
+  });
+  $("videoList").querySelectorAll("[data-remove]").forEach((el) => {
+    el.addEventListener("click", (e) => { videos.splice(+e.target.dataset.remove, 1); renderVideos(); });
+  });
+}
+
+// ---------- helpers ----------
+function slugify(text) {
+  return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "event";
+}
+function resizePhoto(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+        else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+function downloadBlob(blob, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// ---------- generate ----------
+$("generateBtn").addEventListener("click", async () => {
+  const title = $("title").value.trim();
+  if (!title) { $("status").innerHTML = '<div class="banner err">Please enter a title before generating.</div>'; return; }
+
+  $("generateBtn").disabled = true;
+  $("status").innerHTML = '<div class="banner warn">Working — resizing photos, this can take a few seconds…</div>';
+
+  const slug = slugify(title);
+  const photoEntries = [];
+  const filesToDownload = [];
+
+  for (let i = 0; i < photos.length; i++) {
+    const p = photos[i];
+    const blob = await resizePhoto(p.file, 1600, 0.82);
+    const filename = slug + "-" + (i + 1) + ".jpg";
+    filesToDownload.push({ blob, filename });
+    photoEntries.push({ src: "assets/gallery/" + filename, caption: p.caption || title });
+  }
+
+  const videoEntries = videos
+    .filter((v) => extractYouTubeId(v.url))
+    .map((v) => ({ youtubeId: extractYouTubeId(v.url), title: v.title || title, embeddable: v.embeddable }));
+
+  const newEvent = {
+    title,
+    paragraphs: paragraphs.filter((p) => p.trim().length > 0),
+    photos: photoEntries,
+    videos: videoEntries,
+  };
+
+  const merged = [newEvent, ...existingEvents];
+  const jsonBlob = new Blob([JSON.stringify(merged, null, 2)], { type: "application/json" });
+
+  // Stagger downloads slightly — browsers can silently drop near-simultaneous
+  // multi-file downloads without this.
+  let delay = 0;
+  filesToDownload.forEach(({ blob, filename }) => {
+    setTimeout(() => downloadBlob(blob, filename), delay);
+    delay += 300;
+  });
+  setTimeout(() => downloadBlob(jsonBlob, $("targetPage").value), delay + 200);
+
+  $("status").innerHTML =
+    '<div class="banner ok"><strong>Done.</strong> Check your Downloads folder for:' +
+    '<ol class="steps">' +
+    (filesToDownload.length ? '<li>' + filesToDownload.length + ' photo file(s): ' + filesToDownload.map(f => f.filename).join(", ") + '</li>' : '') +
+    '<li>events.json (already includes your new event plus everything that was already there)</li>' +
+    '</ol>' +
+    'Next, on github.com:' +
+    '<ol class="steps">' +
+    '<li>Open the assets/gallery folder → "Add file" → "Upload files" → drag in the photo(s)</li>' +
+    '<li>Open the data folder → "Add file" → "Upload files" → drag in the downloaded ' + $("targetPage").value + ' (GitHub will ask to confirm replacing the existing one — confirm it)</li>' +
+    '<li>Commit both directly to the acamp-website branch</li>' +
+    '</ol></div>';
+  $("generateBtn").disabled = false;
+  if (!fetchOk) {
+    $("status").innerHTML += '<div class="banner err" style="margin-top:10px">Reminder: the existing events file couldn\'t be loaded when this page opened, so events.json above may only contain your new event, not the earlier ones. Re-open this tool via Live Server and try again before uploading, to avoid losing existing events.</div>';
+  }
+});
+</script>
+
+</body>
+</html>
