@@ -3,35 +3,47 @@
   LOCAL EVENT-UPLOAD TOOL — admin.html
   =====================================
   Not part of the public site. This is an offline helper for whoever manages
-  content on the A-Camp Events page (see acamp-subpage.html, "events-news").
+  content on the A-Camp Events pages (see acamp-subpage.html — the "Events"
+  nav item is a hub that links out to one page per academic year, each
+  backed by its own file under data/, e.g. year-2026-27.json).
 
   WHY THIS EXISTS
   There's no backend and no login system here — the site is plain static
-  files on GitHub Pages. Editing data/events.json by hand on github.com works,
-  but a stray missing comma or quote is an easy mistake to make. This page
-  turns that into a form: fill in fields, click one button, and it hands back
-  ready-to-upload files with no hand-written JSON involved.
+  files on GitHub Pages. Editing a year's JSON file by hand on github.com
+  works, but a stray missing comma or quote is an easy mistake to make. This
+  page turns that into a form: pick the year, fill in fields, click one
+  button, and it hands back ready-to-upload files with no hand-written JSON
+  involved.
 
   WHAT IT DOES
-  1. Loads the site's current data/events.json (must be served over http,
-     see the warning banner if that fails).
+  1. Loads the selected year's current content file (must be served over
+     http, see the warning banner if that fails).
   2. Lets the operator fill in one new event: a title, one or more message
      paragraphs, photos (resized/compressed automatically), and YouTube
      videos (paste a normal watch link — the video ID is extracted
      automatically).
   3. On "Generate files", downloads:
        - the new photo(s), already resized and renamed
-       - a complete, updated events.json with the new event added at the top
+       - a complete, updated JSON file (matching the selected year) with the
+         new event added at the top
   4. The operator still has to put those downloaded files in place on GitHub
      (drag-and-drop upload — GitHub replaces a same-named file automatically)
      and commit. This tool only removes the error-prone hand-editing step; it
      doesn't reach into git on its own, since that needs real credentials.
 
+  ADDING A NEW ACADEMIC YEAR (e.g. 2028-29)
+  The dropdown below only lists years the site already has a page for. When a
+  new academic year starts, someone needs to add: a data/year-20XX-YY.json
+  file, a route + hub card in acamp-subpage.html (see "year-2027-28" there
+  for the pattern to copy), and a matching <option> in the dropdown below.
+  That's a code change, not something this form can do on its own — ask
+  whoever maintains the site's code once a year, not more often than that.
+
   WHAT IT DOES NOT DO
   No authentication, no write access to anything. It only ever reads the
-  public events.json and produces files for the operator to download. Safe to
-  leave sitting in the repo — worst case someone generates files and never
-  uploads them.
+  selected year's public JSON file and produces files for the operator to
+  download. Safe to leave sitting in the repo — worst case someone generates
+  files and never uploads them.
 -->
 <html lang="en">
 <head>
@@ -92,8 +104,8 @@
     <h2>1. Which page is this for?</h2>
     <div class="field" style="margin-bottom:0">
       <select id="targetPage" style="width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28">
-        <option value="events.json">News Room → Events</option>
-        <option value="year-2026-27.json">News Room → 2026-27</option>
+        <option value="year-2026-27.json">News Room → Events → 2026-27</option>
+        <option value="year-2027-28.json">News Room → Events → 2027-28</option>
       </select>
     </div>
   </div>
@@ -322,7 +334,7 @@ $("generateBtn").addEventListener("click", async () => {
     '<div class="banner ok"><strong>Done.</strong> Check your Downloads folder for:' +
     '<ol class="steps">' +
     (filesToDownload.length ? '<li>' + filesToDownload.length + ' photo file(s): ' + filesToDownload.map(f => f.filename).join(", ") + '</li>' : '') +
-    '<li>events.json (already includes your new event plus everything that was already there)</li>' +
+    '<li>' + $("targetPage").value + ' (already includes your new event plus everything that was already there)</li>' +
     '</ol>' +
     'Next, on github.com:' +
     '<ol class="steps">' +
@@ -332,7 +344,7 @@ $("generateBtn").addEventListener("click", async () => {
     '</ol></div>';
   $("generateBtn").disabled = false;
   if (!fetchOk) {
-    $("status").innerHTML += '<div class="banner err" style="margin-top:10px">Reminder: the existing events file couldn\'t be loaded when this page opened, so events.json above may only contain your new event, not the earlier ones. Re-open this tool via Live Server and try again before uploading, to avoid losing existing events.</div>';
+    $("status").innerHTML += '<div class="banner err" style="margin-top:10px">Reminder: the existing content file couldn\'t be loaded when this page opened, so the downloaded ' + $("targetPage").value + ' above may only contain your new event, not the earlier ones. Re-open this tool via Live Server and try again before uploading, to avoid losing existing events.</div>';
   }
 });
 </script>

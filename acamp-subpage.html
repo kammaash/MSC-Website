@@ -191,6 +191,17 @@
         <sc-if value="{{ b.isPara }}" hint-placeholder-val="{{ true }}">
           <p style="font-size:17px;line-height:1.72;color:#4a423c;margin:16px 0 0">{{ b.text }}</p>
         </sc-if>
+        <sc-if value="{{ b.isYearLinks }}" hint-placeholder-val="{{ false }}">
+          <div class="g g-2" style="margin:20px 0 0">
+            <sc-for list="{{ b.years }}" as="y" hint-placeholder-count="2">
+              <a href="{{ y.href }}" style="display:block;text-decoration:none;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:14px;padding:22px 24px;transition:border-color .2s ease,transform .2s ease" style-hover="border-color:#e8541b;transform:translateY(-2px)">
+                <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">{{ y.label }}</div>
+                <div style="font-size:14.5px;line-height:1.55;color:#6b615b;margin-top:6px">{{ y.desc }}</div>
+                <span style="display:inline-block;margin-top:12px;font-weight:700;font-size:13.5px;color:#c2410f">View events →</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
         <sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:12px;margin:18px 0 0">
             <sc-for list="{{ b.items }}" as="li" hint-placeholder-count="4">
@@ -323,8 +334,8 @@
 // and the merge step in renderVals below), and which file backs each one.
 // Add a new entry here whenever a new JSON-driven page is created.
 const JSON_CONTENT_FILES = {
-  "events-news": "data/events.json",
   "year-2026-27": "data/year-2026-27.json",
+  "year-2027-28": "data/year-2027-28.json",
 };
 
 class Component extends DCLogic {
@@ -406,7 +417,7 @@ class Component extends DCLogic {
       { label: "Gallery", href: MI + "#gallery", items: [
         ["Photo Gallery", "photo-gallery"], ["Videos", "videos"] ] },
       { label: "News Room", href: MI + "#news", items: [
-        ["Events", "events-news"], ["2026-27", "year-2026-27"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
+        ["Events", "events-news"], ["Latest News", "latest-news"], ["Awards & Achievements", "awards"], ["Circulars & Downloads", "circulars"] ] },
       { label: "Admission", href: MI + "#admissions", items: [
         ["Admission Procedure", "procedure"], ["Admission Form", "form"], ["Brochure", "brochure"], ["School Fee", "fee"] ] },
     ];
@@ -670,7 +681,14 @@ class Component extends DCLogic {
         { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
-      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
+      "events-news": P("News Room", "#news", "Events", "Browse events by academic year.", [
+        { p: "A look at recent happenings from across the Montessori campus. Choose an academic year to see its events, photos and videos." },
+        { yearLinks: [
+          { label: "2026-27", href: "#year-2026-27", desc: "The school's 50th Golden Jubilee year." },
+          { label: "2027-28", href: "#year-2027-28", desc: "Coming soon." },
+        ] },
+      ]),
+      "year-2026-27": P("News Room", "#news", "2026-27", "News, events, photos and videos from the 2026-27 academic year.", [
         { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
         { list: [
           ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
@@ -701,8 +719,8 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
         ] },
       ]),
-      "year-2026-27": P("News Room", "#news", "2026-27", "News, events, photos and videos from the 2026-27 academic year.", [
-        { p: "A running record of the 2026-27 academic year — updated as content comes in." },
+      "year-2027-28": P("News Room", "#news", "2027-28", "News, events, photos and videos from the 2027-28 academic year.", [
+        { p: "Events for the 2027-28 academic year will appear here as they happen." },
       ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
@@ -814,6 +832,7 @@ class Component extends DCLogic {
       if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p });
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
+      else if (b.yearLinks) blocks.push({ key: "b" + (k++), isYearLinks: true, years: b.yearLinks });
       else if (b.gallery) {
         const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption]) => ({ src, caption })) : [];
         blocks.push({ key: "b" + (k++), isGallery: true, hasImages: imgs.length > 0, images: imgs });
