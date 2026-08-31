@@ -191,6 +191,17 @@
         <sc-if value="{{ b.isPara }}" hint-placeholder-val="{{ true }}">
           <p style="font-size:17px;line-height:1.72;color:#4a423c;margin:16px 0 0">{{ b.text }}</p>
         </sc-if>
+        <sc-if value="{{ b.isYearLinks }}" hint-placeholder-val="{{ false }}">
+          <div class="g g-2" style="margin:20px 0 0">
+            <sc-for list="{{ b.years }}" as="y" hint-placeholder-count="2">
+              <a href="{{ y.href }}" style="display:block;text-decoration:none;background:#fbf3f2;border:1px solid #f0e0dc;border-radius:14px;padding:22px 24px;transition:border-color .2s ease,transform .2s ease" style-hover="border-color:#e8541b;transform:translateY(-2px)">
+                <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">{{ y.label }}</div>
+                <div style="font-size:14.5px;line-height:1.55;color:#6b615b;margin-top:6px">{{ y.desc }}</div>
+                <span style="display:inline-block;margin-top:12px;font-weight:700;font-size:13.5px;color:#c2410f">View events →</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
         <sc-if value="{{ b.isList }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex;flex-direction:column;gap:12px;margin:18px 0 0">
             <sc-for list="{{ b.items }}" as="li" hint-placeholder-count="4">
@@ -205,9 +216,20 @@
           <sc-if value="{{ b.hasImages }}" hint-placeholder-val="{{ true }}">
             <div class="g g-3" style="margin:20px 0 0">
               <sc-for list="{{ b.images }}" as="im" hint-placeholder-count="6">
-                <div style="position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
-                  <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
-                  <span style="position:absolute;left:0;right:0;bottom:0;padding:14px 12px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px">{{ im.caption }}</span>
+                <!-- Flip card: perspective on the outer box, the inner box
+                     rotates 180deg on hover (style-hover compiles this into a
+                     real :hover rule). Front and back are both absolutely
+                     positioned, each hidden from view when facing away via
+                     backface-visibility, so only one is ever visible at a time. -->
+                <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                  <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                      <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                    </div>
+                    <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
+                      <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
+                    </div>
+                  </div>
                 </div>
               </sc-for>
             </div>
@@ -307,11 +329,27 @@
   page on the A-Camp site. Editing content here is the normal way to work on
   these pages; the markup above almost never needs to change.
 */
+
+// Which routes load their content from a JSON file (see componentDidMount
+// and the merge step in renderVals below), and which file backs each one.
+// Add a new entry here whenever a new JSON-driven page is created.
+const JSON_CONTENT_FILES = {
+  "year-2026-27": "data/year-2026-27.json",
+  "year-2027-28": "data/year-2027-28.json",
+};
+
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
   //           means no hash, which resolves to the fallback page.
-  state = { openMenu: -1, route: "" };
+  // jsonContent: content loaded from the files in JSON_CONTENT_FILES below
+  //              (see componentDidMount). Lets a non-technical operator add
+  //              new events/news — each with a title, message paragraphs,
+  //              photos and YouTube videos — by editing one plain JSON file
+  //              per page, without touching this page's code at all. Starts
+  //              empty per route so pages still work if a fetch hasn't
+  //              resolved yet or a file is temporarily unavailable.
+  state = { openMenu: -1, route: "", jsonContent: {} };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -325,8 +363,23 @@ class Component extends DCLogic {
     };
     this._apply();                                      // resolve the hash the page was opened with
     // hashchange, not click handlers: this catches in-page links, the browser's
-    // back and forward buttons, and hashes typed straight into the address bar.
+    // back and forward buttons, and hashes typed straight into the address cache.
     window.addEventListener("hashchange", this._apply);
+
+    // Load operator-added content for every JSON-backed route. Each fetch
+    // fails silently (that route just shows its hardcoded content, if any)
+    // if its file is missing or malformed, so a bad edit to one JSON file
+    // can't take any other page down.
+    Object.entries(JSON_CONTENT_FILES).forEach(([route, file]) => {
+      fetch(file)
+        .then((r) => r.ok ? r.json() : [])
+        .then((entries) => {
+          if (Array.isArray(entries)) {
+            this.setState((s) => ({ jsonContent: { ...s.jsonContent, [route]: entries } }));
+          }
+        })
+        .catch(() => {});
+    });
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
@@ -628,7 +681,14 @@ class Component extends DCLogic {
         { link: { href: "https://www.youtube.com/watch?v=cZIK5A0y0dA", label: "Watch on YouTube", sub: "Flavours of Creativity" } },
       ]),
       // ===== News Room =====
-      "events-news": P("News Room", "#news", "Events", "Upcoming and recent school events.", [
+      "events-news": P("News Room", "#news", "Events", "Browse events by academic year.", [
+        { p: "A look at recent happenings from across the Montessori campus. Choose an academic year to see its events, photos and videos." },
+        { yearLinks: [
+          { label: "2026-27", href: "#year-2026-27", desc: "The school's 50th Golden Jubilee year." },
+          { label: "2027-28", href: "#year-2027-28", desc: "Coming soon." },
+        ] },
+      ]),
+      "year-2026-27": P("News Room", "#news", "2026-27", "News, events, photos and videos from the 2026-27 academic year.", [
         { p: "A look at recent happenings from across the Montessori campus, part of the school's 50th Golden Jubilee year." },
         { list: [
           ["Golden Jubilee — National Parents' Day", "Parents and children came together for \"Joy Muse\", a day of bonding activities and a prize-distribution finale, part of the school's 50th year celebrations."],
@@ -658,6 +718,9 @@ class Component extends DCLogic {
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/YOGA-scaled.jpg", "International Yoga Day"],
           ["https://www.montessoricbseacamp.com/wp-content/uploads/2026/07/FLAVORS-scaled.jpg", "Flavours of Creativity"],
         ] },
+      ]),
+      "year-2027-28": P("News Room", "#news", "2027-28", "News, events, photos and videos from the 2027-28 academic year.", [
+        { p: "Events for the 2027-28 academic year will appear here as they happen." },
       ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
@@ -722,6 +785,38 @@ class Component extends DCLogic {
     ]);
     const current = pages[route] || fallback;
 
+    // ---- Merge in operator-added content from this route's JSON file ----
+    // (see JSON_CONTENT_FILES above). Each JSON entry becomes a heading, its
+    // message paragraphs, a photo gallery (if any photos were given) and
+    // videos (if any were given) — converted into the same compact shape
+    // ({ h }, { p }, { gallery }, { embed }/{ link }) the hardcoded content
+    // below already uses, so it flows through the exact same rendering logic.
+    // New entries are placed newest-first, right after the page's intro line.
+    const jsonEntries = this.state.jsonContent[route];
+    if (jsonEntries && jsonEntries.length) {
+      const jsonBlocks = [];
+      jsonEntries.forEach((ev) => {
+        if (ev.title) jsonBlocks.push({ h: ev.title });
+        (ev.paragraphs || []).forEach((p) => jsonBlocks.push({ p }));
+        if (ev.photos && ev.photos.length) {
+          jsonBlocks.push({ gallery: ev.photos.map((ph) => [ph.src, ph.caption]) });
+        }
+        (ev.videos || []).forEach((v) => {
+          if (v.embeddable === false) {
+            // Some uploaders disable embedding on YouTube's side; there's no
+            // code workaround for that, so this falls back to a link card
+            // that opens the video on YouTube instead of playing inline.
+            jsonBlocks.push({ link: { href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" } });
+          } else {
+            jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
+          }
+        });
+      });
+      // current.blocks[0] is the standing intro paragraph; new entries go
+      // directly after it, ahead of any older hardcoded content below.
+      current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
+    }
+
     // ---- Normalise blocks into the flagged form the template renders ----
     // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
     // flags ({ isPara: true, text: "..." }), because the template can only test
@@ -737,6 +832,7 @@ class Component extends DCLogic {
       if (b.p) blocks.push({ key: "b" + (k++), isPara: true, text: b.p });
       else if (b.h) blocks.push({ key: "b" + (k++), isHeading: true, text: b.h });
       else if (b.list) blocks.push({ key: "b" + (k++), isList: true, items: b.list.map(([h, d]) => ({ h, sep: " — ", d })) });
+      else if (b.yearLinks) blocks.push({ key: "b" + (k++), isYearLinks: true, years: b.yearLinks });
       else if (b.gallery) {
         const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption]) => ({ src, caption })) : [];
         blocks.push({ key: "b" + (k++), isGallery: true, hasImages: imgs.length > 0, images: imgs });
