@@ -26,10 +26,30 @@
        - the new photo(s), already resized and renamed
        - a complete, updated JSON file (matching the selected year) with the
          new event added at the top
-  4. The operator still has to put those downloaded files in place on GitHub
-     (drag-and-drop upload — GitHub replaces a same-named file automatically)
-     and commit. This tool only removes the error-prone hand-editing step; it
-     doesn't reach into git on its own, since that needs real credentials.
+  4. Two ways to finish:
+       a) Manual (default, no credentials needed): put the downloaded files
+          in place on GitHub yourself (drag-and-drop upload — GitHub replaces
+          a same-named file automatically) and commit.
+       b) Direct publish: paste a GitHub personal access token into the
+          "Publish directly to GitHub" section and click its button. This
+          calls the GitHub Contents API from your browser and commits the
+          photo(s) and updated JSON straight to the main branch — no manual
+          upload step.
+
+  SECURITY NOTE ON DIRECT PUBLISH
+  The token is held only in a JS variable in memory for the current page
+  load — never written to disk, localStorage, or anywhere else, and it's
+  gone the moment you reload or close the tab. Even so:
+    - Use a fine-grained token (github.com → Settings → Developer settings
+      → Personal access tokens → Fine-grained tokens), scoped to ONLY the
+      kammaash/MSC-Website repository, with ONLY "Contents: Read and write"
+      permission, and a short expiry.
+    - Never use a classic token with full "repo" scope across all your
+      repos for this — a fine-grained, single-repo, short-lived token
+      limits the damage if it's ever exposed.
+    - This page is public (anyone can view its source on GitHub Pages), so
+      never hardcode a token into this file — always paste it fresh into
+      the field each time you use it.
 
   ADDING A NEW ACADEMIC YEAR (e.g. 2028-29)
   The dropdown below only lists years the site already has a page for. When a
@@ -140,8 +160,20 @@
   </div>
 
   <div class="card">
-    <h2>5. Generate</h2>
-    <p class="lead" style="margin-top:0">This creates files on your computer — it does not upload or publish anything by itself.</p>
+    <h2>5. Publish directly to GitHub</h2>
+    <p class="lead" style="margin-top:0">Commits the new photos and the updated data file straight to the <code>main</code> branch — no manual upload needed.</p>
+    <div class="field">
+      <label for="ghToken">GitHub personal access token</label>
+      <input type="password" id="ghToken" placeholder="ghp_... (fine-grained token, repo-scoped)" autocomplete="off">
+      <div class="hint">Never saved anywhere — cleared the moment you close or reload this page. Use a fine-grained token scoped only to kammaash/MSC-Website, with an expiry date, and only "Contents: Read and write" permission. Generate one at github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens.</div>
+    </div>
+    <button type="button" class="btn-generate" id="publishBtn">Publish to GitHub (main branch)</button>
+    <div id="publishStatus"></div>
+  </div>
+
+  <div class="card">
+    <h2>6. Or: generate files to upload manually</h2>
+    <p class="lead" style="margin-top:0">Fallback option if you'd rather not use a token — creates files on your computer for you to drag into GitHub yourself.</p>
     <button type="button" class="btn-generate" id="generateBtn">Generate files to upload</button>
     <div id="status"></div>
   </div>
@@ -287,7 +319,113 @@ function downloadBlob(blob, filename) {
   a.remove();
 }
 
-// ---------- generate ----------
+// ---------- shared: build the new event object + resized photo blobs ----------
+async function buildNewEvent() {
+  const title = $("title").value.trim();
+  if (!title) return { error: "Please enter a title before generating." };
+
+  const slug = slugify(title);
+  const photoEntries = [];
+  const filesToUpload = [];
+
+  for (let i = 0; i < photos.length; i++) {
+    const p = photos[i];
+    const blob = await resizePhoto(p.file, 1600, 0.82);
+    const filename = slug + "-" + (i + 1) + ".jpg";
+    filesToUpload.push({ blob, filename });
+    photoEntries.push({ src: "assets/gallery/" + filename, caption: p.caption || title });
+  }
+
+  const videoEntries = videos
+    .filter((v) => extractYouTubeId(v.url))
+    .map((v) => ({ youtubeId: extractYouTubeId(v.url), title: v.title || title, embeddable: v.embeddable }));
+
+  const newEvent = {
+    title,
+    paragraphs: paragraphs.filter((p) => p.trim().length > 0),
+    photos: photoEntries,
+    videos: videoEntries,
+  };
+
+  const merged = [newEvent, ...existingEvents];
+  return { filesToUpload, merged };
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// ---------- GitHub Contents API helpers ----------
+const GH_OWNER = "kammaash";
+const GH_REPO = "MSC-Website";
+const GH_BRANCH = "main";
+
+async function ghGetSha(path, token) {
+  const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}?ref=${GH_BRANCH}`, {
+    headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error("Couldn't read " + path + " (" + res.status + ")");
+  const data = await res.json();
+  return data.sha;
+}
+
+async function ghPutFile(path, base64Content, message, token) {
+  const sha = await ghGetSha(path, token);
+  const body = { message, content: base64Content, branch: GH_BRANCH };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: "token " + token,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error("Failed to write " + path + ": " + (err.message || res.status));
+  }
+}
+
+// ---------- publish directly ----------
+$("publishBtn").addEventListener("click", async () => {
+  const token = $("ghToken").value.trim();
+  if (!token) { $("publishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+
+  const result = await buildNewEvent();
+  if (result.error) { $("publishStatus").innerHTML = '<div class="banner err">' + result.error + '</div>'; return; }
+
+  $("publishBtn").disabled = true;
+  const targetFile = $("targetPage").value;
+
+  try {
+    for (let i = 0; i < result.filesToUpload.length; i++) {
+      const { blob, filename } = result.filesToUpload[i];
+      $("publishStatus").innerHTML = '<div class="banner warn">Uploading photo ' + (i + 1) + ' of ' + result.filesToUpload.length + ' (' + filename + ')…</div>';
+      const base64 = await blobToBase64(blob);
+      await ghPutFile("assets/gallery/" + filename, base64, "Add photo for event: " + $("title").value.trim(), token);
+    }
+
+    $("publishStatus").innerHTML = '<div class="banner warn">Updating ' + targetFile + '…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(result.merged, null, 2))));
+    await ghPutFile("data/" + targetFile, jsonBase64, "Add event: " + $("title").value.trim(), token);
+
+    $("publishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Pushed directly to main — give GitHub Pages a minute or two, then check the live site.</div>';
+  } catch (e) {
+    $("publishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying, so you don\'t duplicate anything already uploaded.</div>';
+  } finally {
+    $("publishBtn").disabled = false;
+  }
+});
+
+// ---------- generate (manual download fallback) ----------
 $("generateBtn").addEventListener("click", async () => {
   const title = $("title").value.trim();
   if (!title) { $("status").innerHTML = '<div class="banner err">Please enter a title before generating.</div>'; return; }
