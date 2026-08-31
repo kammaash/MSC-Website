@@ -155,20 +155,7 @@
     runtime.markFetched(rootName);
     runtime.setRootName(rootName);
     runtime.adoptParsed(rootName, parsed);
-    // This self-fetch exists only so the authoring tool's live-editing iframe
-    // can pick up template edits without a full reload: it re-fetches the
-    // page's own raw HTML and re-parses it as text via parseDcText(), whose
-    // opening-tag regex just takes the FIRST "<x-dc" it finds in the whole
-    // file. That is safe inside the authoring tool, where the document is
-    // generated and has no such prose. It is NOT safe on a standalone/static
-    // deployment (Live Server, GitHub Pages, ...): any documentation comment
-    // that happens to mention "<x-dc>" as an example (as this project's own
-    // page-header comments do) matches first, and the resulting slice — from
-    // mid-comment to the real closing tag — overwrites the correctly-rendered
-    // page with garbage. window.parent !== window reliably distinguishes
-    // "running inside the authoring tool's iframe" from a normal top-level
-    // page load, so restrict the self-fetch to that case.
-    if (!window.__resources && window.parent !== window) {
+    if (!window.__resources) {
       fetch(location.href).then((res) => res.ok ? res.text() : "").then((t) => {
         const raw = t ? parseDcText(t) : null;
         if (raw?.template) runtime.updateHtml(rootName, raw.template);
@@ -1773,26 +1760,9 @@
     if (document.readyState !== "loading") api.__dcBoot();
     else document.addEventListener("DOMContentLoaded", () => api.__dcBoot());
   }
-  // If React/ReactDOM (loaded from unpkg.com at runtime, see loadReactUmd
-  // above) fail to arrive — offline, a blocked/firewalled network, or an
-  // ad-blocker treating the CDN request as third-party script — the page
-  // used to just stay blank with nothing but a console.error. That is
-  // confusing to debug from a plain "it's showing an error" report, so on
-  // failure we now also show a small on-page banner explaining what to check.
-  function showBootFailureBanner(err) {
-    try {
-      const el = document.createElement("div");
-      el.setAttribute("data-monte-boot-error", "");
-      el.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:999999;background:#7f120f;color:#fff;font:14px/1.5 system-ui,sans-serif;padding:14px 18px;box-shadow:0 -6px 20px rgba(0,0,0,.25)";
-      el.innerHTML = "<strong>This page couldn't finish loading.</strong> It needs an internet connection the first time, to fetch React from unpkg.com. Check your connection, disable any ad-blocker/firewall for this page, then reload. (Details in the browser console — press F12.)";
-      document.body.appendChild(el);
-    } catch (e) {
-    }
-  }
   hideRawTemplate();
   loadReactUmd().then(init).catch((err) => {
     console.error("[dc] failed to load React or boot:", err);
-    if (document.body) showBootFailureBanner(err);
-    else document.addEventListener("DOMContentLoaded", () => showBootFailureBanner(err));
+    throw err;
   });
 })();
