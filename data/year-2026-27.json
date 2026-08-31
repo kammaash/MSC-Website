@@ -2,47 +2,24 @@
   {
     "title": "THE AUREATE QUILL: Celebrating Five Decades of Excellence, Creativity and Learning",
     "paragraphs": [
-      "As Montessori Group of Institutions proudly commemorates its Golden Jubilee – 50 Glorious Years of Educational Excellence, the Montessori English Club is delighted to present the first edition of its English Club Magazine, \"The Aureate Quill\" – From Golden Roots to Glorious Heights.",
-      "This magazine is a celebration of the institution's rich legacy, the creative spirit of its students, the dedication of its teachers, and the values that have guided generations of Montessorians. It brings together literary creativity, imagination, knowledge, expression and the vibrant voices of our young learners.",
-      "The presence of our distinguished Chief Guests makes this occasion even more meaningful. We are honoured by the presence of our esteemed Chief Guests: Mrs. Azra Javed Garu – Secretary & Correspondent, Osmania College, Kurnool; Mr. Bankin Garu – Retd. Professor in English, Gooty; Mr. Viswanath Gopalan Garu – Academic Professional, Chrysalis. Their gracious presence makes this memorable Golden Jubilee occasion even more special."
+      "As Montessori Group of Institutions proudly commemorates its Golden Jubilee – 50 Glorious Years of Educational Excellence, the Montessori English Club is delighted to present the first edition of its English Club Magazine, “The Aureate Quill” – From Golden Roots to Glorious Heights. This magazine is a celebration of the institution’s rich legacy, the creative spirit of its students, the dedication of its teachers, and the values that have guided generations of Montessorians. It brings together literary creativity, imagination, knowledge, expression and the vibrant voices of our young learners. The presence of our distinguished Chief Guests makes this occasion even more meaningful. We are honoured by the presence of our esteemed Chief Guests:\n\nMrs. Azra Javed Garu – Secretary & Correspondent, Osmania College, Kurnool\nMr. Bankin Garu – Retd. Professor in English, Gooty\nMr. Viswanath Gopalan Garu – Academic Professional, Chrysalis\n\nTheir gracious presence makes this memorable Golden Jubilee occasion even more special."
     ],
     "photos": [
-      { "src": "assets/gallery/aureate-quill-launch-guests.jpg", "caption": "Chief Guests & Launch of \"The Aureate Quill\"" },
-      { "src": "assets/gallery/aureate-quill-launch-performances.jpg", "caption": "Golden Jubilee Celebrations & Student Performances" },
-      { "src": "assets/gallery/quill.jpg", "caption": "\"The Aureate Quill\" — Golden Jubilee Magazine" }
-    "videos": [
-      { "youtubeId": "HWN4879wu7Y", "title": "THE AUREATE QUILL — Golden Jubilee Magazine Launch" }
-    ]
-  },
-  {
-    "title": "\"Emote to Empower\" — A Platform to Feel, Deal & Heal",
-    "paragraphs": [
-      "Emote to Empower is a dedicated mental wellness initiative designed to help students, parents, and educators connect with their emotions, navigate challenges, and find inner peace. We believe in nurturing not just academic minds, but emotionally resilient individuals.",
-      "Dr. Kartika Lakshmi brings years of expertise in emotional guidance, counseling, and personal development. Through her structured training programs, motivational sessions, and empathetic approach, she empowers individuals to take control of their emotional well-being and live life to the fullest."
-    ],
-    "photos": [
-      { "src": "assets/gallery/emote-to-empower.jpg", "caption": "\"Emote to Empower\" with Dr. Kartika Lakshmi" }
-    ],
-    "videos": []
-  },
-  {
-    "title": "Independence Day Celebrations – 2026-27",
-    "paragraphs": [
-      "Montessori Sr Secondary School, A-Camp, Kurnool celebrated Independence Day with great enthusiasm, patriotic spirit, and joy. The entire school campus was filled with the colours of patriotism as students and teachers participated actively in a variety of cultural and patriotic activities.",
-      "The celebrations began with the hoisting of the National Flag by our respected Director, Mr. K. N. V. Rajasekhar. The unfurling of the Tricolour was followed by the National Anthem, creating a proud and emotional moment for everyone present.",
-      "Students came dressed in beautiful and colourful traditional and patriotic attire and participated enthusiastically in various dance performances representing the rich cultural heritage of India. The NCC students presented an impressive march-past with discipline and confidence.",
-      "A special highlight of this year's celebration was the participation of our teachers in the march-past. Their energetic participation added a unique charm to the programme and inspired the students. Teachers also dressed in traditional costumes representing different states of India and presented a vibrant cultural dance, beautifully showcasing the country's unity in diversity.",
-      "The teachers delivered inspiring speeches on India's freedom, patriotism, national unity, and the responsibilities of young citizens. Their words encouraged students to respect the sacrifices of our freedom fighters and contribute positively to the nation."
-    ],
-    "photos": [
-      { "src": "assets/gallery/independence-day-flag-hoisting.jpg", "caption": "Flag Hoisting Ceremony" },
-      { "src": "assets/gallery/independence-day-march-past.jpg", "caption": "NCC & Teachers' March-Past" },
-      { "src": "assets/gallery/independence-day-guests-stage.jpg", "caption": "Guests, Staff & Cultural Performances" },
-      { "src": "assets/gallery/independence-day-preprimary.jpg", "caption": "Pre-Primary Costume Celebrations" }
+      {
+        "src": "assets/gallery/the-aureate-quill-celebrating-five-decades-of-excellence-cre-1.jpg",
+        "caption": "THE AUREATE QUILL: Celebrating Five Decades of Excellence, Creativity and Learning"
+      },
+      {
+        "src": "assets/gallery/the-aureate-quill-celebrating-five-decades-of-excellence-cre-2.jpg",
+        "caption": "THE AUREATE QUILL: Celebrating Five Decades of Excellence, Creativity and Learning"
+      }
     ],
     "videos": [
-      { "youtubeId": "GYNW4YmMlYA", "title": "Independence Day Celebrations 2026-27 — Video 1" },
-      { "youtubeId": "sZSPKWXSxgE", "title": "Independence Day Celebrations 2026-27 — Video 2" }
+      {
+        "youtubeId": "HWN4879wu7Y",
+        "title": "THE AUREATE QUILL",
+        "embeddable": false
+      }
     ]
   }
 ]
