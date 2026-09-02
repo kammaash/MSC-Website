@@ -136,14 +136,15 @@
         "caption": "Golden Jubilee Celebrations & Student Performances"
       },
       {
-        "src": "assets/gallery/quill.jpg",
-        "caption": "\"The Aureate Quill\" — Golden Jubilee Magazine"
+        "src": "assets/gallery/the-aureate-quill-celebrating-five-decades-of-excellence-cre-1-1788325447685.jpg",
+        "caption": "THE AUREATE QUILL: Celebrating Five Decades of Excellence, Creativity and Learning"
       }
     ],
     "videos": [
       {
         "youtubeId": "HWN4879wu7Y",
-        "title": "THE AUREATE QUILL — Golden Jubilee Magazine Launch"
+        "title": "THE AUREATE QUILL — Golden Jubilee Magazine Launch",
+        "embeddable": true
       }
     ]
   },
