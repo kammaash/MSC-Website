@@ -18,23 +18,21 @@
   WHAT IT DOES
   1. Loads the selected year's current content file (must be served over
      http, see the warning banner if that fails).
-  2. Lets the operator fill in one new event: a title, one or more message
-     paragraphs, photos (resized/compressed automatically), and YouTube
-     videos (paste a normal watch link — the video ID is extracted
+  2. Lets the operator either ADD a new event, or EDIT/DELETE an existing
+     one — title, message paragraphs, photos (resized/compressed
+     automatically, with existing photos individually removable), and
+     YouTube videos (paste a normal watch link — the video ID is extracted
      automatically).
-  3. On "Generate files", downloads:
-       - the new photo(s), already resized and renamed
-       - a complete, updated JSON file (matching the selected year) with the
-         new event added at the top
-  4. Two ways to finish:
-       a) Manual (default, no credentials needed): put the downloaded files
-          in place on GitHub yourself (drag-and-drop upload — GitHub replaces
-          a same-named file automatically) and commit.
-       b) Direct publish: paste a GitHub personal access token into the
+  3. Two ways to publish:
+       a) Direct publish: paste a GitHub personal access token into the
           "Publish directly to GitHub" section and click its button. This
           calls the GitHub Contents API from your browser and commits the
-          photo(s) and updated JSON straight to the main branch — no manual
-          upload step.
+          photo(s), any deletions, and the updated JSON straight to the
+          main branch — no manual upload step. Required for editing or
+          deleting existing events.
+       b) Manual (no credentials needed, ADD mode only): downloads the new
+          photo(s) and a complete updated JSON file for you to drag into
+          GitHub yourself.
 
   SECURITY NOTE ON DIRECT PUBLISH
   The token is held only in a JS variable in memory for the current page
@@ -51,6 +49,27 @@
       never hardcode a token into this file — always paste it fresh into
       the field each time you use it.
 
+  ABOUT THE LOGIN SCREEN
+  This is a lightweight access gate, NOT real authentication — there's no
+  server here to check credentials against, so anyone who opens this file's
+  source code (trivial on a public GitHub Pages site) can see the password
+  hash and, with enough effort, the underlying password. It exists purely
+  to stop a casual visitor from opening the form and poking around; it is
+  NOT a substitute for keeping your GitHub token private, which remains the
+  actual security boundary — without a valid token, nothing can be
+  published or deleted regardless of this screen.
+
+  TO CHANGE THE USERNAME/PASSWORD YOURSELF (no need to ask for help):
+    1. Open this page in a browser, press F12 to open DevTools, click Console.
+    2. Paste this (edit the username/password inside the quotes first):
+         crypto.subtle.digest("SHA-256", new TextEncoder().encode("newusername:newpassword"))
+           .then(buf => console.log(Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")))
+    3. Press Enter — it prints a long hex string.
+    4. Copy that string and replace the ADMIN_HASH value below with it.
+    5. Commit and push this file like any other change.
+  Default credentials as shipped: username "montessori-admin", password
+  "ChangeMe@2026" — change these the first time you use this.
+
   ADDING A NEW ACADEMIC YEAR (e.g. 2028-29)
   The dropdown below only lists years the site already has a page for. When a
   new academic year starts, someone needs to add: a data/year-20XX-YY.json
@@ -58,18 +77,12 @@
   for the pattern to copy), and a matching <option> in the dropdown below.
   That's a code change, not something this form can do on its own — ask
   whoever maintains the site's code once a year, not more often than that.
-
-  WHAT IT DOES NOT DO
-  No authentication, no write access to anything. It only ever reads the
-  selected year's public JSON file and produces files for the operator to
-  download. Safe to leave sitting in the repo — worst case someone generates
-  files and never uploads them.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add an Event — Montessori School, A-Camp (internal tool)</title>
+<title>Manage Events — Montessori School, A-Camp (internal tool)</title>
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -82,8 +95,8 @@
   header{background:#fff;border-bottom:1px solid #f0e0dc;padding:22px 0}
   .card{background:#fff;border:1px solid #f0e0dc;border-radius:14px;padding:22px;margin-top:20px}
   label{display:block;font-weight:700;font-size:13.5px;color:#332c28;margin-bottom:6px}
-  input[type=text],textarea{width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28;outline:none}
-  input[type=text]:focus,textarea:focus{border-color:#a51915}
+  input[type=text],input[type=password],textarea,select{width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28;outline:none}
+  input[type=text]:focus,input[type=password]:focus,textarea:focus,select:focus{border-color:#a51915}
   textarea{resize:vertical;min-height:64px}
   .field{margin-bottom:16px}
   .hint{font-size:12.5px;color:#8a7d75;margin-top:5px}
@@ -93,12 +106,15 @@
   .btn-add{background:#fdeadf;color:#a51915;font-weight:700;font-size:13px;padding:9px 16px;border-radius:8px}
   .btn-add:hover{background:#f6dcc9}
   .btn-remove{background:none;color:#b23b2f;font-weight:700;font-size:12.5px;padding:6px 4px}
-  .item-box{border:1px dashed #e2d3ce;border-radius:10px;padding:14px;margin-bottom:12px;background:#fffdfc}
+  .btn-danger{width:100%;background:#fff;color:#b23b2f;font-weight:700;font-size:14.5px;padding:13px;border-radius:10px;border:1.5px solid #e6a29a}
+  .btn-danger:hover{background:#fbe7e6}
+  .item-box{border:1px dashed #e2d3ce;border-radius:10px;padding:14px;margin-bottom:12px;background:#fffdfc;position:relative}
   .item-box img.thumb{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;border:1px solid #f0e0dc}
+  .existing-badge{display:inline-block;background:#eaf6ea;color:#2c5e2c;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;margin-bottom:8px}
   .btn-generate{width:100%;background:#a51915;color:#fff;font-weight:700;font-size:15.5px;padding:15px;border-radius:10px;margin-top:6px}
   .btn-generate:hover{background:#7f120f}
   .btn-generate:disabled{background:#d8b9b6;cursor:not-allowed}
-  #status{margin-top:20px}
+  #status,#publishStatus{margin-top:20px}
   .banner{border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.55}
   .banner.warn{background:#fdeadf;border:1px solid #f6c8ae;color:#8a4a1c}
   .banner.ok{background:#eaf6ea;border:1px solid #b9dfb9;color:#2c5e2c}
@@ -106,14 +122,34 @@
   .steps{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.7}
   .checkbox-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:#6b615b;font-weight:600}
   .checkbox-row input{width:auto}
+  .mode-row{display:flex;gap:18px}
+  #loginGate{position:fixed;inset:0;background:#fbf3f2;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+  #loginGate .box{background:#fff;border:1px solid #f0e0dc;border-radius:14px;padding:28px;max-width:360px;width:100%}
+  #loginGate h2{margin-top:0}
+  #gateErr{display:none}
+  #logoutBar{max-width:760px;margin:0 auto;padding:10px 20px 0;text-align:right}
+  #logoutBar button{background:none;color:#8a7d75;font-size:12.5px;font-weight:700;text-decoration:underline;padding:4px}
 </style>
 </head>
 <body>
 
+<div id="loginGate">
+  <div class="box">
+    <h2>Sign in</h2>
+    <p class="lead" style="margin:0 0 14px">This is a lightweight access gate, not real authentication — it just keeps casual visitors from opening this form. It's not a substitute for keeping your GitHub token private (see the comment at the top of this file's source for how to change these credentials).</p>
+    <div class="field"><label for="gateUser">Username</label><input type="text" id="gateUser" autocomplete="username"></div>
+    <div class="field"><label for="gatePass">Password</label><input type="password" id="gatePass" autocomplete="current-password"></div>
+    <button type="button" class="btn-generate" id="gateSubmit">Unlock</button>
+    <div class="banner err" id="gateErr" style="margin-top:12px">Incorrect username or password.</div>
+  </div>
+</div>
+
+<div id="logoutBar"><button type="button" id="logoutBtn">Lock this page</button></div>
+
 <header>
   <div class="wrap">
-    <h1>Add an Event</h1>
-    <p class="lead">Internal tool for Montessori School, A-Camp — fill this in, click "Generate files", then upload what it gives you to GitHub. This page never sends anything anywhere by itself.</p>
+    <h1>Manage Events</h1>
+    <p class="lead">Internal tool for Montessori School, A-Camp — add, edit, or remove events. This page never sends anything anywhere by itself; publishing always requires your explicit click and a GitHub token.</p>
   </div>
 </header>
 
@@ -123,7 +159,7 @@
   <div class="card">
     <h2>1. Which page is this for?</h2>
     <div class="field" style="margin-bottom:0">
-      <select id="targetPage" style="width:100%;padding:11px 13px;border:1px solid #e2d3ce;border-radius:9px;font-family:inherit;font-size:14.5px;background:#fff;color:#332c28">
+      <select id="targetPage">
         <option value="year-2026-27.json">News Room → Events → 2026-27</option>
         <option value="year-2027-28.json">News Room → Events → 2027-28</option>
       </select>
@@ -131,7 +167,19 @@
   </div>
 
   <div class="card">
-    <h2>2. Event details</h2>
+    <h2>2. Add or edit?</h2>
+    <div class="mode-row">
+      <label class="checkbox-row" style="margin-top:0"><input type="radio" name="mode" value="add" checked> Add a new event</label>
+      <label class="checkbox-row" style="margin-top:0"><input type="radio" name="mode" value="edit"> Edit an existing event</label>
+    </div>
+    <div class="field" id="eventPickerField" style="display:none;margin-top:14px;margin-bottom:0">
+      <label for="eventPicker">Which event?</label>
+      <select id="eventPicker"></select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Event details</h2>
     <div class="field">
       <label for="title">Title</label>
       <input type="text" id="title" placeholder="e.g. Sports Day 2026">
@@ -145,23 +193,23 @@
   </div>
 
   <div class="card">
-    <h2>3. Photos</h2>
+    <h2>4. Photos</h2>
     <div id="photoList"></div>
     <input type="file" id="photoInput" accept="image/*" multiple style="display:none">
     <button type="button" class="btn-add" id="addPhotoBtn">+ Add photo(s)</button>
-    <div class="hint">Photos are automatically resized and compressed for the web — upload the original file straight from your camera or phone, no need to edit it first.</div>
+    <div class="hint">Photos are automatically resized and compressed for the web — upload the original file straight from your camera or phone, no need to edit it first. Existing photos (when editing) are marked and can be removed individually.</div>
   </div>
 
   <div class="card">
-    <h2>4. Videos (optional)</h2>
+    <h2>5. Videos (optional)</h2>
     <div id="videoList"></div>
     <button type="button" class="btn-add" id="addVideoBtn">+ Add video</button>
     <div class="hint">Paste a normal YouTube link (youtube.com/watch?v=... or youtu.be/...). If a video shows blank/refuses to play once it's live, come back and tick "opens on YouTube instead" for it.</div>
   </div>
 
   <div class="card">
-    <h2>5. Publish directly to GitHub</h2>
-    <p class="lead" style="margin-top:0">Commits the new photos and the updated data file straight to the <code>main</code> branch — no manual upload needed.</p>
+    <h2>6. Publish directly to GitHub</h2>
+    <p class="lead" style="margin-top:0" id="publishLead">Commits the new photos and the updated data file straight to the <code>main</code> branch — no manual upload needed.</p>
     <div class="field">
       <label for="ghToken">GitHub personal access token</label>
       <input type="password" id="ghToken" placeholder="ghp_... (fine-grained token, repo-scoped)" autocomplete="off">
@@ -171,9 +219,16 @@
     <div id="publishStatus"></div>
   </div>
 
-  <div class="card">
-    <h2>6. Or: generate files to upload manually</h2>
-    <p class="lead" style="margin-top:0">Fallback option if you'd rather not use a token — creates files on your computer for you to drag into GitHub yourself.</p>
+  <div class="card" id="deleteEventCard" style="display:none">
+    <h2>Delete this event</h2>
+    <p class="lead" style="margin-top:0">Removes the event from the page entirely. Cannot be undone.</p>
+    <label class="checkbox-row" style="margin-top:0"><input type="checkbox" id="deletePhotosToo" checked> Also delete this event's photos from assets/gallery</label>
+    <button type="button" class="btn-danger" style="margin-top:14px" id="deleteEventBtn">Delete this event permanently</button>
+  </div>
+
+  <div class="card" id="manualCard">
+    <h2>Or: generate files to upload manually</h2>
+    <p class="lead" style="margin-top:0">Fallback option if you'd rather not use a token — creates files on your computer for you to drag into GitHub yourself. Only available when adding a new event.</p>
     <button type="button" class="btn-generate" id="generateBtn">Generate files to upload</button>
     <div id="status"></div>
   </div>
@@ -182,14 +237,41 @@
 <script>
 const $ = (id) => document.getElementById(id);
 
+// ---------- login gate ----------
+const ADMIN_HASH = "9bcc6665acf130c89ec7ed4666b7b647296305ab989c7e58bc0b35e59908f743";
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function showGate() { $("loginGate").style.display = "flex"; }
+function hideGate() { $("loginGate").style.display = "none"; }
+if (sessionStorage.getItem("admin_unlocked") === "1") { hideGate(); } else { showGate(); }
+async function attemptUnlock() {
+  const combo = $("gateUser").value.trim() + ":" + $("gatePass").value;
+  const hash = await sha256Hex(combo);
+  if (hash === ADMIN_HASH) {
+    sessionStorage.setItem("admin_unlocked", "1");
+    $("gateErr").style.display = "none";
+    hideGate();
+  } else {
+    $("gateErr").style.display = "block";
+  }
+}
+$("gateSubmit").addEventListener("click", attemptUnlock);
+$("gatePass").addEventListener("keydown", (e) => { if (e.key === "Enter") attemptUnlock(); });
+$("logoutBtn").addEventListener("click", () => { sessionStorage.removeItem("admin_unlocked"); showGate(); });
+
 // ---------- state ----------
 let existingEvents = [];
 let fetchOk = false;
-let paragraphs = [];   // array of strings
-let photos = [];       // array of { file, caption, previewUrl }
-let videos = [];       // array of { url, title, embeddable }
+let mode = "add";           // "add" or "edit"
+let editingIndex = null;    // index into existingEvents when mode === "edit"
+let paragraphs = [];        // array of strings
+let photos = [];            // array of { file, caption, previewUrl, existingSrc }
+let videos = [];            // array of { url, title, embeddable }
+let removedPhotoSrcs = [];  // existing photo srcs marked for deletion during an edit
 
-// ---------- load whichever page's content file is selected, so new entries merge with the old ones ----------
+// ---------- load whichever page's content file is selected ----------
 function loadTargetFile() {
   const file = $("targetPage").value;
   fetchOk = false;
@@ -200,14 +282,61 @@ function loadTargetFile() {
     .then((data) => {
       existingEvents = Array.isArray(data) ? data : [];
       fetchOk = true;
-      $("fetchWarning").innerHTML = '<div class="banner ok">Loaded ' + existingEvents.length + ' existing entr' + (existingEvents.length === 1 ? "y" : "ies") + ' from data/' + file + '. Your new entry will be added above them.</div>';
+      $("fetchWarning").innerHTML = '<div class="banner ok">Loaded ' + existingEvents.length + ' existing entr' + (existingEvents.length === 1 ? "y" : "ies") + ' from data/' + file + '.</div>';
+      populateEventPicker();
+      setMode("add");
     })
     .catch(() => {
-      $("fetchWarning").innerHTML = '<div class="banner warn"><strong>Couldn\'t load data/' + file + '.</strong> This usually means this page was opened directly as a file (double-clicked) instead of through Live Server. Open it as <code>http://127.0.0.1:5500/admin.html</code> instead — otherwise this tool can only create a new entry on its own, without merging in the existing ones (not recommended, since it would overwrite them).</div>';
+      $("fetchWarning").innerHTML = '<div class="banner warn"><strong>Couldn\'t load data/' + file + '.</strong> This usually means this page was opened directly as a file (double-clicked) instead of through Live Server. Open it as <code>http://127.0.0.1:5500/admin.html</code> instead — editing or deleting existing events needs this to work, and manual add-mode downloads may only contain your new event, not the earlier ones.</div>';
     });
 }
 $("targetPage").addEventListener("change", loadTargetFile);
 loadTargetFile();
+
+// ---------- add/edit mode ----------
+document.querySelectorAll('input[name="mode"]').forEach((r) => {
+  r.addEventListener("change", (e) => setMode(e.target.value));
+});
+function populateEventPicker() {
+  $("eventPicker").innerHTML = existingEvents
+    .map((ev, i) => '<option value="' + i + '">' + String(ev.title || "(untitled)").replace(/</g, "&lt;") + "</option>")
+    .join("");
+}
+$("eventPicker").addEventListener("change", (e) => loadEventIntoForm(+e.target.value));
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('input[name="mode"]').forEach((r) => { r.checked = r.value === m; });
+  $("eventPickerField").style.display = m === "edit" ? "block" : "none";
+  $("deleteEventCard").style.display = m === "edit" ? "block" : "none";
+  $("manualCard").style.display = m === "add" ? "block" : "none";
+  $("publishLead").textContent = m === "edit"
+    ? "Commits your changes — including any removed photos — straight to the main branch."
+    : "Commits the new photos and the updated data file straight to the main branch — no manual upload needed.";
+  $("publishBtn").textContent = m === "edit" ? "Save changes to GitHub (main branch)" : "Publish to GitHub (main branch)";
+  $("publishStatus").innerHTML = "";
+  if (m === "edit" && existingEvents.length) {
+    loadEventIntoForm(0);
+  } else if (m === "add") {
+    resetFormForAdd();
+  }
+}
+function loadEventIntoForm(idx) {
+  editingIndex = idx;
+  $("eventPicker").value = String(idx);
+  const ev = existingEvents[idx] || {};
+  $("title").value = ev.title || "";
+  paragraphs = Array.isArray(ev.paragraphs) ? ev.paragraphs.slice() : [];
+  photos = (Array.isArray(ev.photos) ? ev.photos : []).map((p) => ({ file: null, caption: p.caption || "", previewUrl: p.src, existingSrc: p.src }));
+  videos = (Array.isArray(ev.videos) ? ev.videos : []).map((v) => ({ url: "https://www.youtube.com/watch?v=" + v.youtubeId, title: v.title || "", embeddable: v.embeddable !== false }));
+  removedPhotoSrcs = [];
+  renderParagraphs(); renderPhotos(); renderVideos();
+}
+function resetFormForAdd() {
+  editingIndex = null;
+  $("title").value = "";
+  paragraphs = []; photos = []; videos = []; removedPhotoSrcs = [];
+  renderParagraphs(); renderPhotos(); renderVideos();
+}
 
 // ---------- paragraphs ----------
 function renderParagraphs() {
@@ -233,7 +362,7 @@ renderParagraphs();
 $("addPhotoBtn").addEventListener("click", () => $("photoInput").click());
 $("photoInput").addEventListener("change", (e) => {
   Array.from(e.target.files).forEach((file) => {
-    photos.push({ file, caption: "", previewUrl: URL.createObjectURL(file) });
+    photos.push({ file, caption: "", previewUrl: URL.createObjectURL(file), existingSrc: null });
   });
   e.target.value = "";
   renderPhotos();
@@ -244,16 +373,22 @@ function renderPhotos() {
     const box = document.createElement("div");
     box.className = "item-box";
     box.innerHTML =
+      (p.existingSrc ? '<span class="existing-badge">Already on the site</span><br>' : "") +
       '<img class="thumb" src="' + p.previewUrl + '">' +
       '<div style="margin-top:8px"><input type="text" data-i="' + i + '" placeholder="Caption for this photo" value="' + p.caption.replace(/"/g, "&quot;") + '"></div>' +
-      '<button type="button" class="btn-remove" data-remove="' + i + '">Remove photo</button>';
+      '<button type="button" class="btn-remove" data-remove="' + i + '">Remove photo' + (p.existingSrc ? " (will be deleted on publish)" : "") + '</button>';
     $("photoList").appendChild(box);
   });
   $("photoList").querySelectorAll("input[type=text]").forEach((el) => {
     el.addEventListener("input", (e) => { photos[+e.target.dataset.i].caption = e.target.value; });
   });
   $("photoList").querySelectorAll("[data-remove]").forEach((el) => {
-    el.addEventListener("click", (e) => { photos.splice(+e.target.dataset.remove, 1); renderPhotos(); });
+    el.addEventListener("click", (e) => {
+      const idx = +e.target.dataset.remove;
+      if (photos[idx].existingSrc) removedPhotoSrcs.push(photos[idx].existingSrc);
+      photos.splice(idx, 1);
+      renderPhotos();
+    });
   });
 }
 
@@ -319,36 +454,46 @@ function downloadBlob(blob, filename) {
   a.remove();
 }
 
-// ---------- shared: build the new event object + resized photo blobs ----------
-async function buildNewEvent() {
+// ---------- shared: build the event object + resized photo blobs (add or edit) ----------
+async function buildEventObject() {
   const title = $("title").value.trim();
   if (!title) return { error: "Please enter a title before generating." };
 
   const slug = slugify(title);
   const photoEntries = [];
   const filesToUpload = [];
+  let newCounter = 1;
 
-  for (let i = 0; i < photos.length; i++) {
-    const p = photos[i];
-    const blob = await resizePhoto(p.file, 1600, 0.82);
-    const filename = slug + "-" + (i + 1) + ".jpg";
-    filesToUpload.push({ blob, filename });
-    photoEntries.push({ src: "assets/gallery/" + filename, caption: p.caption || title });
+  for (const p of photos) {
+    if (p.existingSrc && !p.file) {
+      photoEntries.push({ src: p.existingSrc, caption: p.caption || title });
+    } else {
+      const blob = await resizePhoto(p.file, 1600, 0.82);
+      const filename = slug + "-" + (newCounter++) + "-" + Date.now() + ".jpg";
+      filesToUpload.push({ blob, filename });
+      photoEntries.push({ src: "assets/gallery/" + filename, caption: p.caption || title });
+    }
   }
 
   const videoEntries = videos
     .filter((v) => extractYouTubeId(v.url))
     .map((v) => ({ youtubeId: extractYouTubeId(v.url), title: v.title || title, embeddable: v.embeddable }));
 
-  const newEvent = {
+  const eventObj = {
     title,
     paragraphs: paragraphs.filter((p) => p.trim().length > 0),
     photos: photoEntries,
     videos: videoEntries,
   };
 
-  const merged = [newEvent, ...existingEvents];
-  return { filesToUpload, merged };
+  let merged;
+  if (mode === "edit" && editingIndex !== null) {
+    merged = existingEvents.slice();
+    merged[editingIndex] = eventObj;
+  } else {
+    merged = [eventObj, ...existingEvents];
+  }
+  return { filesToUpload, merged, removedPhotoSrcs: removedPhotoSrcs.slice() };
 }
 
 function blobToBase64(blob) {
@@ -394,38 +539,104 @@ async function ghPutFile(path, base64Content, message, token) {
   }
 }
 
-// ---------- publish directly ----------
+async function ghDeleteFile(path, message, token) {
+  const sha = await ghGetSha(path, token);
+  if (!sha) return; // already gone — nothing to do
+  const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: "token " + token,
+      Accept: "application/vnd.github+json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message, sha, branch: GH_BRANCH }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error("Failed to delete " + path + ": " + (err.message || res.status));
+  }
+}
+
+// ---------- publish (covers both add and edit) ----------
 $("publishBtn").addEventListener("click", async () => {
   const token = $("ghToken").value.trim();
   if (!token) { $("publishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
 
-  const result = await buildNewEvent();
+  const result = await buildEventObject();
   if (result.error) { $("publishStatus").innerHTML = '<div class="banner err">' + result.error + '</div>'; return; }
 
   $("publishBtn").disabled = true;
   const targetFile = $("targetPage").value;
+  const titleNow = $("title").value.trim();
 
   try {
     for (let i = 0; i < result.filesToUpload.length; i++) {
       const { blob, filename } = result.filesToUpload[i];
       $("publishStatus").innerHTML = '<div class="banner warn">Uploading photo ' + (i + 1) + ' of ' + result.filesToUpload.length + ' (' + filename + ')…</div>';
       const base64 = await blobToBase64(blob);
-      await ghPutFile("assets/gallery/" + filename, base64, "Add photo for event: " + $("title").value.trim(), token);
+      await ghPutFile("assets/gallery/" + filename, base64, "Add photo for event: " + titleNow, token);
+    }
+
+    for (let i = 0; i < result.removedPhotoSrcs.length; i++) {
+      const src = result.removedPhotoSrcs[i];
+      $("publishStatus").innerHTML = '<div class="banner warn">Removing old photo (' + src + ')…</div>';
+      await ghDeleteFile(src, "Remove photo for event: " + titleNow, token);
     }
 
     $("publishStatus").innerHTML = '<div class="banner warn">Updating ' + targetFile + '…</div>';
     const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(result.merged, null, 2))));
-    await ghPutFile("data/" + targetFile, jsonBase64, "Add event: " + $("title").value.trim(), token);
+    await ghPutFile("data/" + targetFile, jsonBase64, (mode === "edit" ? "Edit event: " : "Add event: ") + titleNow, token);
+
+    existingEvents = result.merged;
+    populateEventPicker();
+    removedPhotoSrcs = [];
 
     $("publishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Pushed directly to main — give GitHub Pages a minute or two, then check the live site.</div>';
   } catch (e) {
-    $("publishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying, so you don\'t duplicate anything already uploaded.</div>';
+    $("publishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying, so you don\'t duplicate anything already uploaded or lose track of what was deleted.</div>';
   } finally {
     $("publishBtn").disabled = false;
   }
 });
 
-// ---------- generate (manual download fallback) ----------
+// ---------- delete an entire event ----------
+$("deleteEventBtn").addEventListener("click", async () => {
+  if (editingIndex === null) return;
+  const ev = existingEvents[editingIndex];
+  if (!confirm('Delete "' + ev.title + '" permanently? This cannot be undone.')) return;
+
+  const token = $("ghToken").value.trim();
+  if (!token) { $("publishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+
+  $("deleteEventBtn").disabled = true;
+  const deletePhotosToo = $("deletePhotosToo").checked;
+  const targetFile = $("targetPage").value;
+  const merged = existingEvents.slice();
+  merged.splice(editingIndex, 1);
+
+  try {
+    if (deletePhotosToo) {
+      for (let i = 0; i < (ev.photos || []).length; i++) {
+        const src = ev.photos[i].src;
+        $("publishStatus").innerHTML = '<div class="banner warn">Deleting photo (' + src + ')…</div>';
+        await ghDeleteFile(src, "Remove photo (event deleted): " + ev.title, token);
+      }
+    }
+    $("publishStatus").innerHTML = '<div class="banner warn">Updating ' + targetFile + '…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
+    await ghPutFile("data/" + targetFile, jsonBase64, "Delete event: " + ev.title, token);
+
+    existingEvents = merged;
+    $("publishStatus").innerHTML = '<div class="banner ok"><strong>Deleted.</strong> Give GitHub Pages a minute or two, then check the live site.</div>';
+    setMode("add");
+  } catch (e) {
+    $("publishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying.</div>';
+  } finally {
+    $("deleteEventBtn").disabled = false;
+  }
+});
+
+// ---------- generate (manual download fallback — add mode only) ----------
 $("generateBtn").addEventListener("click", async () => {
   const title = $("title").value.trim();
   if (!title) { $("status").innerHTML = '<div class="banner err">Please enter a title before generating.</div>'; return; }
@@ -440,7 +651,7 @@ $("generateBtn").addEventListener("click", async () => {
   for (let i = 0; i < photos.length; i++) {
     const p = photos[i];
     const blob = await resizePhoto(p.file, 1600, 0.82);
-    const filename = slug + "-" + (i + 1) + ".jpg";
+    const filename = slug + "-" + (i + 1) + "-" + Date.now() + ".jpg";
     filesToDownload.push({ blob, filename });
     photoEntries.push({ src: "assets/gallery/" + filename, caption: p.caption || title });
   }
@@ -459,8 +670,6 @@ $("generateBtn").addEventListener("click", async () => {
   const merged = [newEvent, ...existingEvents];
   const jsonBlob = new Blob([JSON.stringify(merged, null, 2)], { type: "application/json" });
 
-  // Stagger downloads slightly — browsers can silently drop near-simultaneous
-  // multi-file downloads without this.
   let delay = 0;
   filesToDownload.forEach(({ blob, filename }) => {
     setTimeout(() => downloadBlob(blob, filename), delay);
@@ -478,7 +687,7 @@ $("generateBtn").addEventListener("click", async () => {
     '<ol class="steps">' +
     '<li>Open the assets/gallery folder → "Add file" → "Upload files" → drag in the photo(s)</li>' +
     '<li>Open the data folder → "Add file" → "Upload files" → drag in the downloaded ' + $("targetPage").value + ' (GitHub will ask to confirm replacing the existing one — confirm it)</li>' +
-    '<li>Commit both directly to the acamp-website branch</li>' +
+    '<li>Commit both directly to the main branch</li>' +
     '</ol></div>';
   $("generateBtn").disabled = false;
   if (!fetchOk) {
