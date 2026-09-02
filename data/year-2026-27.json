@@ -207,16 +207,26 @@
       {
         "src": "assets/gallery/independence-day-preprimary.jpg",
         "caption": "Pre-Primary Costume Celebrations"
+      },
+      {
+        "src": "assets/gallery/independence-day-celebrations-2026-27-1-1788325581699.jpg",
+        "caption": "Independence Day Celebrations – 2026-27"
+      },
+      {
+        "src": "assets/gallery/independence-day-celebrations-2026-27-2-1788325581725.jpg",
+        "caption": "Independence Day Celebrations – 2026-27"
       }
     ],
     "videos": [
       {
         "youtubeId": "GYNW4YmMlYA",
-        "title": "Independence Day Celebrations 2026-27 — Video 1"
+        "title": "Independence Day Celebrations 2026-27 — Video 1",
+        "embeddable": true
       },
       {
         "youtubeId": "sZSPKWXSxgE",
-        "title": "Independence Day Celebrations 2026-27 — Video 2"
+        "title": "Independence Day Celebrations 2026-27 — Video 2",
+        "embeddable": true
       }
     ]
   }
