@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <!--
-  LOCAL EVENT-UPLOAD TOOL — admin.html
+  LOCAL ADMIN TOOL — admin.html
   =====================================
   Not part of the public site. This is an offline helper for whoever manages
-  content on the A-Camp Events pages (see acamp-subpage.html — the "Events"
-  nav item is a hub that links out to one page per academic year, each
-  backed by its own file under data/, e.g. year-2026-27.json).
+  two kinds of content: the A-Camp Events pages (see acamp-subpage.html —
+  the "Events" nav item is a hub that links out to one page per academic
+  year, each backed by its own file under data/, e.g. year-2026-27.json)
+  and the Team Montessori faculty roster (About → Team Montessori, backed
+  by data/faculty.json).
 
   WHY THIS EXISTS
   There's no backend and no login system here — the site is plain static
-  files on GitHub Pages. Editing a year's JSON file by hand on github.com
-  works, but a stray missing comma or quote is an easy mistake to make. This
-  page turns that into a form: pick the year, fill in fields, click one
-  button, and it hands back ready-to-upload files with no hand-written JSON
-  involved.
+  files on GitHub Pages. Editing a JSON file by hand on github.com works,
+  but a stray missing comma or quote is an easy mistake to make. This page
+  turns that into a form: fill in fields, click one button, and it either
+  publishes straight to GitHub or hands back ready-to-upload files.
 
-  WHAT IT DOES
+  EVENTS
   1. Loads the selected year's current content file (must be served over
      http, see the warning banner if that fails).
   2. Lets the operator either ADD a new event, or EDIT/DELETE an existing
@@ -25,14 +26,25 @@
      automatically).
   3. Two ways to publish:
        a) Direct publish: paste a GitHub personal access token into the
-          "Publish directly to GitHub" section and click its button. This
-          calls the GitHub Contents API from your browser and commits the
-          photo(s), any deletions, and the updated JSON straight to the
-          main branch — no manual upload step. Required for editing or
-          deleting existing events.
+          token field near the top and click Publish. This calls the
+          GitHub Contents API from your browser and commits the photo(s),
+          any deletions, and the updated JSON straight to the main branch
+          — no manual upload step. Required for editing or deleting
+          existing events.
        b) Manual (no credentials needed, ADD mode only): downloads the new
           photo(s) and a complete updated JSON file for you to drag into
           GitHub yourself.
+
+  FACULTY
+  Switch the "What do you want to manage?" toggle to Faculty. Add, edit, or
+  delete a staff member (name, qualification, experience, one photo each) —
+  same direct-publish mechanism as events, always requires the token above.
+  For adding many people at once, use "import a list from Excel / CSV":
+  upload a spreadsheet with Name / Qualification / Experience columns (and
+  optionally a Photo column naming a file already uploaded to
+  assets/gallery — a spreadsheet cell can't hold an actual image, so photos
+  still need uploading separately, individually or via the "Add file" →
+  "Upload files" flow on github.com), preview the parsed rows, then publish.
 
   SECURITY NOTE ON DIRECT PUBLISH
   The token is held only in a JS variable in memory for the current page
@@ -71,20 +83,22 @@
   "ChangeMe@2026" — change these the first time you use this.
 
   ADDING A NEW ACADEMIC YEAR (e.g. 2028-29)
-  The dropdown below only lists years the site already has a page for. When a
-  new academic year starts, someone needs to add: a data/year-20XX-YY.json
-  file, a route + hub card in acamp-subpage.html (see "year-2027-28" there
-  for the pattern to copy), and a matching <option> in the dropdown below.
-  That's a code change, not something this form can do on its own — ask
-  whoever maintains the site's code once a year, not more often than that.
+  The dropdown in the Events section only lists years the site already has
+  a page for. When a new academic year starts, someone needs to add: a
+  data/year-20XX-YY.json file, a route + hub card in acamp-subpage.html
+  (see "year-2027-28" there for the pattern to copy), and a matching
+  <option> in the dropdown below. That's a code change, not something this
+  form can do on its own — ask whoever maintains the site's code once a
+  year, not more often than that.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manage Events — Montessori School, A-Camp (internal tool)</title>
+<title>Manage Events & Faculty — Montessori School, A-Camp (internal tool)</title>
 <link rel="icon" type="image/png" href="assets/monte-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   *{box-sizing:border-box}
   body{margin:0;background:#fbf3f2;color:#332c28;font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:80px}
@@ -129,6 +143,11 @@
   #gateErr{display:none}
   #logoutBar{max-width:760px;margin:0 auto;padding:10px 20px 0;text-align:right}
   #logoutBar button{background:none;color:#8a7d75;font-size:12.5px;font-weight:700;text-decoration:underline;padding:4px}
+  table.preview{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  table.preview th,table.preview td{border:1px solid #f0e0dc;padding:7px 9px;text-align:left}
+  table.preview th{background:#fbf3f2;font-family:'Quicksand',sans-serif}
+  table.preview td.missing{color:#b23b2f;font-style:italic}
+  .radio-inline{display:flex;gap:18px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -148,14 +167,32 @@
 
 <header>
   <div class="wrap">
-    <h1>Manage Events</h1>
-    <p class="lead">Internal tool for Montessori School, A-Camp — add, edit, or remove events. This page never sends anything anywhere by itself; publishing always requires your explicit click and a GitHub token.</p>
+    <h1>Manage Events & Faculty</h1>
+    <p class="lead">Internal tool for Montessori School, A-Camp — add, edit, or remove events and faculty members. This page never sends anything anywhere by itself; publishing always requires your explicit click and a GitHub token.</p>
   </div>
 </header>
 
 <div class="wrap">
   <div id="fetchWarning"></div>
 
+  <div class="card">
+    <h2>GitHub personal access token</h2>
+    <p class="lead" style="margin-top:0">Needed to publish any change below, whether it's an event or a faculty member — paste it once, it's used by whichever action you click.</p>
+    <div class="field" style="margin-bottom:0">
+      <input type="password" id="ghToken" placeholder="ghp_... (fine-grained token, repo-scoped)" autocomplete="off">
+      <div class="hint">Never saved anywhere — cleared the moment you close or reload this page. Use a fine-grained token scoped only to kammaash/MSC-Website, with an expiry date, and only "Contents: Read and write" permission. Generate one at github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What do you want to manage?</h2>
+    <div class="mode-row">
+      <label class="checkbox-row" style="margin-top:0"><input type="radio" name="section" value="events" checked> Events</label>
+      <label class="checkbox-row" style="margin-top:0"><input type="radio" name="section" value="faculty"> Faculty</label>
+    </div>
+  </div>
+
+  <div id="eventsSection">
   <div class="card">
     <h2>1. Which page is this for?</h2>
     <div class="field" style="margin-bottom:0">
@@ -210,11 +247,6 @@
   <div class="card">
     <h2>6. Publish directly to GitHub</h2>
     <p class="lead" style="margin-top:0" id="publishLead">Commits the new photos and the updated data file straight to the <code>main</code> branch — no manual upload needed.</p>
-    <div class="field">
-      <label for="ghToken">GitHub personal access token</label>
-      <input type="password" id="ghToken" placeholder="ghp_... (fine-grained token, repo-scoped)" autocomplete="off">
-      <div class="hint">Never saved anywhere — cleared the moment you close or reload this page. Use a fine-grained token scoped only to kammaash/MSC-Website, with an expiry date, and only "Contents: Read and write" permission. Generate one at github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens.</div>
-    </div>
     <button type="button" class="btn-generate" id="publishBtn">Publish to GitHub (main branch)</button>
     <div id="publishStatus"></div>
   </div>
@@ -232,6 +264,70 @@
     <button type="button" class="btn-generate" id="generateBtn">Generate files to upload</button>
     <div id="status"></div>
   </div>
+  </div><!-- /eventsSection -->
+
+  <div id="facultySection" style="display:none">
+    <div id="facultyFetchWarning"></div>
+
+    <div class="card">
+      <h2>1. Add or edit?</h2>
+      <div class="mode-row">
+        <label class="checkbox-row" style="margin-top:0"><input type="radio" name="facultyMode" value="add" checked> Add a new faculty member</label>
+        <label class="checkbox-row" style="margin-top:0"><input type="radio" name="facultyMode" value="edit"> Edit an existing one</label>
+      </div>
+      <div class="field" id="facultyPickerField" style="display:none;margin-top:14px;margin-bottom:0">
+        <label for="facultyPicker">Which faculty member?</label>
+        <select id="facultyPicker"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Details</h2>
+      <div class="field">
+        <label for="facultyName">Name</label>
+        <input type="text" id="facultyName" placeholder="e.g. Mrs. Lakshmi Devi">
+      </div>
+      <div class="field">
+        <label for="facultyQualification">Qualification</label>
+        <input type="text" id="facultyQualification" placeholder="e.g. M.Sc, B.Ed">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="facultyExperience">Experience</label>
+        <input type="text" id="facultyExperience" placeholder="e.g. 12 years of teaching experience">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Photo</h2>
+      <div id="facultyPhotoBox"></div>
+      <input type="file" id="facultyPhotoInput" accept="image/*" style="display:none">
+      <button type="button" class="btn-add" id="facultyAddPhotoBtn">+ Choose photo</button>
+      <div class="hint">One photo per faculty member, automatically resized and compressed. Choosing a new photo while editing replaces the existing one.</div>
+    </div>
+
+    <div class="card">
+      <h2>4. Publish directly to GitHub</h2>
+      <p class="lead" style="margin-top:0" id="facultyPublishLead">Commits the photo and the updated faculty list straight to the <code>main</code> branch.</p>
+      <button type="button" class="btn-generate" id="facultyPublishBtn">Publish to GitHub (main branch)</button>
+      <div id="facultyPublishStatus"></div>
+    </div>
+
+    <div class="card" id="deleteFacultyCard" style="display:none">
+      <h2>Delete this faculty member</h2>
+      <p class="lead" style="margin-top:0">Removes them from the page entirely. Cannot be undone.</p>
+      <label class="checkbox-row" style="margin-top:0"><input type="checkbox" id="deleteFacultyPhotoToo" checked> Also delete their photo from assets/gallery</label>
+      <button type="button" class="btn-danger" style="margin-top:14px" id="deleteFacultyBtn">Delete this faculty member permanently</button>
+    </div>
+
+    <div class="card">
+      <h2>Or: import a list from Excel / CSV</h2>
+      <p class="lead" style="margin-top:0">For adding many faculty members at once. The spreadsheet needs a header row with columns named (in any order, case doesn't matter): <strong>Name</strong>, <strong>Qualification</strong>, <strong>Experience</strong>, and optionally <strong>Photo</strong> (the filename of a photo already uploaded to assets/gallery — this import can't upload photos itself, since a spreadsheet cell can't hold an actual image file). Rows without a photo will use a placeholder image until you add one individually later.</p>
+      <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none">
+      <button type="button" class="btn-add" id="importChooseBtn">Choose Excel/CSV file</button>
+      <div id="importPreviewArea"></div>
+    </div>
+  </div><!-- /facultySection -->
+
 </div>
 
 <script>
@@ -694,6 +790,274 @@ $("generateBtn").addEventListener("click", async () => {
     $("status").innerHTML += '<div class="banner err" style="margin-top:10px">Reminder: the existing content file couldn\'t be loaded when this page opened, so the downloaded ' + $("targetPage").value + ' above may only contain your new event, not the earlier ones. Re-open this tool via Live Server and try again before uploading, to avoid losing existing events.</div>';
   }
 });
+
+// ---------- section toggle ----------
+document.querySelectorAll('input[name="section"]').forEach((r) => {
+  r.addEventListener("change", (e) => {
+    const s = e.target.value;
+    $("eventsSection").style.display = s === "events" ? "block" : "none";
+    $("facultySection").style.display = s === "faculty" ? "block" : "none";
+    if (s === "faculty" && !facultyFetchAttempted) loadFacultyFile();
+  });
+});
+
+// ---------- faculty state ----------
+let facultyExisting = [];
+let facultyFetchOk = false;
+let facultyFetchAttempted = false;
+let facultyMode = "add";
+let facultyEditingIndex = null;
+let facultyPhoto = { file: null, previewUrl: "", existingSrc: null };
+let importedRows = [];
+
+function loadFacultyFile() {
+  facultyFetchAttempted = true;
+  $("facultyFetchWarning").innerHTML = '<div class="banner warn">Loading data/faculty.json…</div>';
+  fetch("data/faculty.json")
+    .then((r) => { if (!r.ok) throw new Error("not ok"); return r.json(); })
+    .then((data) => {
+      facultyExisting = Array.isArray(data) ? data : [];
+      facultyFetchOk = true;
+      $("facultyFetchWarning").innerHTML = '<div class="banner ok">Loaded ' + facultyExisting.length + ' existing faculty member' + (facultyExisting.length === 1 ? "" : "s") + ' from data/faculty.json.</div>';
+      populateFacultyPicker();
+      setFacultyMode("add");
+    })
+    .catch(() => {
+      $("facultyFetchWarning").innerHTML = '<div class="banner warn"><strong>Couldn\'t load data/faculty.json.</strong> Open this page through Live Server (not by double-clicking the file) for editing, deleting, or importing to work correctly.</div>';
+    });
+}
+
+document.querySelectorAll('input[name="facultyMode"]').forEach((r) => {
+  r.addEventListener("change", (e) => setFacultyMode(e.target.value));
+});
+function populateFacultyPicker() {
+  $("facultyPicker").innerHTML = facultyExisting
+    .map((f, i) => '<option value="' + i + '">' + String(f.name || "(unnamed)").replace(/</g, "&lt;") + "</option>")
+    .join("");
+}
+$("facultyPicker").addEventListener("change", (e) => loadFacultyIntoForm(+e.target.value));
+function setFacultyMode(m) {
+  facultyMode = m;
+  document.querySelectorAll('input[name="facultyMode"]').forEach((r) => { r.checked = r.value === m; });
+  $("facultyPickerField").style.display = m === "edit" ? "block" : "none";
+  $("deleteFacultyCard").style.display = m === "edit" ? "block" : "none";
+  $("facultyPublishLead").textContent = m === "edit"
+    ? "Commits your changes straight to the main branch."
+    : "Commits the photo and the updated faculty list straight to the main branch.";
+  $("facultyPublishBtn").textContent = m === "edit" ? "Save changes to GitHub (main branch)" : "Publish to GitHub (main branch)";
+  $("facultyPublishStatus").innerHTML = "";
+  if (m === "edit" && facultyExisting.length) {
+    loadFacultyIntoForm(0);
+  } else if (m === "add") {
+    resetFacultyForm();
+  }
+}
+function loadFacultyIntoForm(idx) {
+  facultyEditingIndex = idx;
+  $("facultyPicker").value = String(idx);
+  const f = facultyExisting[idx] || {};
+  $("facultyName").value = f.name || "";
+  $("facultyQualification").value = f.qualification || "";
+  $("facultyExperience").value = f.experience || "";
+  facultyPhoto = { file: null, previewUrl: f.photo || "", existingSrc: f.photo || null };
+  renderFacultyPhoto();
+}
+function resetFacultyForm() {
+  facultyEditingIndex = null;
+  $("facultyName").value = "";
+  $("facultyQualification").value = "";
+  $("facultyExperience").value = "";
+  facultyPhoto = { file: null, previewUrl: "", existingSrc: null };
+  renderFacultyPhoto();
+}
+
+// ---------- faculty photo ----------
+$("facultyAddPhotoBtn").addEventListener("click", () => $("facultyPhotoInput").click());
+$("facultyPhotoInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  facultyPhoto = { file, previewUrl: URL.createObjectURL(file), existingSrc: facultyPhoto.existingSrc };
+  e.target.value = "";
+  renderFacultyPhoto();
+});
+function renderFacultyPhoto() {
+  if (!facultyPhoto.previewUrl) { $("facultyPhotoBox").innerHTML = '<div class="hint">No photo chosen yet.</div>'; return; }
+  $("facultyPhotoBox").innerHTML =
+    (facultyPhoto.existingSrc && !facultyPhoto.file ? '<span class="existing-badge">Already on the site</span><br>' : "") +
+    '<img class="thumb" style="max-width:220px" src="' + facultyPhoto.previewUrl + '">';
+}
+renderFacultyPhoto();
+
+// ---------- faculty publish ----------
+$("facultyPublishBtn").addEventListener("click", async () => {
+  const token = $("ghToken").value.trim();
+  if (!token) { $("facultyPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+  const name = $("facultyName").value.trim();
+  if (!name) { $("facultyPublishStatus").innerHTML = '<div class="banner err">Please enter a name first.</div>'; return; }
+
+  $("facultyPublishBtn").disabled = true;
+  try {
+    let photoSrc = facultyPhoto.existingSrc;
+    let uploadInfo = null;
+    if (facultyPhoto.file) {
+      const blob = await resizePhoto(facultyPhoto.file, 900, 0.85);
+      const filename = slugify(name) + "-" + Date.now() + ".jpg";
+      uploadInfo = { blob, filename };
+      photoSrc = "assets/gallery/" + filename;
+    }
+    if (!photoSrc) photoSrc = "assets/monte-logo.png";
+
+    if (uploadInfo) {
+      $("facultyPublishStatus").innerHTML = '<div class="banner warn">Uploading photo…</div>';
+      const base64 = await blobToBase64(uploadInfo.blob);
+      await ghPutFile("assets/gallery/" + uploadInfo.filename, base64, "Add photo for faculty: " + name, token);
+    }
+    const prior = facultyMode === "edit" ? facultyExisting[facultyEditingIndex] : null;
+    if (prior && facultyPhoto.file && prior.photo && prior.photo !== photoSrc && prior.photo !== "assets/monte-logo.png") {
+      await ghDeleteFile(prior.photo, "Replace photo for faculty: " + name, token).catch(() => {});
+    }
+
+    const entry = {
+      name,
+      qualification: $("facultyQualification").value.trim(),
+      experience: $("facultyExperience").value.trim(),
+      photo: photoSrc,
+    };
+    let merged;
+    if (facultyMode === "edit" && facultyEditingIndex !== null) {
+      merged = facultyExisting.slice();
+      merged[facultyEditingIndex] = entry;
+    } else {
+      merged = [...facultyExisting, entry];
+    }
+
+    $("facultyPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
+    await ghPutFile("data/faculty.json", jsonBase64, (facultyMode === "edit" ? "Edit faculty: " : "Add faculty: ") + name, token);
+
+    facultyExisting = merged;
+    populateFacultyPicker();
+    $("facultyPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
+  } catch (e) {
+    $("facultyPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying.</div>';
+  } finally {
+    $("facultyPublishBtn").disabled = false;
+  }
+});
+
+// ---------- faculty delete ----------
+$("deleteFacultyBtn").addEventListener("click", async () => {
+  if (facultyEditingIndex === null) return;
+  const f = facultyExisting[facultyEditingIndex];
+  if (!confirm('Delete "' + f.name + '" permanently? This cannot be undone.')) return;
+
+  const token = $("ghToken").value.trim();
+  if (!token) { $("facultyPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+
+  $("deleteFacultyBtn").disabled = true;
+  const deletePhotoToo = $("deleteFacultyPhotoToo").checked;
+  const merged = facultyExisting.slice();
+  merged.splice(facultyEditingIndex, 1);
+
+  try {
+    if (deletePhotoToo && f.photo && f.photo !== "assets/monte-logo.png") {
+      $("facultyPublishStatus").innerHTML = '<div class="banner warn">Deleting photo…</div>';
+      await ghDeleteFile(f.photo, "Remove photo (faculty deleted): " + f.name, token).catch(() => {});
+    }
+    $("facultyPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
+    await ghPutFile("data/faculty.json", jsonBase64, "Delete faculty: " + f.name, token);
+
+    facultyExisting = merged;
+    $("facultyPublishStatus").innerHTML = '<div class="banner ok"><strong>Deleted.</strong> Give GitHub Pages a minute or two, then check the live site.</div>';
+    setFacultyMode("add");
+  } catch (e) {
+    $("facultyPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '.</div>';
+  } finally {
+    $("deleteFacultyBtn").disabled = false;
+  }
+});
+
+// ---------- Excel/CSV import ----------
+$("importChooseBtn").addEventListener("click", () => $("importFileInput").click());
+$("importFileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = new Uint8Array(evt.target.result);
+      const wb = XLSX.read(data, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      importedRows = rows.map(normalizeImportRow).filter((r) => r.name);
+      renderImportPreview();
+    } catch (err) {
+      $("importPreviewArea").innerHTML = '<div class="banner err">Couldn\'t read that file: ' + err.message + '</div>';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = "";
+});
+function normalizeImportRow(row) {
+  const get = (...keys) => {
+    for (const k of Object.keys(row)) {
+      if (keys.includes(String(k).trim().toLowerCase())) return String(row[k]).trim();
+    }
+    return "";
+  };
+  return {
+    name: get("name", "full name", "faculty name"),
+    qualification: get("qualification", "qualifications"),
+    experience: get("experience", "years of experience", "exp"),
+    photoFilename: get("photo", "photo filename", "image", "photo file"),
+  };
+}
+function escapeHtml(s) { return String(s).replace(/</g, "&lt;"); }
+function renderImportPreview() {
+  if (!importedRows.length) {
+    $("importPreviewArea").innerHTML = '<div class="banner err">No usable rows found — make sure the sheet has a "Name" column with values in it.</div>';
+    return;
+  }
+  let html = '<table class="preview"><tr><th>Name</th><th>Qualification</th><th>Experience</th><th>Photo file</th></tr>';
+  importedRows.forEach((r) => {
+    html += "<tr><td>" + escapeHtml(r.name) + "</td><td>" + escapeHtml(r.qualification) + "</td><td>" + escapeHtml(r.experience) + "</td><td" + (r.photoFilename ? "" : ' class="missing"') + ">" + (r.photoFilename ? escapeHtml(r.photoFilename) : "none — placeholder will be used") + "</td></tr>";
+  });
+  html += "</table>";
+  html +=
+    '<div class="radio-inline"><label class="checkbox-row" style="margin-top:0"><input type="radio" name="importAction" value="append" checked> Add to existing list</label>' +
+    '<label class="checkbox-row" style="margin-top:0"><input type="radio" name="importAction" value="replace"> Replace the entire list</label></div>';
+  html += '<button type="button" class="btn-generate" style="margin-top:14px" id="importPublishBtn">Publish this import to GitHub</button>';
+  html += '<div id="importPublishStatus"></div>';
+  $("importPreviewArea").innerHTML = html;
+  $("importPublishBtn").addEventListener("click", publishImport);
+}
+async function publishImport() {
+  const token = $("ghToken").value.trim();
+  if (!token) { $("importPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+  const action = document.querySelector('input[name="importAction"]:checked').value;
+  const newEntries = importedRows.map((r) => ({
+    name: r.name,
+    qualification: r.qualification,
+    experience: r.experience,
+    photo: r.photoFilename ? "assets/gallery/" + r.photoFilename : "assets/monte-logo.png",
+  }));
+  const merged = action === "replace" ? newEntries : [...facultyExisting, ...newEntries];
+
+  $("importPublishBtn").disabled = true;
+  try {
+    $("importPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
+    await ghPutFile("data/faculty.json", jsonBase64, "Import " + newEntries.length + " faculty member(s) from spreadsheet", token);
+    facultyExisting = merged;
+    populateFacultyPicker();
+    $("importPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check the live site. Remember to upload any referenced photo files to assets/gallery separately if you haven\'t already.</div>';
+  } catch (e) {
+    $("importPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed:</strong> ' + e.message + '</div>';
+  } finally {
+    $("importPublishBtn").disabled = false;
+  }
+}
 </script>
 
 </body>

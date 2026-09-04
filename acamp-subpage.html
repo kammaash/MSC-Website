@@ -105,13 +105,13 @@
         <img src="assets/monte-logo.png" alt="Montessori School, A-Camp" style="height:74px;width:auto;display:block">
       </span>
       <span style="display:flex;flex-direction:column;line-height:1.15">
-        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori Senior SecondarySchool, A-Camp</span>
+        <span style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:24px;letter-spacing:.06em;color:#a51915;text-transform:uppercase">Montessori School, A-Camp</span>
         <span style="font-family:'Nunito',sans-serif;font-size:15px;color:#6b615b;margin-top:4px">Help the child to help himself</span>
       </span>
     </a>
     <div class="phone-block" style="text-align:right">
       <div style="font-size:14px;color:#6b615b">Don't hesitate to call</div>
-      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 08518277751</a>
+      <a href="#admissions" style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:22px;color:#a51915">+91 XXXXX XXXXX</a>
     </div>
   </div>
 </div>
@@ -170,16 +170,23 @@
      serve every route, since the curly-brace hole language has no switch and cannot call
      a function to pick a renderer.
 
-     The five block types, all produced by the normaliser in renderVals():
-       isHeading  a sub-heading within the page
-       isPara     a paragraph (the common case)
-       isList     bulleted cards, each a bold term followed by a description
-       isGallery  real photos when a page's { gallery: [[src,caption],...] }
-                  entry supplies them; otherwise the original 6-tile
-                  placeholder grid with a "photos coming soon" note
-       isNote     a highlighted panel, used to mark exactly what content is
-                  still missing and what the school needs to supply
-     Adding a sixth type means adding a flag in the normaliser and an sc-if
+     The block types, all produced by the normaliser in renderVals():
+       isHeading     a sub-heading within the page
+       isPara        a paragraph (the common case)
+       isList        bulleted cards, each a bold term followed by a description
+       isGallery     real photos when a page's { gallery: [[src,caption],...] }
+                     entry supplies them; otherwise the original 6-tile
+                     placeholder grid with a "photos coming soon" note
+       isNote        a highlighted panel, used to mark exactly what content is
+                     still missing and what the school needs to supply
+       isPerson      a single named person with photo, name and title — a
+                     one-off bio card, e.g. for a founder or director
+       isVideo       a self-hosted <video> with a poster image
+       isEmbed       an embedded iframe (e.g. a form or map)
+       isFacultyGrid a repeating grid of staff cards (photo, name,
+                     qualification, years of experience) — used for the
+                     Team Montessori page, sourced from data/faculty.json
+     Adding another type means adding a flag in the normaliser and an sc-if
      here. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
   <div style="display:grid;grid-template-columns:1fr;gap:0;max-width:820px">
@@ -261,6 +268,23 @@
             </div>
           </div>
         </sc-if>
+        <sc-if value="{{ b.isFacultyGrid }}" hint-placeholder-val="{{ false }}">
+          <div class="g g-3" style="margin:20px 0 0">
+            <sc-for list="{{ b.facultyList }}" as="f" hint-placeholder-count="6">
+              <div style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:14px;overflow:hidden;text-align:center">
+                <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block">
+                <div style="padding:14px 12px 16px">
+                  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15.5px;color:#a51915">{{ f.name }}</div>
+                  <div style="font-size:13px;color:#6b615b;margin-top:4px;line-height:1.4">{{ f.qualification }}</div>
+                  <div style="font-size:12.5px;color:#c2410f;font-weight:600;margin-top:6px">{{ f.experience }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ !b.facultyList.length }}" hint-placeholder-val="{{ false }}">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">faculty list coming soon</div>
+          </sc-if>
+        </sc-if>
         <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
             <video controls playsinline preload="metadata" poster="{{ b.video.poster }}" style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover">
@@ -338,6 +362,10 @@ const JSON_CONTENT_FILES = {
   "year-2027-28": "data/year-2027-28.json",
 };
 
+// The Team Montessori page's staff roster — see the fetch in
+// componentDidMount and the injection step in renderVals.
+const FACULTY_FILE = "data/faculty.json";
+
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
@@ -349,7 +377,11 @@ class Component extends DCLogic {
   //              per page, without touching this page's code at all. Starts
   //              empty per route so pages still work if a fetch hasn't
   //              resolved yet or a file is temporarily unavailable.
-  state = { openMenu: -1, route: "", jsonContent: {} };
+  // facultyList: content loaded from data/faculty.json (see componentDidMount
+  //              and the merge step in renderVals). One flat list of staff
+  //              cards for the Team Montessori page; starts empty so the
+  //              page still works if the fetch hasn't resolved yet.
+  state = { openMenu: -1, route: "", jsonContent: {}, facultyList: [] };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -380,6 +412,14 @@ class Component extends DCLogic {
         })
         .catch(() => {});
     });
+
+    // Team Montessori's faculty roster — same fail-silent pattern as above.
+    fetch(FACULTY_FILE)
+      .then((r) => r.ok ? r.json() : [])
+      .then((entries) => {
+        if (Array.isArray(entries)) this.setState({ facultyList: entries });
+      })
+      .catch(() => {});
   }
   componentWillUnmount() { if (this._apply) window.removeEventListener("hashchange", this._apply); }
 
@@ -482,7 +522,7 @@ class Component extends DCLogic {
       ]),
       "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
         { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
-        { gallery: true },
+        { facultyList: [] },
       ]),
       "affiliations": P("About", "#about", "Affiliations", "Recognitions and affiliations that underpin a Montessori education.", [
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
@@ -780,7 +820,7 @@ class Component extends DCLogic {
     // a stale or mistyped link lands on something usable instead of a blank
     // page. Worth remembering when adding a link: a typo fails quietly here
     // rather than erroring.
-    const fallback = P("Montessori", "#top", "Montessori Senior Secondary School, A-Camp", "Choose a section from the menu above to explore.", [
+    const fallback = P("Montessori", "#top", "Montessori School, A-Camp", "Choose a section from the menu above to explore.", [
       { p: "Select any item from the dropdown navigation to open its dedicated page." },
     ]);
     const current = pages[route] || fallback;
@@ -817,6 +857,16 @@ class Component extends DCLogic {
       current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
     }
 
+    // Team Montessori's faculty grid is data-driven the same way, just
+    // simpler: one flat list from data/faculty.json rather than one JSON
+    // file producing several page blocks. Swap the placeholder's empty
+    // array for whatever's actually loaded, once it has.
+    if (route === "team-monte") {
+      current.blocks = current.blocks.map((b) =>
+        b.facultyList !== undefined ? { ...b, facultyList: this.state.facultyList } : b
+      );
+    }
+
     // ---- Normalise blocks into the flagged form the template renders ----
     // Turns the compact authoring shape ({ p: "..." }) into explicit boolean
     // flags ({ isPara: true, text: "..." }), because the template can only test
@@ -841,6 +891,7 @@ class Component extends DCLogic {
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
       else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
+      else if (b.facultyList) blocks.push({ key: "b" + (k++), isFacultyGrid: true, facultyList: Array.isArray(b.facultyList) ? b.facultyList : [] });
       else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
