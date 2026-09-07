@@ -183,9 +183,18 @@
                      one-off bio card, e.g. for a founder or director
        isVideo       a self-hosted <video> with a poster image
        isEmbed       an embedded iframe (e.g. a form or map)
-       isFacultyGrid a repeating grid of staff cards (photo, name,
-                     qualification, years of experience) — used for the
-                     Team Montessori page, sourced from data/faculty.json
+       isFacultyGrid a table of staff grouped by block/wing, each row a
+                     circular photo, name, qualification, subject and years
+                     of experience — used for the Team Montessori page,
+                     sourced from data/faculty.json
+       isNewsList    a chronological list of announcements (title, date,
+                     message) — used for the Latest News page, sourced
+                     from data/news.json
+       isEventAccordion a collapsed list of events (title + thumbnail);
+                     clicking a row expands its message, photos and videos
+                     in place — used for the year-by-year Events pages, so
+                     a year with many events doesn't turn into one long
+                     scroll of everything at once
      Adding another type means adding a flag in the normaliser and an sc-if
      here. -->
 <section class="wrap" style="padding-top:56px;padding-bottom:70px">
@@ -269,21 +278,102 @@
           </div>
         </sc-if>
         <sc-if value="{{ b.isFacultyGrid }}" hint-placeholder-val="{{ false }}">
-          <div class="g g-3" style="margin:20px 0 0">
-            <sc-for list="{{ b.facultyList }}" as="f" hint-placeholder-count="6">
-              <div style="background:#fbf3f2;border:1px solid #f0e0dc;border-radius:14px;overflow:hidden;text-align:center">
-                <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block">
-                <div style="padding:14px 12px 16px">
-                  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:15.5px;color:#a51915">{{ f.name }}</div>
-                  <div style="font-size:13px;color:#6b615b;margin-top:4px;line-height:1.4">{{ f.qualification }}</div>
-                  <div style="font-size:12.5px;color:#c2410f;font-weight:600;margin-top:6px">{{ f.experience }}</div>
-                </div>
+          <sc-for list="{{ b.facultyGroups }}" as="grp" hint-placeholder-count="1">
+            <div style="margin:26px 0 0">
+              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px;color:#a51915;margin-bottom:10px">{{ grp.block }}</div>
+              <div style="overflow-x:auto;border:1px solid #f0e0dc;border-radius:12px">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
+                  <tr style="background:#fbf3f2">
+                    <th style="padding:10px 12px;width:64px"></th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Experience</th>
+                  </tr>
+                  <sc-for list="{{ grp.members }}" as="f" hint-placeholder-count="3">
+                    <tr>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc"><img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc"></td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#c2410f;font-weight:600">{{ f.experience }}</td>
+                    </tr>
+                  </sc-for>
+                </table>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ !b.facultyGroups.length }}" hint-placeholder-val="{{ false }}">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">faculty list coming soon</div>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{ b.isNewsList }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:20px 0 0;display:grid;gap:14px">
+            <sc-for list="{{ b.newsList }}" as="n" hint-placeholder-count="3">
+              <div style="border:1px solid #f0e0dc;border-radius:12px;padding:16px 18px;background:#fbf3f2">
+                <div style="font-size:12.5px;color:#c2410f;font-weight:700;letter-spacing:.04em">{{ n.date }}</div>
+                <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:16.5px;color:#a51915;margin-top:4px">{{ n.title }}</div>
+                <div style="font-size:14.5px;color:#6b615b;line-height:1.6;margin-top:6px">{{ n.message }}</div>
               </div>
             </sc-for>
           </div>
-          <sc-if value="{{ !b.facultyList.length }}" hint-placeholder-val="{{ false }}">
-            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">faculty list coming soon</div>
+          <sc-if value="{{ !b.newsList.length }}" hint-placeholder-val="{{ false }}">
+            <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:13px;color:#c2410f;margin-top:12px">no announcements yet — check back soon</div>
           </sc-if>
+        </sc-if>
+        <sc-if value="{{ b.isEventAccordion }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;gap:12px;margin:20px 0 0">
+            <sc-for list="{{ b.events }}" as="ev" hint-placeholder-count="3">
+              <div style="border:1px solid #f0e0dc;border-radius:12px;overflow:hidden;background:#fff">
+                <div onClick="{{ ev.toggle }}" style="display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer">
+                  <img src="{{ ev.thumb }}" alt="{{ ev.title }}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;flex:none;border:1px solid #f0e0dc">
+                  <div style="flex:1;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15.5px;color:#a51915">{{ ev.title }}</div>
+                  <div style="font-size:22px;color:#c2410f;font-weight:700;flex:none;width:22px;text-align:center">{{ ev.arrow }}</div>
+                </div>
+                <sc-if value="{{ ev.expanded }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:2px 18px 20px;border-top:1px solid #f0e0dc">
+                    <sc-for list="{{ ev.paragraphs }}" as="para" hint-placeholder-count="2">
+                      <p style="font-size:15px;line-height:1.7;color:#4a423d;margin:14px 0 0">{{ para }}</p>
+                    </sc-for>
+                    <sc-if value="{{ ev.hasImages }}" hint-placeholder-val="{{ false }}">
+                      <div class="g g-3" style="margin:16px 0 0">
+                        <sc-for list="{{ ev.images }}" as="im" hint-placeholder-count="3">
+                          <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                            <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
+                              <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
+                                <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+                              </div>
+                              <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:rotateY(180deg);border-radius:12px;overflow:hidden;border:1px solid #f0e0dc;background:linear-gradient(135deg,#a51915,#7f120f);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center">
+                                <span style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:700;font-size:15px;line-height:1.45">{{ im.caption }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-for list="{{ ev.videoItems }}" as="vid" hint-placeholder-count="0">
+                      <sc-if value="{{ vid.isLink }}" hint-placeholder-val="{{ false }}">
+                        <a href="{{ vid.href }}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;border:1px solid #f0e0dc;border-radius:14px;padding:14px 18px;margin:16px 0 0;text-decoration:none;background:#fff7f4">
+                          <span style="width:44px;height:44px;border-radius:50%;background:#e8541b;display:flex;align-items:center;justify-content:center;flex:none">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+                          </span>
+                          <span>
+                            <span style="display:block;font-weight:700;color:#a51915;font-size:15.5px">{{ vid.label }}</span>
+                            <span style="display:block;font-size:13.5px;color:#7a6f6b">{{ vid.sub }}</span>
+                          </span>
+                        </a>
+                      </sc-if>
+                      <sc-if value="{{ !vid.isLink }}" hint-placeholder-val="{{ false }}">
+                        <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:16px 0 0;position:relative;padding-top:56.25%">
+                          <iframe src="{{ vid.src }}" title="{{ vid.title }}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
         </sc-if>
         <sc-if value="{{ b.isVideo }}" hint-placeholder-val="{{ false }}">
           <div style="border-radius:16px;overflow:hidden;border:1px solid #f0e0dc;background:#000;margin:20px 0 0">
@@ -366,6 +456,10 @@ const JSON_CONTENT_FILES = {
 // componentDidMount and the injection step in renderVals.
 const FACULTY_FILE = "data/faculty.json";
 
+// The Latest News page's announcement list — same fetch pattern as
+// FACULTY_FILE above, just a flat chronological list, newest first.
+const NEWS_FILE = "data/news.json";
+
 class Component extends DCLogic {
   // openMenu: index of the open nav dropdown, -1 for none.
   // route:    the current hash without its "#", e.g. "library". Empty string
@@ -378,10 +472,11 @@ class Component extends DCLogic {
   //              empty per route so pages still work if a fetch hasn't
   //              resolved yet or a file is temporarily unavailable.
   // facultyList: content loaded from data/faculty.json (see componentDidMount
-  //              and the merge step in renderVals). One flat list of staff
-  //              cards for the Team Montessori page; starts empty so the
-  //              page still works if the fetch hasn't resolved yet.
-  state = { openMenu: -1, route: "", jsonContent: {}, facultyList: [] };
+  //              and the grouping/merge step in renderVals). One flat list of
+  //              staff from the file; renderVals groups it by block before
+  //              handing it to the template. Starts empty so the page still
+  //              works if the fetch hasn't resolved yet.
+  state = { openMenu: -1, route: "", jsonContent: {}, facultyList: [], newsList: [], expandedEvents: {} };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -418,6 +513,14 @@ class Component extends DCLogic {
       .then((r) => r.ok ? r.json() : [])
       .then((entries) => {
         if (Array.isArray(entries)) this.setState({ facultyList: entries });
+      })
+      .catch(() => {});
+
+    // Latest News's announcement list — same fail-silent pattern.
+    fetch(NEWS_FILE)
+      .then((r) => r.ok ? r.json() : [])
+      .then((entries) => {
+        if (Array.isArray(entries)) this.setState({ newsList: entries });
       })
       .catch(() => {});
   }
@@ -522,7 +625,7 @@ class Component extends DCLogic {
       ]),
       "team-monte": P("About", "#about", "Team Montessori", "The educators and staff who make Montessori a home away from home.", [
         { p: "Our faculty bring together experience across early-childhood, primary and secondary education, sport, the arts and pastoral care." },
-        { facultyList: [] },
+        { facultyGroups: [] },
       ]),
       "affiliations": P("About", "#about", "Affiliations", "Recognitions and affiliations that underpin a Montessori education.", [
         { list: [["Montessori School Committee", "the governing society of the Montessori Schools."]] },
@@ -764,7 +867,7 @@ class Component extends DCLogic {
       ]),
       "latest-news": P("News Room", "#news", "Latest News", "Announcements and updates from Montessori.", [
         { p: "Stay up to date with the latest happenings, notices and stories from across the school." },
-        { note: "News feed", sub: "Share announcements and we'll build out the news list." },
+        { newsList: [] },
       ]),
       "awards": P("News Room", "#news", "Awards & Achievements", "Celebrating our students and staff.", [
         { p: "From olympiad honours to inter-school championships, this space celebrates the achievements of the Montessori community." },
@@ -826,44 +929,74 @@ class Component extends DCLogic {
     const current = pages[route] || fallback;
 
     // ---- Merge in operator-added content from this route's JSON file ----
-    // (see JSON_CONTENT_FILES above). Each JSON entry becomes a heading, its
-    // message paragraphs, a photo gallery (if any photos were given) and
-    // videos (if any were given) — converted into the same compact shape
-    // ({ h }, { p }, { gallery }, { embed }/{ link }) the hardcoded content
-    // below already uses, so it flows through the exact same rendering logic.
-    // New entries are placed newest-first, right after the page's intro line.
+    // (see JSON_CONTENT_FILES above). Each event stays as one accordion row
+    // — title + thumbnail — collapsed by default so a year with many events
+    // doesn't turn into one long scroll. Clicking a row expands its message,
+    // photos and videos in place, right there in the list; nothing here ever
+    // navigates to a different file or a different hash.
     const jsonEntries = this.state.jsonContent[route];
     if (jsonEntries && jsonEntries.length) {
-      const jsonBlocks = [];
-      jsonEntries.forEach((ev) => {
-        if (ev.title) jsonBlocks.push({ h: ev.title });
-        (ev.paragraphs || []).forEach((p) => jsonBlocks.push({ p }));
-        if (ev.photos && ev.photos.length) {
-          jsonBlocks.push({ gallery: ev.photos.map((ph) => [ph.src, ph.caption]) });
-        }
-        (ev.videos || []).forEach((v) => {
-          if (v.embeddable === false) {
-            // Some uploaders disable embedding on YouTube's side; there's no
-            // code workaround for that, so this falls back to a link card
-            // that opens the video on YouTube instead of playing inline.
-            jsonBlocks.push({ link: { href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" } });
-          } else {
-            jsonBlocks.push({ embed: { src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title } });
-          }
-        });
-      });
-      // current.blocks[0] is the standing intro paragraph; new entries go
-      // directly after it, ahead of any older hardcoded content below.
+      const jsonBlocks = [{ eventAccordion: jsonEntries }];
+      // current.blocks[0] is the standing intro paragraph; the accordion
+      // goes directly after it, ahead of any older hardcoded content below.
       current.blocks = [current.blocks[0], ...jsonBlocks, ...current.blocks.slice(1)];
     }
 
-    // Team Montessori's faculty grid is data-driven the same way, just
+    // Expand the raw event list above into what the template actually
+    // needs to render each row: a thumbnail, an expand/collapse toggle
+    // bound to this.state.expandedEvents, and — only computed once, not
+    // re-done on every render of every row — the same image/video shapes
+    // isGallery/isEmbed/isLink already know how to draw.
+    if (route === "year-2026-27" || route === "year-2027-28") {
+      current.blocks = current.blocks.map((b) => {
+        if (b.eventAccordion === undefined) return b;
+        const events = b.eventAccordion.map((ev, i) => {
+          const stateKey = route + ":" + i;
+          const expanded = !!this.state.expandedEvents[stateKey];
+          const images = (ev.photos || []).map((ph) => ({ src: ph.src, caption: ph.caption }));
+          const videoItems = (ev.videos || []).map((v) =>
+            v.embeddable === false
+              ? { isLink: true, href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" }
+              : { isLink: false, src: "https://www.youtube.com/embed/" + v.youtubeId, title: v.title || "" }
+          );
+          return {
+            title: ev.title,
+            thumb: images.length ? images[0].src : "assets/monte-logo.png",
+            expanded,
+            arrow: expanded ? "\u2212" : "+",
+            toggle: () => this.setState((s) => ({ expandedEvents: { ...s.expandedEvents, [stateKey]: !s.expandedEvents[stateKey] } })),
+            paragraphs: ev.paragraphs || [],
+            hasImages: images.length > 0,
+            images,
+            videoItems,
+          };
+        });
+        return { eventAccordion: events };
+      });
+    }
+
+    // Team Montessori's faculty roster is data-driven the same way, just
     // simpler: one flat list from data/faculty.json rather than one JSON
-    // file producing several page blocks. Swap the placeholder's empty
-    // array for whatever's actually loaded, once it has.
+    // file producing several page blocks. Group it by block/wing before
+    // handing it to the template, which expects { block, members } pairs.
     if (route === "team-monte") {
+      const groups = [];
+      (this.state.facultyList || []).forEach((f) => {
+        const blockName = f.block || "Other";
+        let g = groups.find((existing) => existing.block === blockName);
+        if (!g) { g = { block: blockName, members: [] }; groups.push(g); }
+        g.members.push(f);
+      });
       current.blocks = current.blocks.map((b) =>
-        b.facultyList !== undefined ? { ...b, facultyList: this.state.facultyList } : b
+        b.facultyGroups !== undefined ? { ...b, facultyGroups: groups } : b
+      );
+    }
+
+    // Latest News's announcement list — same data-driven swap, no grouping
+    // needed since it's already a flat, ordered list.
+    if (route === "latest-news") {
+      current.blocks = current.blocks.map((b) =>
+        b.newsList !== undefined ? { ...b, newsList: this.state.newsList } : b
       );
     }
 
@@ -891,7 +1024,9 @@ class Component extends DCLogic {
       else if (b.person) blocks.push({ key: "b" + (k++), isPerson: true, person: b.person });
       else if (b.video) blocks.push({ key: "b" + (k++), isVideo: true, video: b.video });
       else if (b.embed) blocks.push({ key: "b" + (k++), isEmbed: true, embed: b.embed });
-      else if (b.facultyList) blocks.push({ key: "b" + (k++), isFacultyGrid: true, facultyList: Array.isArray(b.facultyList) ? b.facultyList : [] });
+      else if (b.facultyGroups) blocks.push({ key: "b" + (k++), isFacultyGrid: true, facultyGroups: Array.isArray(b.facultyGroups) ? b.facultyGroups : [] });
+      else if (b.newsList) blocks.push({ key: "b" + (k++), isNewsList: true, newsList: Array.isArray(b.newsList) ? b.newsList : [] });
+      else if (b.eventAccordion) blocks.push({ key: "b" + (k++), isEventAccordion: true, events: Array.isArray(b.eventAccordion) ? b.eventAccordion : [] });
       else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
