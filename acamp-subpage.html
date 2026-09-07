@@ -75,6 +75,7 @@
 
   .g{display:grid}
   .g-3{grid-template-columns:repeat(3,1fr);gap:12px}   /* the gallery block */
+  .g-2{grid-template-columns:repeat(2,1fr);gap:14px}   /* the events accordion */
 
   /* ===== Tablet: gutter only ===== */
   @media (max-width:1024px){
@@ -85,6 +86,7 @@
   @media (max-width:720px){
     .wrap{padding-left:18px;padding-right:18px}
     .g-3{grid-template-columns:1fr}
+    .g-2{grid-template-columns:1fr}
     .top-bar{flex-direction:column;align-items:flex-start!important;gap:14px}
     .top-bar .phone-block{text-align:left!important}
     .foot-row{flex-direction:column;align-items:flex-start!important;gap:16px}
@@ -288,7 +290,6 @@
                     <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
                     <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
                     <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
-                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Experience</th>
                   </tr>
                   <sc-for list="{{ grp.members }}" as="f" hint-placeholder-count="3">
                     <tr>
@@ -296,7 +297,6 @@
                       <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
                       <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
                       <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
-                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#c2410f;font-weight:600">{{ f.experience }}</td>
                     </tr>
                   </sc-for>
                 </table>
@@ -322,7 +322,7 @@
           </sc-if>
         </sc-if>
         <sc-if value="{{ b.isEventAccordion }}" hint-placeholder-val="{{ false }}">
-          <div style="display:grid;gap:12px;margin:20px 0 0">
+          <div class="g g-2" style="margin:20px 0 0;align-items:start">
             <sc-for list="{{ b.events }}" as="ev" hint-placeholder-count="3">
               <div style="border:1px solid #f0e0dc;border-radius:12px;overflow:hidden;background:#fff">
                 <div onClick="{{ ev.toggle }}" style="display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer">
