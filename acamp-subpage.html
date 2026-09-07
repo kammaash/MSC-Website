@@ -239,7 +239,7 @@
                      real :hover rule). Front and back are both absolutely
                      positioned, each hidden from view when facing away via
                      backface-visibility, so only one is ever visible at a time. -->
-                <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                <div onClick="{{ im.open }}" style="perspective:1200px;aspect-ratio:4/3;border-radius:12px;cursor:zoom-in">
                   <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
                     <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
                       <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
@@ -338,7 +338,7 @@
                     <sc-if value="{{ ev.hasImages }}" hint-placeholder-val="{{ false }}">
                       <div class="g g-3" style="margin:16px 0 0">
                         <sc-for list="{{ ev.images }}" as="im" hint-placeholder-count="3">
-                          <div style="perspective:1200px;aspect-ratio:4/3;border-radius:12px">
+                          <div onClick="{{ im.open }}" style="perspective:1200px;aspect-ratio:4/3;border-radius:12px;cursor:zoom-in">
                             <div style="position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)" style-hover="transform:rotateY(180deg)">
                               <div style="position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid #f0e0dc">
                                 <img src="{{ im.src }}" alt="{{ im.caption }}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
@@ -401,6 +401,27 @@
         </sc-if>
       </div>
     </sc-for>
+    <!-- Lightbox overlay: fixed positioning means it renders on top of
+         everything regardless of where it sits in the DOM. Clicking the
+         dark backdrop closes it; clicking the image/caption area itself
+         does not, via stopClick. -->
+    <sc-if value="{{ lightbox }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeLightbox }}" style="position:fixed;inset:0;background:rgba(20,10,8,.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px">
+        <button type="button" onClick="{{ closeLightbox }}" aria-label="Close" style="position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;font-size:34px;line-height:1;cursor:pointer">×</button>
+        <sc-if value="{{ lightbox.hasPrev }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ lightboxPrev }}" aria-label="Previous photo" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:26px;width:46px;height:46px;border-radius:50%;cursor:pointer">‹</button>
+        </sc-if>
+        <sc-if value="{{ lightbox.hasNext }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ lightboxNext }}" aria-label="Next photo" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:26px;width:46px;height:46px;border-radius:50%;cursor:pointer">›</button>
+        </sc-if>
+        <div onClick="{{ stopClick }}" style="max-width:min(90vw,900px);max-height:88vh;display:flex;flex-direction:column;align-items:center">
+          <img src="{{ lightbox.src }}" alt="{{ lightbox.caption }}" style="max-width:100%;max-height:76vh;border-radius:10px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+          <sc-if value="{{ lightbox.caption }}" hint-placeholder-val="{{ false }}">
+            <div style="color:#fff;font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;margin-top:16px;text-align:center;max-width:700px">{{ lightbox.caption }}</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
 
     <!-- CTA: fixed on every route. The second button returns to whichever
          section of the branch page this route belongs to (current.parentHref). -->
@@ -476,7 +497,7 @@ class Component extends DCLogic {
   //              staff from the file; renderVals groups it by block before
   //              handing it to the template. Starts empty so the page still
   //              works if the fetch hasn't resolved yet.
-  state = { openMenu: -1, route: "", jsonContent: {}, facultyList: [], newsList: [], expandedEvents: {} };
+  state = { openMenu: -1, route: "", jsonContent: {}, facultyList: [], newsList: [], expandedEvents: {}, lightbox: null };
 
   componentDidMount() {
     // Read the hash into state, and scroll back to the top. That scroll matters:
@@ -954,6 +975,7 @@ class Component extends DCLogic {
           const stateKey = route + ":" + i;
           const expanded = !!this.state.expandedEvents[stateKey];
           const images = (ev.photos || []).map((ph) => ({ src: ph.src, caption: ph.caption }));
+          images.forEach((im, i) => { im.open = () => this.setState({ lightbox: { images, index: i } }); });
           const videoItems = (ev.videos || []).map((v) =>
             v.embeddable === false
               ? { isLink: true, href: "https://www.youtube.com/watch?v=" + v.youtubeId, label: v.title || "Watch on YouTube", sub: "Opens on YouTube" }
@@ -1018,6 +1040,7 @@ class Component extends DCLogic {
       else if (b.yearLinks) blocks.push({ key: "b" + (k++), isYearLinks: true, years: b.yearLinks });
       else if (b.gallery) {
         const imgs = Array.isArray(b.gallery) ? b.gallery.map(([src, caption]) => ({ src, caption })) : [];
+        imgs.forEach((im, i) => { im.open = () => this.setState({ lightbox: { images: imgs, index: i } }); });
         blocks.push({ key: "b" + (k++), isGallery: true, hasImages: imgs.length > 0, images: imgs });
       }
       else if (b.note) blocks.push({ key: "b" + (k++), isNote: true, text: b.note, sub: b.sub || "" });
@@ -1030,6 +1053,22 @@ class Component extends DCLogic {
       else if (b.link) blocks.push({ key: "b" + (k++), isLink: true, link: b.link });
     });
 
+    // ---- Lightbox: one shared overlay for every photo grid on the page ----
+    // (event galleries and the general Photo Gallery/Awards/Team grids
+    // alike). Whichever image was clicked stashes the array it came from
+    // plus its position in state, so Prev/Next can step through that same
+    // set without the individual photo grids needing to know about each
+    // other.
+    const lb = this.state.lightbox;
+    const lightbox = lb
+      ? {
+          src: lb.images[lb.index].src,
+          caption: lb.images[lb.index].caption || "",
+          hasPrev: lb.index > 0,
+          hasNext: lb.index < lb.images.length - 1,
+        }
+      : null;
+
     return {
       menus,
       closeMenu: () => this.setState({ openMenu: -1 }),
@@ -1037,6 +1076,11 @@ class Component extends DCLogic {
       // separately in its normalised form, so current.blocks is not exposed.
       current: { parent: current.parent, parentHref: current.parentHref, title: current.title, intro: current.intro },
       blocks,
+      lightbox,
+      closeLightbox: () => this.setState({ lightbox: null }),
+      lightboxPrev: (e) => { e.stopPropagation(); this.setState((s) => (s.lightbox ? { lightbox: { ...s.lightbox, index: Math.max(0, s.lightbox.index - 1) } } : s)); },
+      lightboxNext: (e) => { e.stopPropagation(); this.setState((s) => (s.lightbox ? { lightbox: { ...s.lightbox, index: Math.min(s.lightbox.images.length - 1, s.lightbox.index + 1) } } : s)); },
+      stopClick: (e) => e.stopPropagation(),
     };
   }
 }
