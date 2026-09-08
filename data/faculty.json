@@ -1,1 +1,1878 @@
-[]
+[
+  {
+    "name": "APARNA N",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ARUNA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BADARU ANITHA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BADIGER SHILPA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BORUSU YERUSHA PRIYADARSHINI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BOYA VARALAKSHMI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "CHANDRAKALA NAGANNA ANANTPUR",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DARIPINENI SUSMITHA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "PRIMARY",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GANDAVARAPU VYJAYANTHI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "HUSNA NASREEN",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JAMPALA VENKATA RAMANI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K APARNA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KANAMPALLI JAHNAVI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KODANDAPURAM ANURADHA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KONDAKRINDI MAHA LAKSHMI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KUKATIKONDA ASHWINI VENKATESHWARLU",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KURUPATI VIJAYALAKSHMI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KURUVA MAHESWARI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MANCHA JAYASREE",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MOHAMMED SAFIA NAHEEN",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "N S SANDHYA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "N SAHITHI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "PRIMARY",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NAZIA FATIMA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "P PRIYA DARSHINI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PADMAVATHI GURRALA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PANUGANTI MARTEENA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "PRIMARY",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "R MIRIAM CECILIA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK AFREEN",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK FATHIMA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Art & Craft",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SUDHA J",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "UMMADI BOYINA VIJAYA DURGA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V MADHURI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V NARMADA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V SUPRAJA",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "YARASI SRAVANTHI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "Teacher Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "YEDDULA RAMA DEVI",
+    "block": "CHRYSALIS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "LOKESH KUMAR P T",
+    "block": "Chess - M",
+    "qualification": "",
+    "subject": "Coach Chess",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "A NARESH KUMAR",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "C NAVYA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "CHALLA NAGARANI",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "CHILAMAKURI KRISHNAVENI",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DHARMAVARAM SHAMSHAD BEGUM",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DOLA SAHA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "EDIGA MADHULIKA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GOLLA VEERANJANEYULU",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K RAGAVEENA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KURNOOL PEDDESWARI KUMARI",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M P CHANDRAKANTH",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MANE NAGA JYOTHI",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Telugu Sanskrit",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NILOFAR SAYEEDA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PALLE MURALI MOHAN REDDY",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "S ARIFA SULTHANA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SULAKE SREELEKHA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V NAGA SULOCHANA",
+    "block": "LAKSHYA JUNIORS",
+    "qualification": "",
+    "subject": "Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "A MALLIKARJUNA",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ANKIREDDY PALLI MOHAN REDDY",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DEEBA VIJAYASEKHAR",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GADWAL STANTON RAVI KUMAR",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GOLLA BHASKAR",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JAKKA HARI BABU",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K LAKSHMI KANTHA REDDY",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K MANOJ KUMAR",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K RAMACHANDRA REDDY",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KARAGATLA NAGAMADDAIAH",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KURLA LAKSHMIKANTHA REDDY",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MARRI SURENDRA NATH",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "N JAGADEESH BABU",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NARINIKOLU AYYASWAMY",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PADAKANDLA MURALIDHARA RAO",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PAGIDALA VINAY TEJA",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PATNANA MANMADHARAO",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SAMEERA AHMED",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SYED KHAJA MOINUDDIN",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Art & Craft",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "TANAGALA MURALI MOHAN RAO",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "U VENKATESWARA RAJU",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VEERAM SETTY MADHU",
+    "block": "LAKSHYA SENIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "A LAKSHMI NARAYANA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Computer Lab Asst",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "A PREETHI BENJAMIN",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ADIKE MOULALI",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B KEZIA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B NAVEEN KUMAR",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B VENGALA REDDY",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BENGALI DEEPTHI",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BIJJULA SWAPNA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DARGA KHADAR MODIN",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "G KAREEMULLA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "G PRATHAP REDDY",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GANGIREDDY SUBBA REDDY",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GOLLA NAGA RAJU",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Librarian",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GOPIREDDY GARI MADHAVI",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K KANAKA PRASAD",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K RAGHU RAMUDU",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K S NANDA KISHORE",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KAMMARI VENKATESWARLU",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KESANAPALLI HEMA SUNDARI",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KONKULA KALPANA DEVI",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KOPPU MOHAN RAO",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "LAKSHMI PRASAD YADAV KETHAM",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M A HEENA PARVEEN",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M B SUJATHA RAO",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M SRINIVASULU",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MAHADARI SANDEEP",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MUTHYALA NIRANJAN KUMAR",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NOORUNNISA BEGUM",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "P NAVAZ KHAN",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "P PAVAN",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PRAVEEN KUMAR MALIGE",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "RAHIMUDDIN AHMED",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SADIQ HUSSAIN K",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SANJAPOGU KESHAVA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SAYE KASI VISWANATH",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHABBEER AHMED SHAIK",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SOGANUR ARUNA SMITHA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SREENIVASULU EDURE",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "THUMMALA RAMESH",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VADDE NAGA SHESHANNA",
+    "block": "MEDHA",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ANUMULA MADHAVI LATHA",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Cashier",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BANDI KUMARA SWAMY",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "INCHARGE",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "G CHANDRAKALA",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Supervisor",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GUNDLAPALLI YOHAN",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Clerk",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K RAMANJANEYULU",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KODI VENKATESWARLU",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Accountant",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M VENKATESH",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Estate Manager",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "REDDY POGU KALYANI",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Cashier",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SRIRAMANA GUNTI",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "T SREEKANTH",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Dance Master",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VIJAYA KUMAR LALGUDI",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Accountant",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "Y RAMAJYOTHI",
+    "block": "OFFICE",
+    "qualification": "",
+    "subject": "Head Mistress",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ALIVI SUJATHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ANURADHA MITTI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "AVULA RADIKA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "AVVARU VIJAYA LAKSHMI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B AREEFA KHATOON",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English, Science, Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B SIREESHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BANDI KONDA REDDY",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BOGGULA GEETARANI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "C AZRA BEGUM",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GALI GIRIJA KALPANA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GALTU SHAIK NAZIA BANU",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GANDIKOTA APARNA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GHOUSIA BEGUM",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "H KARUNA PRIYA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English, Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "J SUNITHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JAKKI ANITHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K SHIRISHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "K UMADEVI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KAMSALI MADHAVI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KANIKE ANURADHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KARALA VEERA TEJASWANI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Art & Craft",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KEERTHANA K",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KENCHUGUNDU LAKSHMI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "L MADHURI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English, Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M FAIYAZUNNISA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M HASEENUNNISA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M VENKATA LAKSHUMAMMA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MADDELA YAGANTESWARI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "NCC",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MADEM ARUNA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu, Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MISKIN VIJAYA LAKSHMI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MODI LATHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English, Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "N ANURADHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NAGALDINNI AAIZA ZUBEDA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NAYANI ANITHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PONDUGULA PADMAVATHI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "RAFIA ANJUM",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "RAFIA SULTANA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "S ARSHIA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "S CHANDRAKALA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK ABDUL BARI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK FATHIMA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English, Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK FOUZIA ANJUM",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK SAMEENA BEGUM",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "English Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK ZEBA SADAN",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "PRIMARY",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SOUDAGAR VASIA SULTANA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SWETHA K M",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "UPPARA INDIRA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "USHARANI M K",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V JYOTHSNA DEVI",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V SIREESHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VEMULA SARITHA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Science Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VIJAYALAKSHMI ANANTAPUR",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Hindi Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VISWABRAMHANA PADMAJA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "YEDDULA ROJA",
+    "block": "OXFORD",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BANDAMEEDI RANGAMUNI",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BATTIKERI RAGHAVENDRA",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BOYA RAGHAVENDRA NAIDU",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KODIMUKKALA VENKATESULU",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MALIGELI SANTHA RAJU",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MARELLA ARUNAMMA",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MUPPASANI SURESH",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MUSTAF ISMAIL",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "REDDY POGULA IRAJU",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SARAKONDA ESWARAIAH",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "T RAMESWARI",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "Y SRINIVASULU",
+    "block": "PET - M",
+    "qualification": "",
+    "subject": "PET",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B SIDDHARTHA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B SRI JYOTHI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Principal",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DUGGANI SHARADA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "G SWAROOPA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GALAMURI RAVI KESAVULU",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Art & Craft",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GUNDRALA YELLA KRISHNA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GUNDRALLA VENU",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KALLAKURI NAGA PRASUNA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KATIKA YUSUF",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KOLUKULA PADMAVATI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M PADMA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PASUPULA SHILPA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PINNAKA APARNA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Maths Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SELLA SARASWATHI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Computer",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK HASEENA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK RAMEEZA BI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SOGANUR ANITHA",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SUPRIYA JAVALAKAR",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SURYA DEEPTHI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "U M KATYAYINI",
+    "block": "PRAGNYA JUNIORS",
+    "qualification": "",
+    "subject": "Social Primary",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "A G SURESH BABU",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ABDUL HAMEED M",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Biology",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ADAVI NAGA GAYATRI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "ANUMULA RAJYA LAKSHMI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "B SOMASEKHARA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "C NARESH",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "CHAKALI SANGEETHA VARALAKSHMI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Hindi",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "CHENNAMSETTY SAI SANTHOSH",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "G RAJA SEKHAR",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GADDA DORAI RAJ",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Physics",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GINNELA INDIRA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GOLLA JAYARAMANJANEYULU",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "DTP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "GONA DULCY KALPANA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JAMEDARU BRAHMANANDA RAYUDU",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Handwriting",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JOSHI RATHNA AMRUTHA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Science Chemistry",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KODI RAMAKRISHNA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KURUVA THIPPAYAPALLI RAJASEKHAR",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Telugu",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "MOGATHALI ANJANAIAH",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PATHAPADU SATYA PRASAD",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "S SHAHEENA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SYED MOHAMMAD RAFI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V VIJAYA LAKSHMI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Social High",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VAKKATI CHINNA SUNKANNA",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "English",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VARALAKSHMI",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "VEERA SEKHAR REDDY V",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Librarian",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "YEDDULA SESHI REDDY",
+    "block": "PRAGNYA SENIORS",
+    "qualification": "",
+    "subject": "Maths",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "NAYAK BHAKTUR BABA",
+    "block": "STATE",
+    "qualification": "",
+    "subject": "NCC",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "AMRUTHAKAVI RAGHAVI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BATTULA SWETHA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "BYLUPATI URMILA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "DEENABANDHU KUPPUSALA MUKTHESWARI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "E K ANNURANI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "EDDULA KANAKA PRIYANKA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "HOLACHI SAI DEEPTHI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "JANGAM CHAMUNDESWARI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KARANAM SIREESHA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "TUTOR",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "KISTAYYA CHANDRAGIKER JYOTHI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Coordinator",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "LALAM ABHINAYA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "M A RAFFATH PARVEEN",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "P VENKATA SUNITHA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "POTHULA JAYANTHI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PUDUGANDLA SWAROOPA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "PULLAGURA LAKSHMI PRASANNA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "R SRILEKHA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "S CHANDANA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SEELLA LEELAVATHAMMA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK AYESHA JABEEN",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK NIKATH ANJUM",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SHAIK SHABANA",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SOFIYA MUBEEN",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SUJATHA L",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "SURYA PALLAVI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "U ASFIA BEGUM",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Teacher PP",
+    "photo": "assets/monte-logo.png"
+  },
+  {
+    "name": "V SHOBHA RANI",
+    "block": "TINY TYKES",
+    "qualification": "",
+    "subject": "Nurse Female",
+    "photo": "assets/monte-logo.png"
+  }
+]
