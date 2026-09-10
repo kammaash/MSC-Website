@@ -260,7 +260,7 @@
 <section id="top" class="g g-hero">
   <div class="g-hero-pad" style="display:flex;flex-direction:column;justify-content:center">
     <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:20px;color:#c2410f;animation:fadeIn .8s ease both">Welcome to</div>
-    <h1 class="h-hero" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori Senior Secondary School, A-Camp</h1>
+    <h1 class="h-hero" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.08;color:#a51915;margin:8px 0 0;animation:riseIn .9s ease both">Montessori Senior Secondary School,<br> A-Camp</h1>
     <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:26px 0 0;max-width:560px;animation:riseIn .9s ease .1s both">Montessori A-Camp is a co-educational &amp; semi-residential school, established under the aegis of Montessori School Committee, as the latest associate of the Montessori family of schools. The school is spread over a verdant campus in lush green environs, on the outskirts of Kurnool city — embodying state-of-the-art facilities in a specifically designed ambience replete with centralized AC classrooms and unique sporting facilities.</p>
     <p style="font-size:17.5px;line-height:1.7;color:#4a423c;margin:18px 0 0;max-width:560px;animation:riseIn .9s ease .2s both">Through modern learning-teaching techniques, the school endeavours to make education a happy, value-based and progressive journey that creates the global citizens of tomorrow.</p>
     <div class="hero-btns" style="display:flex;gap:13px;margin-top:32px;animation:riseIn .9s ease .3s both">
@@ -318,7 +318,10 @@
     </div>
     <div>
       <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:#c2410f">Our Founder</div>
-      <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.15;color:#a51915;margin:12px 0 0">Smt. P. Kalyanamma, M.A., B.Ed.</h2>
+      <div style="display:inline-block;margin:12px 0 0">
+        <h2 class="h-1" style="font-family:'Quicksand',sans-serif;font-weight:700;line-height:1.15;color:#a51915;margin:0">Smt. P. Kalyanamma</h2>
+        <div style="font-family:'Quicksand',sans-serif;font-weight:600;font-size:15px;color:#a51915;text-align:right;margin:2px 0 0">M.A., B.Ed.</div>
+      </div>
       <p style="font-size:15px;line-height:1.5;color:#c2410f;font-family:'Quicksand',sans-serif;font-weight:600;margin:6px 0 0">Founder, Montessori Institutions</p>
       <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:18px 0 0">Fondly known to generations of students and staff as "Big Aunty", Smt. Kalyanamma founded the Montessori Institutions in Kurnool over four decades ago. A self-made educator with sharp analytical thinking and an unwavering resolve to see every goal through, she trained formally in the Montessori method after being inspired by Maria Montessori's founding belief that a child should be guided to help himself.</p>
       <p style="font-size:16.5px;line-height:1.7;color:#4a423c;margin:14px 0 0">As Chief Patron, she continues to shape teaching practice across the group, championing methods that support the all-round development of every child.</p>
@@ -672,13 +675,25 @@ class Component extends DCLogic {
     }
 
     // ---- 3. Loading screen fade-out ----
-    // Purely time-based: fade at 1250ms, then remove from the layout at 1900ms
-    // once the opacity transition has finished. It is not waiting on any real
-    // load event.
+    // Was purely time-based (fade at 1250ms, gone at 1900ms) with no way to
+    // know it had already played — so bouncing from a subpage back to this
+    // page (very common: most subpage nav items link back here) replayed
+    // the full ~1.9s red splash every single time, which reads as the page
+    // "going back to a welcome screen and then coming back." Now it only
+    // plays in full on the first load of a visit; after that, it's skipped
+    // almost entirely so a returning navigation doesn't get blocked by it.
     const loader = this._loaderEl;
     if (loader) {
-      this._t1 = setTimeout(() => { loader.style.opacity = "0"; }, 1250);
-      this._t2 = setTimeout(() => { loader.style.display = "none"; }, 1900);
+      const seen = sessionStorage.getItem("msc_loader_seen");
+      if (seen) {
+        loader.style.transition = "none";
+        loader.style.opacity = "0";
+        loader.style.display = "none";
+      } else {
+        sessionStorage.setItem("msc_loader_seen", "1");
+        this._t1 = setTimeout(() => { loader.style.opacity = "0"; }, 1250);
+        this._t2 = setTimeout(() => { loader.style.display = "none"; }, 1900);
+      }
     }
 
     // custom cursor handled globally by cursor.js
@@ -755,7 +770,6 @@ class Component extends DCLogic {
         { label: "Core Values", href: SUB + "core-values" }, { label: "Founder's Message", href: SUB + "founders-message" },
         { label: "From Principal's Desk", href: SUB + "principals-desk" }, { label: "Team Montessori", href: SUB + "team-monte" },
         { label: "Affiliations", href: SUB + "affiliations" }, { label: "Documents", href: SUB + "documents" } ] },
-      { label: "School Life", href: SUB + "house", items: [] },
       { label: "Academics", href: "#academics", items: [
         { label: "Pre-Primary Program", href: SUB + "pre-primary" },
         { label: "Primary School", href: SUB + "primary" }, { label: "Secondary School", href: SUB + "secondary" },
@@ -772,7 +786,6 @@ class Component extends DCLogic {
       // Smart Lib 360 digital library application, hosted on its own
       // subdomain rather than as a page of this site.
       { label: "Digital Library", href: "https://library.msceducation.net", items: [] },
-      { label: "Transport", href: SUB + "transport", items: [] },
       { label: "Gallery", href: "#gallery", items: [
         { label: "Photo Gallery", href: SUB + "photo-gallery" }, { label: "Videos", href: SUB + "videos" } ] },
       { label: "News Room", href: "#news", items: [
@@ -791,7 +804,12 @@ class Component extends DCLogic {
       hasItems: m.items.length > 0,
       isOpen: open === i,
       showDropdown: open === i && m.items.length > 0,
-      color: i === 0 ? "#fff" : "#a51915",
+      // Digital Library is an external link to a separate application, not a
+      // page on this site — using blue here (the one clearly different hue
+      // on this page) makes that obvious at a glance, since every other
+      // accent color on this site is a shade of red/orange and would have
+      // blended in rather than standing out.
+      color: i === 0 ? "#fff" : (m.label === "Digital Library" ? "#1565a8" : "#a51915"),
       bg: i === 0 ? "#a51915" : "transparent",
       open: () => this.setState({ openMenu: i }),
     }));
