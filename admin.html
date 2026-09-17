@@ -153,10 +153,6 @@
   .scroll-wrap::-webkit-scrollbar-thumb{background:#d8b9b6;border-radius:6px}
   .scroll-wrap::-webkit-scrollbar-track{background:#fbf3f2}
   .card.wide-card{max-width:1300px;width:calc(100vw - 40px);margin-left:calc(50% - 50vw + 20px);margin-right:calc(50% - 50vw + 20px)}
-  .scroll-btn-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-  .scroll-arrow-btn{background:#a51915;color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px}
-  .scroll-arrow-btn:hover{background:#7f120f}
-  .scroll-hint{font-size:12.5px;color:#a51915;font-weight:700;margin-bottom:6px}
   table.bulk th.sticky-col,table.bulk td.sticky-col{position:sticky;left:0;background:#fff;z-index:2;box-shadow:2px 0 4px rgba(0,0,0,0.06)}
   table.bulk th.sticky-col{background:#fbf3f2;z-index:3}
   .bulk-thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #e2d3ce;display:block;margin-bottom:5px}
@@ -338,13 +334,6 @@
       <p class="lead" style="margin-top:0" id="facultyPublishLead">Commits the photo and the updated faculty list straight to the <code>main</code> branch.</p>
       <button type="button" class="btn-generate" id="facultyPublishBtn">Publish to GitHub (main branch)</button>
       <div id="facultyPublishStatus"></div>
-    </div>
-
-    <div class="card" id="deleteFacultyCard" style="display:none">
-      <h2>Delete this faculty member</h2>
-      <p class="lead" style="margin-top:0">Removes them from the page entirely. Cannot be undone.</p>
-      <label class="checkbox-row" style="margin-top:0"><input type="checkbox" id="deleteFacultyPhotoToo" checked> Also delete their photo from assets/gallery</label>
-      <button type="button" class="btn-danger" style="margin-top:14px" id="deleteFacultyBtn">Delete this faculty member permanently</button>
     </div>
 
     <div class="card">
@@ -875,7 +864,6 @@ function setFacultyMode(m) {
   facultyMode = m;
   document.querySelectorAll('input[name="facultyMode"]').forEach((r) => { r.checked = r.value === m; });
   $("facultyPickerField").style.display = m === "edit" ? "block" : "none";
-  $("deleteFacultyCard").style.display = m === "edit" ? "block" : "none";
   $("facultyPublishLead").textContent = m === "edit"
     ? "Commits your changes straight to the main branch."
     : "Commits the photo and the updated faculty list straight to the main branch.";
@@ -991,37 +979,9 @@ $("facultyPublishBtn").addEventListener("click", async () => {
 });
 
 // ---------- faculty delete ----------
-$("deleteFacultyBtn").addEventListener("click", async () => {
-  if (facultyEditingIndex === null) return;
-  const f = facultyExisting[facultyEditingIndex];
-  if (!confirm('Delete "' + f.name + '" permanently? This cannot be undone.')) return;
-
-  const token = $("ghToken").value.trim();
-  if (!token) { $("facultyPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
-
-  $("deleteFacultyBtn").disabled = true;
-  const deletePhotoToo = $("deleteFacultyPhotoToo").checked;
-  const merged = facultyExisting.slice();
-  merged.splice(facultyEditingIndex, 1);
-
-  try {
-    if (deletePhotoToo && f.photo && f.photo !== "assets/monte-logo.png") {
-      $("facultyPublishStatus").innerHTML = '<div class="banner warn">Deleting photo…</div>';
-      await ghDeleteFile(f.photo, "Remove photo (faculty deleted): " + f.name, token).catch(() => {});
-    }
-    $("facultyPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
-    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
-    await ghPutFile("data/faculty.json", jsonBase64, "Delete faculty: " + f.name, token);
-
-    facultyExisting = merged;
-    $("facultyPublishStatus").innerHTML = '<div class="banner ok"><strong>Deleted.</strong> Give GitHub Pages a minute or two, then check the live site.</div>';
-    setFacultyMode("add");
-  } catch (e) {
-    $("facultyPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '.</div>';
-  } finally {
-    $("deleteFacultyBtn").disabled = false;
-  }
-});
+// (Removed the standalone single-person delete card — use "Remove row" in the
+// spreadsheet-view bulk editor below instead, which now also deletes the
+// person's photo from assets/gallery when you publish.)
 
 // ---------- Excel/CSV import ----------
 $("importChooseBtn").addEventListener("click", () => $("importFileInput").click());
@@ -1110,6 +1070,7 @@ async function publishImport() {
 
 // ---------- bulk faculty editor (spreadsheet view) ----------
 let bulkRows = [];
+let bulkRemovedPhotos = []; // photo paths to delete on next publish, from rows removed via "Remove row"
 
 $("bulkLoadBtn").addEventListener("click", () => {
   if (!facultyFetchAttempted) loadFacultyFile();
@@ -1129,9 +1090,7 @@ function renderBulkTable() {
     ["qualification", "Qualification"],
     ["subject", "Subject"],
   ];
-  let html = '<div class="scroll-btn-row"><span class="scroll-hint" style="margin:0">If the table below doesn\'t fully fit, use these buttons or drag the scrollbar under it →</span>' +
-    '<span><button type="button" class="scroll-arrow-btn" id="bulkScrollLeftBtn">◀</button> <button type="button" class="scroll-arrow-btn" id="bulkScrollRightBtn">▶</button></span></div>';
-  html += '<div class="scroll-wrap" id="bulkScrollWrap"><table class="preview bulk" style="min-width:900px">';
+  let html = '<div class="scroll-wrap" id="bulkScrollWrap"><table class="preview bulk" style="width:100%;margin:0 auto">';
   html += "<tr><th class=\"sticky-col\">" + cols[0][1] + "</th>" + cols.slice(1).map(([, label]) => "<th>" + label + "</th>").join("") + '<th class="bulk-photo-cell">Photo</th><th></th></tr>';
   bulkRows.forEach((r, i) => {
     html += "<tr>";
@@ -1160,7 +1119,11 @@ function renderBulkTable() {
   });
   $("bulkEditArea").querySelectorAll("[data-bulk-remove]").forEach((el) => {
     el.addEventListener("click", (e) => {
-      bulkRows.splice(+e.target.dataset.bulkRemove, 1);
+      const idx = +e.target.dataset.bulkRemove;
+      const row = bulkRows[idx];
+      if (!confirm('Remove "' + (row.name || "this row") + '" from the list? This takes effect once you publish.')) return;
+      if (row.photo && row.photo !== "assets/monte-logo.png") bulkRemovedPhotos.push(row.photo);
+      bulkRows.splice(idx, 1);
       renderBulkTable();
     });
   });
@@ -1187,8 +1150,6 @@ function renderBulkTable() {
     if (inputs.length) inputs[inputs.length - 1].focus();
   });
   $("bulkPublishBtn").addEventListener("click", publishBulkFaculty);
-  $("bulkScrollLeftBtn").addEventListener("click", () => $("bulkScrollWrap").scrollBy({ left: -320, behavior: "smooth" }));
-  $("bulkScrollRightBtn").addEventListener("click", () => $("bulkScrollWrap").scrollBy({ left: 320, behavior: "smooth" }));
 }
 
 // shared hidden file input for the bulk photo column
@@ -1242,10 +1203,23 @@ async function publishBulkFaculty() {
     const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleaned, null, 2))));
     await ghPutFile("data/faculty.json", jsonBase64, "Bulk update faculty list (" + cleaned.length + " entries)", token);
 
+    // clean up photo files belonging to rows that were removed with "Remove row"
+    if (bulkRemovedPhotos.length) {
+      $("bulkPublishStatus").innerHTML = '<div class="banner warn">Removing photos for deleted faculty…</div>';
+      for (const p of bulkRemovedPhotos) {
+        await ghDeleteFile(p, "Remove photo (faculty deleted via bulk editor)", token).catch(() => {});
+      }
+    }
+    const removedCount = bulkRemovedPhotos.length;
+    bulkRemovedPhotos = [];
+
     facultyExisting = cleaned;
     bulkRows = cleaned.map((f) => ({ ...f }));
     populateFacultyPicker(); populateFacultyBlockOptions();
-    $("bulkPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> ' + cleaned.length + ' faculty entries saved' + (photoRows.length ? " (including " + photoRows.length + " updated photo" + (photoRows.length > 1 ? "s" : "") + ")" : "") + '. Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
+    const extras = [];
+    if (photoRows.length) extras.push(photoRows.length + " updated photo" + (photoRows.length > 1 ? "s" : ""));
+    if (removedCount) extras.push(removedCount + " removed photo" + (removedCount > 1 ? "s" : "") + " cleaned up");
+    $("bulkPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> ' + cleaned.length + ' faculty entries saved' + (extras.length ? " (" + extras.join(", ") + ")" : "") + '. Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
   } catch (e) {
     $("bulkPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying, so a retry doesn\'t conflict with a partially-saved state.</div>';
   } finally {
