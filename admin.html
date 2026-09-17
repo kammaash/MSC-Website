@@ -288,12 +288,25 @@
         <input type="text" id="facultyName" placeholder="e.g. Mrs. Lakshmi Devi">
       </div>
       <div class="field">
+        <label for="facultyDesignation">Designation</label>
+        <input type="text" id="facultyDesignation" placeholder="e.g. PGT, TGT, PRT, PET" list="facultyDesignationOptions">
+        <datalist id="facultyDesignationOptions">
+          <option value="PRINCIPAL"><option value="VICE PRINCIPAL"><option value="PGT"><option value="TGT"><option value="PRT"><option value="PET"><option value="WELLNESS TEACHER"><option value="SPECIAL EDUCATOR"><option value="OTHER">
+        </datalist>
+        <div class="hint">Faculty are grouped on the live page by this first, then by block within it — use the same spelling every time (e.g. always "PGT", not sometimes "pgt").</div>
+      </div>
+      <div class="field">
+        <label for="facultyBlock">Block / Wing</label>
+        <input type="text" id="facultyBlock" placeholder="e.g. MEDHA" list="facultyBlockOptions">
+        <datalist id="facultyBlockOptions"></datalist>
+      </div>
+      <div class="field">
         <label for="facultyQualification">Qualification</label>
         <input type="text" id="facultyQualification" placeholder="e.g. M.Sc, B.Ed">
       </div>
       <div class="field" style="margin-bottom:0">
-        <label for="facultyExperience">Experience</label>
-        <input type="text" id="facultyExperience" placeholder="e.g. 12 years of teaching experience">
+        <label for="facultySubject">Subject</label>
+        <input type="text" id="facultySubject" placeholder="e.g. Mathematics">
       </div>
     </div>
 
@@ -321,10 +334,17 @@
 
     <div class="card">
       <h2>Or: import a list from Excel / CSV</h2>
-      <p class="lead" style="margin-top:0">For adding many faculty members at once. The spreadsheet needs a header row with columns named (in any order, case doesn't matter): <strong>Name</strong>, <strong>Qualification</strong>, <strong>Experience</strong>, and optionally <strong>Photo</strong> (the filename of a photo already uploaded to assets/gallery — this import can't upload photos itself, since a spreadsheet cell can't hold an actual image file). Rows without a photo will use a placeholder image until you add one individually later.</p>
+      <p class="lead" style="margin-top:0">For adding many new faculty members at once. The spreadsheet needs a header row with columns named (in any order, case doesn't matter): <strong>Name</strong>, <strong>Designation</strong>, <strong>Block</strong> (or "Wing"), <strong>Qualification</strong>, <strong>Subject</strong>, and optionally <strong>Photo</strong> (the filename of a photo already uploaded to assets/gallery — this import can't upload photos itself, since a spreadsheet cell can't hold an actual image file). Rows without a photo show an initials avatar until you add a real one individually later.</p>
       <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none">
       <button type="button" class="btn-add" id="importChooseBtn">Choose Excel/CSV file</button>
       <div id="importPreviewArea"></div>
+    </div>
+
+    <div class="card">
+      <h2>Or: edit everyone at once (spreadsheet view)</h2>
+      <p class="lead" style="margin-top:0">The best way to manage a large roster — edit names, designations, blocks, qualifications, and subjects for many people side by side, add or remove rows, then publish every change in a single commit. Photos aren't editable here (each person keeps whatever photo they already have) — use the single-person form above for uploading or replacing a photo.</p>
+      <button type="button" class="btn-add" id="bulkLoadBtn">Load current faculty into the table</button>
+      <div id="bulkEditArea" style="margin-top:14px"></div>
     </div>
   </div><!-- /facultySection -->
 
@@ -819,7 +839,7 @@ function loadFacultyFile() {
       facultyExisting = Array.isArray(data) ? data : [];
       facultyFetchOk = true;
       $("facultyFetchWarning").innerHTML = '<div class="banner ok">Loaded ' + facultyExisting.length + ' existing faculty member' + (facultyExisting.length === 1 ? "" : "s") + ' from data/faculty.json.</div>';
-      populateFacultyPicker();
+      populateFacultyPicker(); populateFacultyBlockOptions();
       setFacultyMode("add");
     })
     .catch(() => {
@@ -857,18 +877,26 @@ function loadFacultyIntoForm(idx) {
   $("facultyPicker").value = String(idx);
   const f = facultyExisting[idx] || {};
   $("facultyName").value = f.name || "";
+  $("facultyDesignation").value = f.designation || "";
+  $("facultyBlock").value = f.block || "";
   $("facultyQualification").value = f.qualification || "";
-  $("facultyExperience").value = f.experience || "";
+  $("facultySubject").value = f.subject || "";
   facultyPhoto = { file: null, previewUrl: f.photo || "", existingSrc: f.photo || null };
   renderFacultyPhoto();
 }
 function resetFacultyForm() {
   facultyEditingIndex = null;
   $("facultyName").value = "";
+  $("facultyDesignation").value = "";
+  $("facultyBlock").value = "";
   $("facultyQualification").value = "";
-  $("facultyExperience").value = "";
+  $("facultySubject").value = "";
   facultyPhoto = { file: null, previewUrl: "", existingSrc: null };
   renderFacultyPhoto();
+}
+function populateFacultyBlockOptions() {
+  const blocks = [...new Set(facultyExisting.map((f) => f.block).filter(Boolean))];
+  $("facultyBlockOptions").innerHTML = blocks.map((b) => '<option value="' + String(b).replace(/</g, "&lt;") + '">').join("");
 }
 
 // ---------- faculty photo ----------
@@ -905,7 +933,7 @@ $("facultyPublishBtn").addEventListener("click", async () => {
       uploadInfo = { blob, filename };
       photoSrc = "assets/gallery/" + filename;
     }
-    if (!photoSrc) photoSrc = "assets/monte-logo.png";
+    if (!photoSrc) photoSrc = "";
 
     if (uploadInfo) {
       $("facultyPublishStatus").innerHTML = '<div class="banner warn">Uploading photo…</div>';
@@ -919,8 +947,10 @@ $("facultyPublishBtn").addEventListener("click", async () => {
 
     const entry = {
       name,
+      designation: $("facultyDesignation").value.trim(),
+      block: $("facultyBlock").value.trim(),
       qualification: $("facultyQualification").value.trim(),
-      experience: $("facultyExperience").value.trim(),
+      subject: $("facultySubject").value.trim(),
       photo: photoSrc,
     };
     let merged;
@@ -936,7 +966,7 @@ $("facultyPublishBtn").addEventListener("click", async () => {
     await ghPutFile("data/faculty.json", jsonBase64, (facultyMode === "edit" ? "Edit faculty: " : "Add faculty: ") + name, token);
 
     facultyExisting = merged;
-    populateFacultyPicker();
+    populateFacultyPicker(); populateFacultyBlockOptions();
     $("facultyPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
   } catch (e) {
     $("facultyPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying.</div>';
@@ -1008,8 +1038,10 @@ function normalizeImportRow(row) {
   };
   return {
     name: get("name", "full name", "faculty name"),
+    designation: get("designation", "role"),
+    block: get("block", "wing", "block / wing", "block/wing"),
     qualification: get("qualification", "qualifications"),
-    experience: get("experience", "years of experience", "exp"),
+    subject: get("subject", "subjects"),
     photoFilename: get("photo", "photo filename", "image", "photo file"),
   };
 }
@@ -1019,9 +1051,9 @@ function renderImportPreview() {
     $("importPreviewArea").innerHTML = '<div class="banner err">No usable rows found — make sure the sheet has a "Name" column with values in it.</div>';
     return;
   }
-  let html = '<table class="preview"><tr><th>Name</th><th>Qualification</th><th>Experience</th><th>Photo file</th></tr>';
+  let html = '<table class="preview"><tr><th>Name</th><th>Designation</th><th>Block</th><th>Qualification</th><th>Subject</th><th>Photo file</th></tr>';
   importedRows.forEach((r) => {
-    html += "<tr><td>" + escapeHtml(r.name) + "</td><td>" + escapeHtml(r.qualification) + "</td><td>" + escapeHtml(r.experience) + "</td><td" + (r.photoFilename ? "" : ' class="missing"') + ">" + (r.photoFilename ? escapeHtml(r.photoFilename) : "none — placeholder will be used") + "</td></tr>";
+    html += "<tr><td>" + escapeHtml(r.name) + "</td><td>" + escapeHtml(r.designation) + "</td><td>" + escapeHtml(r.block) + "</td><td>" + escapeHtml(r.qualification) + "</td><td>" + escapeHtml(r.subject) + "</td><td" + (r.photoFilename ? "" : ' class="missing"') + ">" + (r.photoFilename ? escapeHtml(r.photoFilename) : "none — initials avatar will be used") + "</td></tr>";
   });
   html += "</table>";
   html +=
@@ -1038,9 +1070,11 @@ async function publishImport() {
   const action = document.querySelector('input[name="importAction"]:checked').value;
   const newEntries = importedRows.map((r) => ({
     name: r.name,
+    designation: r.designation,
+    block: r.block,
     qualification: r.qualification,
-    experience: r.experience,
-    photo: r.photoFilename ? "assets/gallery/" + r.photoFilename : "assets/monte-logo.png",
+    subject: r.subject,
+    photo: r.photoFilename ? "assets/gallery/" + r.photoFilename : "",
   }));
   const merged = action === "replace" ? newEntries : [...facultyExisting, ...newEntries];
 
@@ -1050,12 +1084,94 @@ async function publishImport() {
     const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
     await ghPutFile("data/faculty.json", jsonBase64, "Import " + newEntries.length + " faculty member(s) from spreadsheet", token);
     facultyExisting = merged;
-    populateFacultyPicker();
+    populateFacultyPicker(); populateFacultyBlockOptions();
     $("importPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check the live site. Remember to upload any referenced photo files to assets/gallery separately if you haven\'t already.</div>';
   } catch (e) {
     $("importPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed:</strong> ' + e.message + '</div>';
   } finally {
     $("importPublishBtn").disabled = false;
+  }
+}
+
+// ---------- bulk faculty editor (spreadsheet view) ----------
+let bulkRows = [];
+
+$("bulkLoadBtn").addEventListener("click", () => {
+  if (!facultyFetchAttempted) loadFacultyFile();
+  bulkRows = facultyExisting.map((f) => ({ ...f }));
+  renderBulkTable();
+});
+
+function renderBulkTable() {
+  if (!bulkRows.length) {
+    $("bulkEditArea").innerHTML = '<div class="hint">Nothing loaded yet, or the current list is empty. Click "Load current faculty into the table" above.</div>';
+    return;
+  }
+  const cols = [
+    ["name", "Name"],
+    ["designation", "Designation"],
+    ["block", "Block"],
+    ["qualification", "Qualification"],
+    ["subject", "Subject"],
+  ];
+  let html = '<div style="overflow-x:auto"><table class="preview" style="min-width:900px">';
+  html += "<tr>" + cols.map(([, label]) => "<th>" + label + "</th>").join("") + "<th></th></tr>";
+  bulkRows.forEach((r, i) => {
+    html += "<tr>";
+    cols.forEach(([key]) => {
+      html += '<td><input type="text" data-bulk="' + key + '" data-i="' + i + '" value="' + escapeHtml(r[key] || "").replace(/"/g, "&quot;") + '" style="width:100%;min-width:120px;border:1px solid #e2d3ce;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px"></td>';
+    });
+    html += '<td><button type="button" class="btn-remove" data-bulk-remove="' + i + '">Remove</button></td>';
+    html += "</tr>";
+  });
+  html += "</table></div>";
+  html += '<button type="button" class="btn-add" style="margin-top:14px" id="bulkAddRowBtn">+ Add row</button>';
+  html += '<div style="margin-top:14px"><button type="button" class="btn-generate" id="bulkPublishBtn">Publish all changes to GitHub (main branch) — ' + bulkRows.length + ' entries</button></div>';
+  html += '<div id="bulkPublishStatus"></div>';
+  $("bulkEditArea").innerHTML = html;
+
+  $("bulkEditArea").querySelectorAll("input[data-bulk]").forEach((el) => {
+    el.addEventListener("input", (e) => {
+      bulkRows[+e.target.dataset.i][e.target.dataset.bulk] = e.target.value;
+    });
+  });
+  $("bulkEditArea").querySelectorAll("[data-bulk-remove]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      bulkRows.splice(+e.target.dataset.bulkRemove, 1);
+      renderBulkTable();
+    });
+  });
+  $("bulkAddRowBtn").addEventListener("click", () => {
+    bulkRows.push({ name: "", designation: "", block: "", qualification: "", subject: "", photo: "" });
+    renderBulkTable();
+    // jump focus to the new row's Name field so typing can start immediately
+    const inputs = $("bulkEditArea").querySelectorAll('input[data-bulk="name"]');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+  $("bulkPublishBtn").addEventListener("click", publishBulkFaculty);
+}
+
+async function publishBulkFaculty() {
+  const token = $("ghToken").value.trim();
+  if (!token) { $("bulkPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
+
+  const cleaned = bulkRows.filter((r) => r.name && r.name.trim());
+  if (!cleaned.length) { $("bulkPublishStatus").innerHTML = '<div class="banner err">Every row is missing a name — nothing to publish.</div>'; return; }
+
+  $("bulkPublishBtn").disabled = true;
+  try {
+    $("bulkPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
+    const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleaned, null, 2))));
+    await ghPutFile("data/faculty.json", jsonBase64, "Bulk update faculty list (" + cleaned.length + " entries)", token);
+
+    facultyExisting = cleaned;
+    bulkRows = cleaned.map((f) => ({ ...f }));
+    populateFacultyPicker(); populateFacultyBlockOptions();
+    $("bulkPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> ' + cleaned.length + ' faculty entries saved. Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
+  } catch (e) {
+    $("bulkPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in data/faculty.json on GitHub before retrying, so a retry doesn\'t conflict with a partially-saved state.</div>';
+  } finally {
+    $("bulkPublishBtn").disabled = false;
   }
 }
 </script>

@@ -280,27 +280,39 @@
           </div>
         </sc-if>
         <sc-if value="{{ b.isFacultyGrid }}" hint-placeholder-val="{{ false }}">
-          <sc-for list="{{ b.facultyGroups }}" as="grp" hint-placeholder-count="1">
-            <div style="margin:26px 0 0">
-              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px;color:#a51915;margin-bottom:10px">{{ grp.block }}</div>
-              <div style="overflow-x:auto;border:1px solid #f0e0dc;border-radius:12px">
-                <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
-                  <tr style="background:#fbf3f2">
-                    <th style="padding:10px 12px;width:64px"></th>
-                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
-                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
-                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
-                  </tr>
-                  <sc-for list="{{ grp.members }}" as="f" hint-placeholder-count="3">
-                    <tr>
-                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc"><img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc"></td>
-                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
-                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
-                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
-                    </tr>
-                  </sc-for>
-                </table>
-              </div>
+          <sc-for list="{{ b.facultyGroups }}" as="dg" hint-placeholder-count="1">
+            <div style="margin:34px 0 0">
+              <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#332c28;padding-bottom:6px;border-bottom:2px solid #f0e0dc">{{ dg.designation }}</div>
+              <sc-for list="{{ dg.blockGroups }}" as="grp" hint-placeholder-count="1">
+                <div style="margin:20px 0 0">
+                  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:#a51915;margin-bottom:10px">{{ grp.block }}</div>
+                  <div style="overflow-x:auto;border:1px solid #f0e0dc;border-radius:12px">
+                    <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
+                      <tr style="background:#fbf3f2">
+                        <th style="padding:10px 12px;width:64px"></th>
+                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
+                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
+                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
+                      </tr>
+                      <sc-for list="{{ grp.members }}" as="f" hint-placeholder-count="3">
+                        <tr>
+                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc">
+                            <sc-if value="{{ f.hasPhoto }}" hint-placeholder-val="{{ false }}">
+                              <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc">
+                            </sc-if>
+                            <sc-if value="{{ !f.hasPhoto }}" hint-placeholder-val="{{ false }}">
+                              <div style="width:52px;height:52px;border-radius:50%;background:{{ f.avatarColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px">{{ f.initial }}</div>
+                            </sc-if>
+                          </td>
+                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
+                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
+                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
+                        </tr>
+                      </sc-for>
+                    </table>
+                  </div>
+                </div>
+              </sc-for>
             </div>
           </sc-for>
           <sc-if value="{{ !b.facultyGroups.length }}" hint-placeholder-val="{{ false }}">
@@ -997,18 +1009,43 @@ class Component extends DCLogic {
 
     // Team Montessori's faculty roster is data-driven the same way, just
     // simpler: one flat list from data/faculty.json rather than one JSON
-    // file producing several page blocks. Group it by block/wing before
-    // handing it to the template, which expects { block, members } pairs.
+    // file producing several page blocks. Grouped two levels deep —
+    // designation (PGT/TGT/PRT/etc, in a fixed seniority order) then
+    // block/wing within each — before handing it to the template, which
+    // expects { designation, blockGroups: [{ block, members }] }.
     if (route === "team-monte") {
-      const groups = [];
-      (this.state.facultyList || []).forEach((f) => {
-        const blockName = f.block || "Other";
-        let g = groups.find((existing) => existing.block === blockName);
-        if (!g) { g = { block: blockName, members: [] }; groups.push(g); }
-        g.members.push(f);
+      const DESIG_ORDER = ["PRINCIPAL", "VICE PRINCIPAL", "PGT", "TGT", "PRT", "PET", "WELLNESS TEACHER", "SPECIAL EDUCATOR", "OTHER"];
+      const AVATAR_COLORS = ["#a51915", "#c2410f", "#7f120f", "#b23b2f", "#8a4a1c", "#9a2f28"];
+      const hashCode = (s) => {
+        let h = 0;
+        for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+        return h;
+      };
+      const withAvatar = (f) => ({
+        ...f,
+        hasPhoto: !!(f.photo && f.photo.trim()),
+        initial: (f.name || "?").trim().charAt(0).toUpperCase(),
+        avatarColor: AVATAR_COLORS[hashCode(f.name || "") % AVATAR_COLORS.length],
       });
+
+      const desigGroups = [];
+      (this.state.facultyList || []).forEach((f0) => {
+        const f = withAvatar(f0);
+        const desigName = f.designation || "OTHER";
+        let dg = desigGroups.find((existing) => existing.designation === desigName);
+        if (!dg) { dg = { designation: desigName, blockGroups: [] }; desigGroups.push(dg); }
+        const blockName = f.block || "Other";
+        let bg = dg.blockGroups.find((existing) => existing.block === blockName);
+        if (!bg) { bg = { block: blockName, members: [] }; dg.blockGroups.push(bg); }
+        bg.members.push(f);
+      });
+      desigGroups.sort((a, b) => {
+        const ai = DESIG_ORDER.indexOf(a.designation); const bi = DESIG_ORDER.indexOf(b.designation);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+
       current.blocks = current.blocks.map((b) =>
-        b.facultyGroups !== undefined ? { ...b, facultyGroups: groups } : b
+        b.facultyGroups !== undefined ? { ...b, facultyGroups: desigGroups } : b
       );
     }
 
