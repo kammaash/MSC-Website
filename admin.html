@@ -148,7 +148,14 @@
   table.preview th{background:#fbf3f2;font-family:'Quicksand',sans-serif}
   table.preview td.missing{color:#b23b2f;font-style:italic}
   .radio-inline{display:flex;gap:18px;margin-top:10px}
-  .scroll-wrap{overflow-x:auto;border:1px solid #f0e0dc;border-radius:10px}
+  .scroll-wrap{overflow-x:auto;border:1px solid #f0e0dc;border-radius:10px;scrollbar-width:auto}
+  .scroll-wrap::-webkit-scrollbar{height:12px}
+  .scroll-wrap::-webkit-scrollbar-thumb{background:#d8b9b6;border-radius:6px}
+  .scroll-wrap::-webkit-scrollbar-track{background:#fbf3f2}
+  .card.wide-card{max-width:1300px;width:calc(100vw - 40px);margin-left:calc(50% - 50vw + 20px);margin-right:calc(50% - 50vw + 20px)}
+  .scroll-btn-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .scroll-arrow-btn{background:#a51915;color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:8px}
+  .scroll-arrow-btn:hover{background:#7f120f}
   .scroll-hint{font-size:12.5px;color:#a51915;font-weight:700;margin-bottom:6px}
   table.bulk th.sticky-col,table.bulk td.sticky-col{position:sticky;left:0;background:#fff;z-index:2;box-shadow:2px 0 4px rgba(0,0,0,0.06)}
   table.bulk th.sticky-col{background:#fbf3f2;z-index:3}
@@ -348,7 +355,7 @@
       <div id="importPreviewArea"></div>
     </div>
 
-    <div class="card">
+    <div class="card wide-card">
       <h2>Or: edit everyone at once (spreadsheet view)</h2>
       <p class="lead" style="margin-top:0">The best way to manage a large roster — edit names, designations, blocks, qualifications, subjects, and photos for many people side by side, add or remove rows, then publish every change in a single commit. The table scrolls sideways on smaller screens; the Name column stays pinned so you always know which row you're on.</p>
       <button type="button" class="btn-add" id="bulkLoadBtn">Load current faculty into the table</button>
@@ -1122,8 +1129,9 @@ function renderBulkTable() {
     ["qualification", "Qualification"],
     ["subject", "Subject"],
   ];
-  let html = '<div class="scroll-hint">← Scroll sideways to see every column, including Photo →</div>';
-  html += '<div class="scroll-wrap"><table class="preview bulk" style="min-width:1050px">';
+  let html = '<div class="scroll-btn-row"><span class="scroll-hint" style="margin:0">If the table below doesn\'t fully fit, use these buttons or drag the scrollbar under it →</span>' +
+    '<span><button type="button" class="scroll-arrow-btn" id="bulkScrollLeftBtn">◀</button> <button type="button" class="scroll-arrow-btn" id="bulkScrollRightBtn">▶</button></span></div>';
+  html += '<div class="scroll-wrap" id="bulkScrollWrap"><table class="preview bulk" style="min-width:900px">';
   html += "<tr><th class=\"sticky-col\">" + cols[0][1] + "</th>" + cols.slice(1).map(([, label]) => "<th>" + label + "</th>").join("") + '<th class="bulk-photo-cell">Photo</th><th></th></tr>';
   bulkRows.forEach((r, i) => {
     html += "<tr>";
@@ -1179,6 +1187,8 @@ function renderBulkTable() {
     if (inputs.length) inputs[inputs.length - 1].focus();
   });
   $("bulkPublishBtn").addEventListener("click", publishBulkFaculty);
+  $("bulkScrollLeftBtn").addEventListener("click", () => $("bulkScrollWrap").scrollBy({ left: -320, behavior: "smooth" }));
+  $("bulkScrollRightBtn").addEventListener("click", () => $("bulkScrollWrap").scrollBy({ left: 320, behavior: "smooth" }));
 }
 
 // shared hidden file input for the bulk photo column
