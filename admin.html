@@ -148,6 +148,14 @@
   table.preview th{background:#fbf3f2;font-family:'Quicksand',sans-serif}
   table.preview td.missing{color:#b23b2f;font-style:italic}
   .radio-inline{display:flex;gap:18px;margin-top:10px}
+  .scroll-wrap{overflow-x:auto;border:1px solid #f0e0dc;border-radius:10px}
+  .scroll-hint{font-size:12.5px;color:#a51915;font-weight:700;margin-bottom:6px}
+  table.bulk th.sticky-col,table.bulk td.sticky-col{position:sticky;left:0;background:#fff;z-index:2;box-shadow:2px 0 4px rgba(0,0,0,0.06)}
+  table.bulk th.sticky-col{background:#fbf3f2;z-index:3}
+  .bulk-thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #e2d3ce;display:block;margin-bottom:5px}
+  .bulk-photo-cell{min-width:110px}
+  .bulk-photo-btn{background:#fdeadf;color:#a51915;font-weight:700;font-size:11px;padding:5px 8px;border-radius:6px;white-space:nowrap}
+  .bulk-photo-btn:hover{background:#f6dcc9}
 </style>
 </head>
 <body>
@@ -342,7 +350,7 @@
 
     <div class="card">
       <h2>Or: edit everyone at once (spreadsheet view)</h2>
-      <p class="lead" style="margin-top:0">The best way to manage a large roster — edit names, designations, blocks, qualifications, and subjects for many people side by side, add or remove rows, then publish every change in a single commit. Photos aren't editable here (each person keeps whatever photo they already have) — use the single-person form above for uploading or replacing a photo.</p>
+      <p class="lead" style="margin-top:0">The best way to manage a large roster — edit names, designations, blocks, qualifications, subjects, and photos for many people side by side, add or remove rows, then publish every change in a single commit. The table scrolls sideways on smaller screens; the Name column stays pinned so you always know which row you're on.</p>
       <button type="button" class="btn-add" id="bulkLoadBtn">Load current faculty into the table</button>
       <div id="bulkEditArea" style="margin-top:14px"></div>
     </div>
@@ -1114,14 +1122,21 @@ function renderBulkTable() {
     ["qualification", "Qualification"],
     ["subject", "Subject"],
   ];
-  let html = '<div style="overflow-x:auto"><table class="preview" style="min-width:900px">';
-  html += "<tr>" + cols.map(([, label]) => "<th>" + label + "</th>").join("") + "<th></th></tr>";
+  let html = '<div class="scroll-hint">← Scroll sideways to see every column, including Photo →</div>';
+  html += '<div class="scroll-wrap"><table class="preview bulk" style="min-width:1050px">';
+  html += "<tr><th class=\"sticky-col\">" + cols[0][1] + "</th>" + cols.slice(1).map(([, label]) => "<th>" + label + "</th>").join("") + '<th class="bulk-photo-cell">Photo</th><th></th></tr>';
   bulkRows.forEach((r, i) => {
     html += "<tr>";
-    cols.forEach(([key]) => {
-      html += '<td><input type="text" data-bulk="' + key + '" data-i="' + i + '" value="' + escapeHtml(r[key] || "").replace(/"/g, "&quot;") + '" style="width:100%;min-width:120px;border:1px solid #e2d3ce;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px"></td>';
+    cols.forEach(([key], ci) => {
+      html += '<td' + (ci === 0 ? ' class="sticky-col"' : "") + '><input type="text" data-bulk="' + key + '" data-i="' + i + '" value="' + escapeHtml(r[key] || "").replace(/"/g, "&quot;") + '" style="width:100%;min-width:120px;border:1px solid #e2d3ce;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px"></td>';
     });
-    html += '<td><button type="button" class="btn-remove" data-bulk-remove="' + i + '">Remove</button></td>';
+    const previewSrc = r._previewUrl || r.photo || "";
+    html += '<td class="bulk-photo-cell">';
+    html += previewSrc ? '<img class="bulk-thumb" src="' + previewSrc + '">' : '<div class="hint" style="margin:0 0 5px">No photo</div>';
+    html += '<button type="button" class="bulk-photo-btn" data-bulk-photo="' + i + '">' + (previewSrc ? "Change" : "Add photo") + '</button>';
+    if (previewSrc) html += ' <button type="button" class="bulk-photo-btn" style="background:#fbe7e6;color:#b23b2f" data-bulk-photo-clear="' + i + '">Remove</button>';
+    html += "</td>";
+    html += '<td><button type="button" class="btn-remove" data-bulk-remove="' + i + '">Remove row</button></td>';
     html += "</tr>";
   });
   html += "</table></div>";
@@ -1141,6 +1156,21 @@ function renderBulkTable() {
       renderBulkTable();
     });
   });
+  $("bulkEditArea").querySelectorAll("[data-bulk-photo]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      bulkPhotoTargetIndex = +e.target.dataset.bulkPhoto;
+      $("bulkPhotoInput").click();
+    });
+  });
+  $("bulkEditArea").querySelectorAll("[data-bulk-photo-clear]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const i = +e.target.dataset.bulkPhotoClear;
+      bulkRows[i]._newPhotoFile = null;
+      bulkRows[i]._previewUrl = "";
+      bulkRows[i].photo = "";
+      renderBulkTable();
+    });
+  });
   $("bulkAddRowBtn").addEventListener("click", () => {
     bulkRows.push({ name: "", designation: "", block: "", qualification: "", subject: "", photo: "" });
     renderBulkTable();
@@ -1151,15 +1181,53 @@ function renderBulkTable() {
   $("bulkPublishBtn").addEventListener("click", publishBulkFaculty);
 }
 
+// shared hidden file input for the bulk photo column
+let bulkPhotoTargetIndex = null;
+if (!document.getElementById("bulkPhotoInput")) {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*"; inp.id = "bulkPhotoInput"; inp.style.display = "none";
+  document.body.appendChild(inp);
+  inp.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file || bulkPhotoTargetIndex === null) return;
+    bulkRows[bulkPhotoTargetIndex]._newPhotoFile = file;
+    bulkRows[bulkPhotoTargetIndex]._previewUrl = URL.createObjectURL(file);
+    renderBulkTable();
+  });
+}
+
 async function publishBulkFaculty() {
   const token = $("ghToken").value.trim();
   if (!token) { $("bulkPublishStatus").innerHTML = '<div class="banner err">Paste a GitHub token first.</div>'; return; }
 
-  const cleaned = bulkRows.filter((r) => r.name && r.name.trim());
-  if (!cleaned.length) { $("bulkPublishStatus").innerHTML = '<div class="banner err">Every row is missing a name — nothing to publish.</div>'; return; }
+  const rowsWithNames = bulkRows.filter((r) => r.name && r.name.trim());
+  if (!rowsWithNames.length) { $("bulkPublishStatus").innerHTML = '<div class="banner err">Every row is missing a name — nothing to publish.</div>'; return; }
 
   $("bulkPublishBtn").disabled = true;
   try {
+    // upload any new/changed photos first, and delete the old file they replace
+    const photoRows = rowsWithNames.filter((r) => r._newPhotoFile);
+    let done = 0;
+    for (const r of photoRows) {
+      done++;
+      $("bulkPublishStatus").innerHTML = '<div class="banner warn">Uploading photo ' + done + " of " + photoRows.length + " (" + escapeHtml(r.name) + ")…</div>";
+      const priorPhoto = r.photo;
+      const blob = await resizePhoto(r._newPhotoFile, 900, 0.85);
+      const filename = slugify(r.name) + "-" + Date.now() + "-" + done + ".jpg";
+      const base64 = await blobToBase64(blob);
+      await ghPutFile("assets/gallery/" + filename, base64, "Add/replace photo for faculty: " + r.name, token);
+      r.photo = "assets/gallery/" + filename;
+      if (priorPhoto && priorPhoto !== r.photo && priorPhoto !== "assets/monte-logo.png") {
+        await ghDeleteFile(priorPhoto, "Replace photo for faculty: " + r.name, token).catch(() => {});
+      }
+    }
+
+    // strip transient fields (the File object / blob preview URL) before saving
+    const cleaned = rowsWithNames.map(({ name, designation, block, qualification, subject, photo }) => ({
+      name, designation, block, qualification, subject, photo: photo || "",
+    }));
+
     $("bulkPublishStatus").innerHTML = '<div class="banner warn">Updating data/faculty.json…</div>';
     const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleaned, null, 2))));
     await ghPutFile("data/faculty.json", jsonBase64, "Bulk update faculty list (" + cleaned.length + " entries)", token);
@@ -1167,9 +1235,9 @@ async function publishBulkFaculty() {
     facultyExisting = cleaned;
     bulkRows = cleaned.map((f) => ({ ...f }));
     populateFacultyPicker(); populateFacultyBlockOptions();
-    $("bulkPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> ' + cleaned.length + ' faculty entries saved. Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
+    $("bulkPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> ' + cleaned.length + ' faculty entries saved' + (photoRows.length ? " (including " + photoRows.length + " updated photo" + (photoRows.length > 1 ? "s" : "") + ")" : "") + '. Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
   } catch (e) {
-    $("bulkPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in data/faculty.json on GitHub before retrying, so a retry doesn\'t conflict with a partially-saved state.</div>';
+    $("bulkPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying, so a retry doesn\'t conflict with a partially-saved state.</div>';
   } finally {
     $("bulkPublishBtn").disabled = false;
   }
