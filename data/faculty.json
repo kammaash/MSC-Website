@@ -8,10 +8,322 @@
     "subject": "Principal"
   },
   {
+    "name": "Shaik Haseena",
+    "designation": "PGT",
+    "block": "Pragnya Juniors",
+    "qualification": "MA. B.ED",
+    "subject": "Social High",
+    "photo": ""
+  },
+  {
+    "name": "B Siddhartha",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.Sc. B.Ed",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Duggani Sharada",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.SC. B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "G Swaroopa",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "B.SC., B.ED",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Kallakuri Naga Prasuna",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.A., B.ED",
+    "subject": "Telugu",
+    "photo": ""
+  },
+  {
+    "name": "Katika Yusuf",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.A., B.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "Kolukula Padmavati",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.A. B.ED",
+    "subject": "Telugu",
+    "photo": ""
+  },
+  {
+    "name": "M Padma",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.SC, B.ED",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "Pasupula Shilpa",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "MBA B.ED",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Pinnaka Aparna",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Maths Primary",
+    "photo": ""
+  },
+  {
+    "name": "Soganur Anitha",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "B.SC., B.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "Supriya Javalakar",
+    "designation": "TGT",
+    "block": "Pragnya Juniors",
+    "qualification": "M Sc, B Ed",
+    "subject": "Science Chemistry",
+    "photo": ""
+  },
+  {
+    "name": "Gundrala Yella Krishna",
+    "designation": "PRT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.A., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Gundralla Venu",
+    "designation": "PRT",
+    "block": "Pragnya Juniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Handwriting",
+    "photo": ""
+  },
+  {
+    "name": "Sella Saraswathi",
+    "designation": "PRT",
+    "block": "Pragnya Juniors",
+    "qualification": "B.COM B.ED",
+    "subject": "Computer",
+    "photo": ""
+  },
+  {
+    "name": "Shaik Rameeza Bi",
+    "designation": "PRT",
+    "block": "Pragnya Juniors",
+    "qualification": "BA HPT",
+    "subject": "Hindi",
+    "photo": ""
+  },
+  {
+    "name": "Galamuri Ravi Kesavulu",
+    "designation": "OTHER",
+    "block": "Pragnya Juniors",
+    "qualification": "B.SC., TTC",
+    "subject": "Art & Craft",
+    "photo": ""
+  },
+  {
     "name": "Gona Dulcy Kalpana",
     "designation": "VICE PRINCIPAL",
     "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
+    "subject": "Coordinator",
+    "photo": ""
+  },
+  {
+    "name": "A G Suresh Babu",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Abdul Hameed M",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.Sc., B.Ed.",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Adavi Naga Gayatri",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Science Chemistry",
+    "photo": ""
+  },
+  {
+    "name": "Anumula Rajya Lakshmi",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.Sc., B.ED",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "Chakali Sangeetha Varalakshmi",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., HPT",
+    "subject": "Hindi",
+    "photo": ""
+  },
+  {
+    "name": "Chennamsetty Sai Santhosh",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., M.ED",
+    "subject": "Social High",
+    "photo": ""
+  },
+  {
+    "name": "G Raja Sekhar",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., TPT",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Joshi Rathna Amrutha",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC, B.ED",
+    "subject": "Science Chemistry",
+    "photo": ""
+  },
+  {
+    "name": "Kodi Ramakrishna",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC, B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Pathapadu Satya Prasad",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC, B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "S Shaheena",
+    "designation": "PGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., B.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "C Naresh",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "B.SC., B.ED",
+    "subject": "Science Chemistry",
+    "photo": ""
+  },
+  {
+    "name": "Gadda Dorai Raj",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC., D.ED",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "Jamedaru Brahmananda Rayudu",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC, B.ED",
+    "subject": "Handwriting",
+    "photo": ""
+  },
+  {
+    "name": "Mogathali Anjanaiah",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "MA",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Vakkati Chinna Sunkanna",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., M.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "Yeddula Seshi Reddy",
+    "designation": "TGT",
+    "block": "Pragnya Seniors",
+    "qualification": "BSC B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "V Vijaya Lakshmi",
+    "designation": "PRT",
+    "block": "Pragnya Seniors",
+    "qualification": "M.A., B.ED",
+    "subject": "Social High",
+    "photo": ""
+  },
+  {
+    "name": "Varalakshmi",
+    "designation": "PRT",
+    "block": "Pragnya Seniors",
+    "qualification": "B.A., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Syed Mohammad Rafi",
+    "designation": "WELLNESS TEACHER",
+    "block": "Pragnya Seniors",
+    "qualification": "M.SC., M.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "Veera Sekhar Reddy V",
+    "designation": "OTHER",
+    "block": "Pragnya Seniors",
+    "qualification": "B.SC., BLISC",
+    "subject": "Librarian",
+    "photo": ""
+  },
+  {
+    "name": "Dola Saha",
+    "designation": "PGT",
+    "block": "Lakshya Juniors",
+    "qualification": "M.SC,. B.ED",
     "subject": "Coordinator",
     "photo": ""
   },
@@ -21,14 +333,6 @@
     "block": "Lakshya Juniors",
     "qualification": "M.A., HPT",
     "subject": "Hindi",
-    "photo": ""
-  },
-  {
-    "name": "Dola Saha",
-    "designation": "PGT",
-    "block": "Lakshya Juniors",
-    "qualification": "M.SC,. B.ED",
-    "subject": "Coordinator",
     "photo": ""
   },
   {
@@ -54,6 +358,86 @@
     "qualification": "M.COM, B.ED",
     "subject": "Social High",
     "photo": ""
+  },
+  {
+    "name": "C Navya",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "M.TEC PHD",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "Challa Nagarani",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Golla Veeranjaneyulu",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Palle Murali Mohan Reddy",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "B.SC, PGDCA, H.PT",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "S Arifa Sulthana",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "M.COM., B.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "V Naga Sulochana",
+    "designation": "TGT",
+    "block": "Lakshya Juniors",
+    "qualification": "MA HPT",
+    "subject": "Hindi Primary",
+    "photo": ""
+  },
+  {
+    "name": "A Naresh Kumar",
+    "designation": "PRT",
+    "block": "Lakshya Juniors",
+    "qualification": "MBA., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "M P Chandrakanth",
+    "designation": "PRT",
+    "block": "Lakshya Juniors",
+    "qualification": "BSC PGDCA",
+    "subject": "Computer",
+    "photo": ""
+  },
+  {
+    "name": "K Ragaveena",
+    "designation": "PET",
+    "block": "Lakshya Juniors",
+    "qualification": "B.A., UGD",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Lakshmi Kanth Reddy K",
+    "designation": "PGT",
+    "qualification": "M.SC., B.ED",
+    "photo": "",
+    "block": "Lakshya Seniors",
+    "subject": "Coordinator"
   },
   {
     "name": "Deeba Vijayasekhar",
@@ -112,6 +496,78 @@
     "photo": ""
   },
   {
+    "name": "A Mallikarjuna",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "B.SC, B.ED",
+    "subject": "Maths",
+    "photo": ""
+  },
+  {
+    "name": "Gadwal Stanton Ravi Kumar",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "B.ED",
+    "subject": "Science Biology",
+    "photo": ""
+  },
+  {
+    "name": "Jakka Hari Babu",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "MSC. D.EL.ED",
+    "subject": "Science Physics",
+    "photo": ""
+  },
+  {
+    "name": "Marri Surendra Nath",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "M.COM",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Pagidala Vinay Teja",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "M.SC., B.ED",
+    "subject": "Chemistry",
+    "photo": ""
+  },
+  {
+    "name": "Tanagala Murali Mohan Rao",
+    "designation": "TGT",
+    "block": "Lakshya Seniors",
+    "qualification": "B.SC, PGDCA, H.PT",
+    "subject": "Computer",
+    "photo": ""
+  },
+  {
+    "name": "Golla Bhaskar",
+    "designation": "PRT",
+    "block": "Lakshya Seniors",
+    "qualification": "M.A., HPT",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "K Ramachandra Reddy",
+    "designation": "OTHER",
+    "block": "Lakshya Seniors",
+    "qualification": "M.A., B LIS",
+    "subject": "Handwriting",
+    "photo": ""
+  },
+  {
+    "name": "Gangireddy Subba Reddy",
+    "designation": "PGT",
+    "block": "Medha",
+    "qualification": "M.SC., M.ED",
+    "subject": "Coordinator",
+    "photo": ""
+  },
+  {
     "name": "Adike Moulali",
     "designation": "PGT",
     "block": "Medha",
@@ -141,14 +597,6 @@
     "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Gangireddy Subba Reddy",
-    "designation": "PGT",
-    "block": "Medha",
-    "qualification": "M.SC., M.ED",
-    "subject": "Coordinator",
     "photo": ""
   },
   {
@@ -248,238 +696,6 @@
     "photo": ""
   },
   {
-    "name": "Y Srinivasulu",
-    "designation": "PGT",
-    "block": "PET - M",
-    "qualification": "M.SC., B.ED",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Shaik Haseena",
-    "designation": "PGT",
-    "block": "Pragnya Juniors",
-    "qualification": "MA. B.ED",
-    "subject": "Social High",
-    "photo": ""
-  },
-  {
-    "name": "A G Suresh Babu",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Abdul Hameed M",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.Sc., B.Ed.",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Adavi Naga Gayatri",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Science Chemistry",
-    "photo": ""
-  },
-  {
-    "name": "Anumula Rajya Lakshmi",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.Sc., B.ED",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Chakali Sangeetha Varalakshmi",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., HPT",
-    "subject": "Hindi",
-    "photo": ""
-  },
-  {
-    "name": "Chennamsetty Sai Santhosh",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., M.ED",
-    "subject": "Social High",
-    "photo": ""
-  },
-  {
-    "name": "G Raja Sekhar",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., TPT",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Joshi Rathna Amrutha",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC, B.ED",
-    "subject": "Science Chemistry",
-    "photo": ""
-  },
-  {
-    "name": "Kodi Ramakrishna",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC, B.ED",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Pathapadu Satya Prasad",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC, B.ED",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "S Shaheena",
-    "designation": "PGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., B.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "Shaik Ayesha Jabeen",
-    "designation": "PGT",
-    "block": "Tiny Tykes",
-    "qualification": "M.A, H.P.T",
-    "subject": "Teacher PP",
-    "photo": ""
-  },
-  {
-    "name": "Aparna N",
-    "designation": "TGT",
-    "block": "Chrysalis",
-    "qualification": "MA. B.Ed",
-    "subject": "Teacher Primary",
-    "photo": ""
-  },
-  {
-    "name": "Husna Nasreen",
-    "designation": "TGT",
-    "block": "Chrysalis",
-    "qualification": "B.SC., B.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "K Aparna",
-    "designation": "TGT",
-    "block": "Chrysalis",
-    "qualification": "MA. B.Ed",
-    "subject": "Handwriting",
-    "photo": ""
-  },
-  {
-    "name": "C Navya",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "M.TEC PHD",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Challa Nagarani",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Golla Veeranjaneyulu",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Palle Murali Mohan Reddy",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "B.SC, PGDCA, H.PT",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "S Arifa Sulthana",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "M.COM., B.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "V Naga Sulochana",
-    "designation": "TGT",
-    "block": "Lakshya Juniors",
-    "qualification": "MA HPT",
-    "subject": "Hindi Primary",
-    "photo": ""
-  },
-  {
-    "name": "A Mallikarjuna",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "B.SC, B.ED",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Gadwal Stanton Ravi Kumar",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "B.ED",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Jakka Hari Babu",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "MSC. D.EL.ED",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Marri Surendra Nath",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "M.COM",
-    "subject": "Tutor",
-    "photo": ""
-  },
-  {
-    "name": "Pagidala Vinay Teja",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Chemistry",
-    "photo": ""
-  },
-  {
-    "name": "Tanagala Murali Mohan Rao",
-    "designation": "TGT",
-    "block": "Lakshya Seniors",
-    "qualification": "B.SC, PGDCA, H.PT",
-    "subject": "Computer",
-    "photo": ""
-  },
-  {
     "name": "B Vengala Reddy",
     "designation": "TGT",
     "block": "Medha",
@@ -560,211 +776,131 @@
     "photo": ""
   },
   {
-    "name": "Anuradha Mitti",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.SC.,B.ED",
-    "subject": "Science Primary",
-    "photo": ""
-  },
-  {
-    "name": "B Sireesha",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.SC. B.ED",
-    "subject": "Maths Primary",
-    "photo": ""
-  },
-  {
-    "name": "Boggula Geetarani",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M. A TPT",
-    "subject": "Telugu Primary",
-    "photo": ""
-  },
-  {
-    "name": "C Azra Begum",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.A., B.ED",
-    "subject": "Coordinator",
-    "photo": ""
-  },
-  {
-    "name": "Galtu Shaik Nazia Banu",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.A., B.ED",
-    "subject": "Science Primary",
-    "photo": ""
-  },
-  {
-    "name": "Kanike Anuradha",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.A., B.ED., HPT",
-    "subject": "Hindi Primary",
-    "photo": ""
-  },
-  {
-    "name": "M Haseenunnisa",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.A.B.ED",
-    "subject": "Social Primary",
-    "photo": ""
-  },
-  {
-    "name": "Nayani Anitha",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "B.SC., BED",
-    "subject": "Maths Primary",
-    "photo": ""
-  },
-  {
-    "name": "Rafia Anjum",
-    "designation": "TGT",
-    "block": "Oxford",
-    "qualification": "M.A. B.Ed",
-    "subject": "English Primary",
-    "photo": ""
-  },
-  {
-    "name": "B Siddhartha",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.Sc. B.Ed",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Duggani Sharada",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.SC. B.ED",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "G Swaroopa",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "B.SC., B.ED",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Kallakuri Naga Prasuna",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.A., B.ED",
-    "subject": "Telugu",
-    "photo": ""
-  },
-  {
-    "name": "Katika Yusuf",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.A., B.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "Kolukula Padmavati",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.A. B.ED",
-    "subject": "Telugu",
-    "photo": ""
-  },
-  {
-    "name": "M Padma",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.SC, B.ED",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Pasupula Shilpa",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "MBA B.ED",
-    "subject": "Science Biology",
-    "photo": ""
-  },
-  {
-    "name": "Pinnaka Aparna",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Maths Primary",
-    "photo": ""
-  },
-  {
-    "name": "Soganur Anitha",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "B.SC., B.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "Supriya Javalakar",
-    "designation": "TGT",
-    "block": "Pragnya Juniors",
-    "qualification": "M Sc, B Ed",
-    "subject": "Science Chemistry",
-    "photo": ""
-  },
-  {
-    "name": "C Naresh",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "B.SC., B.ED",
-    "subject": "Science Chemistry",
-    "photo": ""
-  },
-  {
-    "name": "Gadda Dorai Raj",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC., D.ED",
-    "subject": "Science Physics",
-    "photo": ""
-  },
-  {
-    "name": "Jamedaru Brahmananda Rayudu",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC, B.ED",
+    "name": "Kammari Venkateswarlu",
+    "designation": "PRT",
+    "block": "Medha",
+    "qualification": "B.Sc. B.Ed",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "Mogathali Anjanaiah",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "MA",
-    "subject": "Tutor",
-    "photo": ""
-  },
-  {
-    "name": "Vakkati Chinna Sunkanna",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., M.ED",
+    "name": "Konkula Kalpana Devi",
+    "designation": "PRT",
+    "block": "Medha",
+    "qualification": "B.TEC., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "Yeddula Seshi Reddy",
-    "designation": "TGT",
-    "block": "Pragnya Seniors",
-    "qualification": "BSC B.ED",
-    "subject": "Maths",
+    "name": "P Pavan",
+    "designation": "PRT",
+    "block": "Medha",
+    "qualification": "B.A., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Saye Kasi Viswanath",
+    "designation": "PRT",
+    "block": "Medha",
+    "qualification": "B.SC., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Golla Naga Raju",
+    "designation": "OTHER",
+    "block": "Medha",
+    "qualification": "MCOM MLISC",
+    "subject": "Librarian",
+    "photo": ""
+  },
+  {
+    "name": "Y Srinivasulu",
+    "designation": "PGT",
+    "block": "PET - M",
+    "qualification": "M.SC., B.ED",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Bandameedi Rangamuni",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B.A. B.PED",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Battikeri Raghavendra",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B.A., UGD",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Boya Raghavendra Naidu",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B. PED",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Kodimukkala Venkatesulu",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "UGD",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Maligeli Santha Raju",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "PET",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Muppasani Suresh",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "M.A., M.PED",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Mustaf Ismail",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B.A., UGD",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Sarakonda Eswaraiah",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B.Com., B.P.Ed",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "T Rameswari",
+    "designation": "PET",
+    "block": "PET - M",
+    "qualification": "B.Com., B.P.Ed",
+    "subject": "PET",
+    "photo": ""
+  },
+  {
+    "name": "Shaik Ayesha Jabeen",
+    "designation": "PGT",
+    "block": "Tiny Tykes",
+    "qualification": "M.A, H.P.T",
+    "subject": "Teacher PP",
     "photo": ""
   },
   {
@@ -773,6 +909,62 @@
     "block": "Tiny Tykes",
     "qualification": "M.A., B.ED",
     "subject": "Teacher PP",
+    "photo": ""
+  },
+  {
+    "name": "Jangam Chamundeswari",
+    "designation": "PRT",
+    "block": "Tiny Tykes",
+    "qualification": "B.SC., B.ED",
+    "subject": "Teacher PP",
+    "photo": ""
+  },
+  {
+    "name": "Karanam Sireesha",
+    "designation": "PRT",
+    "block": "Tiny Tykes",
+    "qualification": "M.A., B.ED",
+    "subject": "Tutor",
+    "photo": ""
+  },
+  {
+    "name": "Sujatha L",
+    "designation": "PRT",
+    "block": "Tiny Tykes",
+    "qualification": "B.SC, B.ED",
+    "subject": "Teacher PP",
+    "photo": ""
+  },
+  {
+    "name": "Kurupati Vijaya Lakshmi",
+    "designation": "PRT",
+    "block": "Chrysalis",
+    "qualification": "B.A., B.ED",
+    "subject": "Coordinator",
+    "photo": ""
+  },
+  {
+    "name": "Aparna N",
+    "designation": "TGT",
+    "block": "Chrysalis",
+    "qualification": "MA. B.Ed",
+    "subject": "Teacher Primary",
+    "photo": ""
+  },
+  {
+    "name": "Husna Nasreen",
+    "designation": "TGT",
+    "block": "Chrysalis",
+    "qualification": "B.SC., B.ED",
+    "subject": "English",
+    "photo": ""
+  },
+  {
+    "name": "K Aparna",
+    "designation": "TGT",
+    "block": "Chrysalis",
+    "qualification": "MA. B.Ed",
+    "subject": "Handwriting",
     "photo": ""
   },
   {
@@ -821,14 +1013,6 @@
     "block": "Chrysalis",
     "qualification": "B.SC.,B.ED",
     "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "Kurupati Vijayalakshmi",
-    "designation": "PRT",
-    "block": "Chrysalis",
-    "qualification": "B.A., B.ED",
-    "subject": "",
     "photo": ""
   },
   {
@@ -912,59 +1096,75 @@
     "photo": ""
   },
   {
-    "name": "A Naresh Kumar",
-    "designation": "PRT",
-    "block": "Lakshya Juniors",
-    "qualification": "MBA., B.ED",
-    "subject": "Tutor",
+    "name": "C Azra Begum",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.A., B.ED",
+    "subject": "Coordinator",
     "photo": ""
   },
   {
-    "name": "M P Chandrakanth",
-    "designation": "PRT",
-    "block": "Lakshya Juniors",
-    "qualification": "BSC PGDCA",
-    "subject": "Computer",
+    "name": "Anuradha Mitti",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.SC.,B.ED",
+    "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "Golla Bhaskar",
-    "designation": "PRT",
-    "block": "Lakshya Seniors",
-    "qualification": "M.A., HPT",
-    "subject": "Tutor",
+    "name": "B Sireesha",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.SC. B.ED",
+    "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "Kammari Venkateswarlu",
-    "designation": "PRT",
-    "block": "Medha",
-    "qualification": "B.Sc. B.Ed",
-    "subject": "Handwriting",
+    "name": "Boggula Geetarani",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M. A TPT",
+    "subject": "Telugu Primary",
     "photo": ""
   },
   {
-    "name": "Konkula Kalpana Devi",
-    "designation": "PRT",
-    "block": "Medha",
-    "qualification": "B.TEC., B.ED",
-    "subject": "English",
+    "name": "Galtu Shaik Nazia Banu",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.A., B.ED",
+    "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "P Pavan",
-    "designation": "PRT",
-    "block": "Medha",
-    "qualification": "B.A., B.ED",
-    "subject": "Tutor",
+    "name": "Kanike Anuradha",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.A., B.ED., HPT",
+    "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "Saye Kasi Viswanath",
-    "designation": "PRT",
-    "block": "Medha",
-    "qualification": "B.SC., B.ED",
-    "subject": "Tutor",
+    "name": "M Haseenunnisa",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.A.B.ED",
+    "subject": "Social Primary",
+    "photo": ""
+  },
+  {
+    "name": "Nayani Anitha",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "B.SC., BED",
+    "subject": "Maths Primary",
+    "photo": ""
+  },
+  {
+    "name": "Rafia Anjum",
+    "designation": "TGT",
+    "block": "Oxford",
+    "qualification": "M.A. B.Ed",
+    "subject": "English Primary",
     "photo": ""
   },
   {
@@ -1221,198 +1421,6 @@
     "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Hindi Primary",
-    "photo": ""
-  },
-  {
-    "name": "Gundrala Yella Krishna",
-    "designation": "PRT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.A., B.ED",
-    "subject": "Tutor",
-    "photo": ""
-  },
-  {
-    "name": "Gundralla Venu",
-    "designation": "PRT",
-    "block": "Pragnya Juniors",
-    "qualification": "M.SC., B.ED",
-    "subject": "Handwriting",
-    "photo": ""
-  },
-  {
-    "name": "Sella Saraswathi",
-    "designation": "PRT",
-    "block": "Pragnya Juniors",
-    "qualification": "B.COM B.ED",
-    "subject": "Computer",
-    "photo": ""
-  },
-  {
-    "name": "Shaik Rameeza Bi",
-    "designation": "PRT",
-    "block": "Pragnya Juniors",
-    "qualification": "BA HPT",
-    "subject": "Hindi",
-    "photo": ""
-  },
-  {
-    "name": "V Vijaya Lakshmi",
-    "designation": "PRT",
-    "block": "Pragnya Seniors",
-    "qualification": "M.A., B.ED",
-    "subject": "Social High",
-    "photo": ""
-  },
-  {
-    "name": "Varalakshmi",
-    "designation": "PRT",
-    "block": "Pragnya Seniors",
-    "qualification": "B.A., B.ED",
-    "subject": "Tutor",
-    "photo": ""
-  },
-  {
-    "name": "Jangam Chamundeswari",
-    "designation": "PRT",
-    "block": "Tiny Tykes",
-    "qualification": "B.SC., B.ED",
-    "subject": "Teacher PP",
-    "photo": ""
-  },
-  {
-    "name": "Karanam Sireesha",
-    "designation": "PRT",
-    "block": "Tiny Tykes",
-    "qualification": "M.A., B.ED",
-    "subject": "Tutor",
-    "photo": ""
-  },
-  {
-    "name": "Sujatha L",
-    "designation": "PRT",
-    "block": "Tiny Tykes",
-    "qualification": "B.SC, B.ED",
-    "subject": "Teacher PP",
-    "photo": ""
-  },
-  {
-    "name": "K Ragaveena",
-    "designation": "PET",
-    "block": "Lakshya Juniors",
-    "qualification": "B.A., UGD",
-    "subject": "Maths",
-    "photo": ""
-  },
-  {
-    "name": "Bandameedi Rangamuni",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B.A. B.PED",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Battikeri Raghavendra",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B.A., UGD",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Boya Raghavendra Naidu",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B. PED",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Kodimukkala Venkatesulu",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "UGD",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Maligeli Santha Raju",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "PET",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Muppasani Suresh",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "M.A., M.PED",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Mustaf Ismail",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B.A., UGD",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Sarakonda Eswaraiah",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B.Com., B.P.Ed",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "T Rameswari",
-    "designation": "PET",
-    "block": "PET - M",
-    "qualification": "B.Com., B.P.Ed",
-    "subject": "PET",
-    "photo": ""
-  },
-  {
-    "name": "Syed Mohammad Rafi",
-    "designation": "WELLNESS TEACHER",
-    "block": "Pragnya Seniors",
-    "qualification": "M.SC., M.ED",
-    "subject": "English",
-    "photo": ""
-  },
-  {
-    "name": "K Ramachandra Reddy",
-    "designation": "OTHER",
-    "block": "Lakshya Seniors",
-    "qualification": "M.A., B LIS",
-    "subject": "Handwriting",
-    "photo": ""
-  },
-  {
-    "name": "Golla Naga Raju",
-    "designation": "OTHER",
-    "block": "Medha",
-    "qualification": "MCOM MLISC",
-    "subject": "Librarian",
-    "photo": ""
-  },
-  {
-    "name": "Galamuri Ravi Kesavulu",
-    "designation": "OTHER",
-    "block": "Pragnya Juniors",
-    "qualification": "B.SC., TTC",
-    "subject": "Art & Craft",
-    "photo": ""
-  },
-  {
-    "name": "Veera Sekhar Reddy V",
-    "designation": "OTHER",
-    "block": "Pragnya Seniors",
-    "qualification": "B.SC., BLISC",
-    "subject": "Librarian",
     "photo": ""
   },
   {
