@@ -1,252 +1,254 @@
 [
   {
-    "name": "B SRI JYOTHI",
+    "name": "B Sri Jyothi",
+    "designation": "PRINCIPAL",
     "qualification": "M.A.,B.ED",
-    "experience": "",
-    "photo": "assets/gallery/b-sri-jyothi-1789614295466.jpg"
+    "photo": "",
+    "block": "Pragnya Juniors",
+    "subject": "Principal"
   },
   {
-    "name": "GONA DULCY KALPANA",
+    "name": "Gona Dulcy Kalpana",
     "designation": "VICE PRINCIPAL",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Coordinator",
     "photo": ""
   },
   {
-    "name": "DHARMAVARAM SHAMSHAD BEGUM",
+    "name": "Dharmavaram Shamshad Begum",
     "designation": "PGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.A., HPT",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "DOLA SAHA",
+    "name": "Dola Saha",
     "designation": "PGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.SC,. B.ED",
     "subject": "Coordinator",
     "photo": ""
   },
   {
-    "name": "KURNOOL PEDDESWARI KUMARI",
+    "name": "Kurnool Peddeswari Kumari",
     "designation": "PGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "MANE NAGA JYOTHI",
+    "name": "Mane Naga Jyothi",
     "designation": "PGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.A B.ED",
     "subject": "Telugu Sanskrit",
     "photo": ""
   },
   {
-    "name": "NILOFAR SAYEEDA",
+    "name": "Nilofar Sayeeda",
     "designation": "PGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.COM, B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "DEEBA VIJAYASEKHAR",
+    "name": "Deeba Vijayasekhar",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "K LAKSHMI KANTHA REDDY",
+    "name": "K Lakshmi Kantha Reddy",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A., TPT",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "K MANOJ KUMAR",
+    "name": "K Manoj Kumar",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "PADAKANDLA MURALIDHARA RAO",
+    "name": "Padakandla Muralidhara Rao",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "PATNANA MANMADHARAO",
+    "name": "Patnana Manmadharao",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "MSC D.EL.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "SAMEERA AHMED",
+    "name": "Sameera Ahmed",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A, H.P.T",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "U VENKATESWARA RAJU",
+    "name": "U Venkateswara Raju",
     "designation": "PGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "ADIKE MOULALI",
+    "name": "Adike Moulali",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Chemistry",
     "photo": ""
   },
   {
-    "name": "B KEZIA",
+    "name": "B Kezia",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "MSC MED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "B NAVEEN KUMAR",
+    "name": "B Naveen Kumar",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "DARGA KHADAR MODIN",
+    "name": "Darga Khadar Modin",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "GANGIREDDY SUBBA REDDY",
+    "name": "Gangireddy Subba Reddy",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., M.ED",
     "subject": "Coordinator",
     "photo": ""
   },
   {
-    "name": "K KANAKA PRASAD",
+    "name": "K Kanaka Prasad",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "K S NANDA KISHORE",
+    "name": "K S Nanda Kishore",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.TEC., B.ED",
     "subject": "Computer",
     "photo": ""
   },
   {
-    "name": "KESANAPALLI HEMA SUNDARI",
+    "name": "Kesanapalli Hema Sundari",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., PH.D",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "M A HEENA PARVEEN",
+    "name": "M A Heena Parveen",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "M B SUJATHA RAO",
+    "name": "M B Sujatha Rao",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M. A. B.Ed",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "M SRINIVASULU",
+    "name": "M Srinivasulu",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "MUTHYALA NIRANJAN KUMAR",
+    "name": "Muthyala Niranjan Kumar",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A. B.ED",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "P NAVAZ KHAN",
+    "name": "P Navaz Khan",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A., BE.D",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "PRAVEEN KUMAR MALIGE",
+    "name": "Praveen Kumar Malige",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC, B.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "SADIQ HUSSAIN K",
+    "name": "Sadiq Hussain K",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A., H.P.T",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "SHABBEER AHMED SHAIK",
+    "name": "Shabbeer Ahmed Shaik",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.A, H.P.T",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "THUMMALA RAMESH",
+    "name": "Thummala Ramesh",
     "designation": "PGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., M.PHI. B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "Y SRINIVASULU",
+    "name": "Y Srinivasulu",
     "designation": "PGT",
     "block": "PET - M",
     "qualification": "M.SC., B.ED",
@@ -254,1055 +256,1055 @@
     "photo": ""
   },
   {
-    "name": "SHAIK HASEENA",
+    "name": "Shaik Haseena",
     "designation": "PGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "MA. B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "A G SURESH BABU",
+    "name": "A G Suresh Babu",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "ABDUL HAMEED M",
+    "name": "Abdul Hameed M",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.Sc., B.Ed.",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "ADAVI NAGA GAYATRI",
+    "name": "Adavi Naga Gayatri",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "ANUMULA RAJYA LAKSHMI",
+    "name": "Anumula Rajya Lakshmi",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.Sc., B.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "CHAKALI SANGEETHA VARALAKSHMI",
+    "name": "Chakali Sangeetha Varalakshmi",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., HPT",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "CHENNAMSETTY SAI SANTHOSH",
+    "name": "Chennamsetty Sai Santhosh",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., M.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "G RAJA SEKHAR",
+    "name": "G Raja Sekhar",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., TPT",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "JOSHI RATHNA AMRUTHA",
+    "name": "Joshi Rathna Amrutha",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "KODI RAMAKRISHNA",
+    "name": "Kodi Ramakrishna",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "PATHAPADU SATYA PRASAD",
+    "name": "Pathapadu Satya Prasad",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "S SHAHEENA",
+    "name": "S Shaheena",
     "designation": "PGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "SHAIK AYESHA JABEEN",
+    "name": "Shaik Ayesha Jabeen",
     "designation": "PGT",
-    "block": "TINY TYKES",
+    "block": "Tiny Tykes",
     "qualification": "M.A, H.P.T",
     "subject": "Teacher PP",
     "photo": ""
   },
   {
-    "name": "APARNA N",
+    "name": "Aparna N",
     "designation": "TGT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "MA. B.Ed",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "HUSNA NASREEN",
+    "name": "Husna Nasreen",
     "designation": "TGT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "K APARNA",
+    "name": "K Aparna",
     "designation": "TGT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "MA. B.Ed",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "C NAVYA",
+    "name": "C Navya",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.TEC PHD",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "CHALLA NAGARANI",
+    "name": "Challa Nagarani",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "GOLLA VEERANJANEYULU",
+    "name": "Golla Veeranjaneyulu",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "PALLE MURALI MOHAN REDDY",
+    "name": "Palle Murali Mohan Reddy",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "B.SC, PGDCA, H.PT",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "S ARIFA SULTHANA",
+    "name": "S Arifa Sulthana",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "M.COM., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "V NAGA SULOCHANA",
+    "name": "V Naga Sulochana",
     "designation": "TGT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "MA HPT",
     "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "A MALLIKARJUNA",
+    "name": "A Mallikarjuna",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "B.SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "GADWAL STANTON  RAVI KUMAR",
+    "name": "Gadwal Stanton Ravi Kumar",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "JAKKA HARI BABU",
+    "name": "Jakka Hari Babu",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "MSC. D.EL.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "MARRI SURENDRA NATH",
+    "name": "Marri Surendra Nath",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.COM",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "PAGIDALA VINAY  TEJA",
+    "name": "Pagidala Vinay Teja",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Chemistry",
     "photo": ""
   },
   {
-    "name": "TANAGALA MURALI MOHAN RAO",
+    "name": "Tanagala Murali Mohan Rao",
     "designation": "TGT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "B.SC, PGDCA, H.PT",
     "subject": "Computer",
     "photo": ""
   },
   {
-    "name": "B VENGALA REDDY",
+    "name": "B Vengala Reddy",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.A., B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "BENGALI DEEPTHI",
+    "name": "Bengali Deepthi",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "BIJJULA SWAPNA",
+    "name": "Bijjula Swapna",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "G KAREEMULLA",
+    "name": "G Kareemulla",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.TEC., B.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "G PRATHAP REDDY",
+    "name": "G Prathap Reddy",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.A. TPT",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "GOPIREDDY GARI MADHAVI",
+    "name": "Gopireddy Gari Madhavi",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "KOPPU MOHAN RAO",
+    "name": "Koppu Mohan Rao",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "MSC D.EL.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "LAKSHMI PRASAD YADAV KETHAM",
+    "name": "Lakshmi Prasad Yadav Ketham",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "M.SC., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "NOORUNNISA BEGUM",
+    "name": "Noorunnisa Begum",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.Sc., B.Ed",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "SOGANUR ARUNA SMITHA",
+    "name": "Soganur Aruna Smitha",
     "designation": "TGT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "ANURADHA MITTI",
+    "name": "Anuradha Mitti",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC.,B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "B SIREESHA",
+    "name": "B Sireesha",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC. B.ED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "BOGGULA GEETARANI",
+    "name": "Boggula Geetarani",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M. A TPT",
     "subject": "Telugu Primary",
     "photo": ""
   },
   {
-    "name": "C AZRA BEGUM",
+    "name": "C Azra Begum",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Coordinator",
     "photo": ""
   },
   {
-    "name": "GALTU SHAIK NAZIA BANU",
+    "name": "Galtu Shaik Nazia Banu",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "KANIKE ANURADHA",
+    "name": "Kanike Anuradha",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., B.ED., HPT",
     "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "M HASEENUNNISA",
+    "name": "M Haseenunnisa",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A.B.ED",
     "subject": "Social Primary",
     "photo": ""
   },
   {
-    "name": "NAYANI ANITHA",
+    "name": "Nayani Anitha",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.SC., BED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "RAFIA ANJUM",
+    "name": "Rafia Anjum",
     "designation": "TGT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A. B.Ed",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "B SIDDHARTHA",
+    "name": "B Siddhartha",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.Sc. B.Ed",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "DUGGANI SHARADA",
+    "name": "Duggani Sharada",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.SC. B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "G SWAROOPA",
+    "name": "G Swaroopa",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "B.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "KALLAKURI NAGA PRASUNA",
+    "name": "Kallakuri Naga Prasuna",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "KATIKA YUSUF",
+    "name": "Katika Yusuf",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "KOLUKULA PADMAVATI",
+    "name": "Kolukula Padmavati",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.A. B.ED",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "M PADMA",
+    "name": "M Padma",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.SC, B.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "PASUPULA SHILPA",
+    "name": "Pasupula Shilpa",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "MBA B.ED",
     "subject": "Science Biology",
     "photo": ""
   },
   {
-    "name": "PINNAKA APARNA",
+    "name": "Pinnaka Aparna",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "SOGANUR ANITHA",
+    "name": "Soganur Anitha",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "SUPRIYA JAVALAKAR",
+    "name": "Supriya Javalakar",
     "designation": "TGT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M Sc, B Ed",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "C NARESH",
+    "name": "C Naresh",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "B.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
   },
   {
-    "name": "GADDA DORAI RAJ",
+    "name": "Gadda Dorai Raj",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC., D.ED",
     "subject": "Science Physics",
     "photo": ""
   },
   {
-    "name": "JAMEDARU BRAHMANANDA RAYUDU",
+    "name": "Jamedaru Brahmananda Rayudu",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "MOGATHALI ANJANAIAH",
+    "name": "Mogathali Anjanaiah",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "MA",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "VAKKATI CHINNA SUNKANNA",
+    "name": "Vakkati Chinna Sunkanna",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., M.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "YEDDULA SESHI REDDY",
+    "name": "Yeddula Seshi Reddy",
     "designation": "TGT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "BSC B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "U ASFIA BEGUM",
+    "name": "U Asfia Begum",
     "designation": "TGT",
-    "block": "TINY TYKES",
+    "block": "Tiny Tykes",
     "qualification": "M.A., B.ED",
     "subject": "Teacher PP",
     "photo": ""
   },
   {
-    "name": "BADIGER SHILPA",
+    "name": "Badiger Shilpa",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A., D.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "BORUSU YERUSHA PRIYADARSHINI",
+    "name": "Borusu Yerusha Priyadarshini",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.COM., D.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "BOYA VARALAKSHMI",
+    "name": "Boya Varalakshmi",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A., B.ED",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "GANDAVARAPU VYJAYANTHI",
+    "name": "Gandavarapu Vyjayanthi",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A. B.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "JAMPALA VENKATA RAMANI",
+    "name": "Jampala Venkata Ramani",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M.Sc., B.Ed",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "KODANDAPURAM ANURADHA",
+    "name": "Kodandapuram Anuradha",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.SC.,B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "KURUPATI VIJAYALAKSHMI",
+    "name": "Kurupati Vijayalakshmi",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A., B.ED",
     "subject": "",
     "photo": ""
   },
   {
-    "name": "KURUVA MAHESWARI",
+    "name": "Kuruva Maheswari",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M.SC. B.ED",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "MANCHA JAYASREE",
+    "name": "Mancha Jayasree",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "N SAHITHI",
+    "name": "N Sahithi",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.SC., HPT",
-    "subject": "PRIMARY",
+    "subject": "Primary",
     "photo": ""
   },
   {
-    "name": "NAZIA FATIMA",
+    "name": "Nazia Fatima",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A.., B.ED",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "PADMAVATHI GURRALA",
+    "name": "Padmavathi Gurrala",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M.A.",
     "subject": "Telugu",
     "photo": ""
   },
   {
-    "name": "R MIRIAM CECILIA",
+    "name": "R Miriam Cecilia",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M.A., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "SHAIK FATHIMA",
+    "name": "Shaik Fathima",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B.A.., B.ED",
     "subject": "Art & Craft",
     "photo": ""
   },
   {
-    "name": "SUDHA J",
+    "name": "Sudha J",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "B. SC, B.ED",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "V MADHURI",
+    "name": "V Madhuri",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M. A., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "YARASI SRAVANTHI",
+    "name": "Yarasi Sravanthi",
     "designation": "PRT",
-    "block": "CHRYSALIS",
+    "block": "Chrysalis",
     "qualification": "M.SC., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
   },
   {
-    "name": "A NARESH KUMAR",
+    "name": "A Naresh Kumar",
     "designation": "PRT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "MBA., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "M P CHANDRAKANTH",
+    "name": "M P Chandrakanth",
     "designation": "PRT",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "BSC PGDCA",
     "subject": "Computer",
     "photo": ""
   },
   {
-    "name": "GOLLA BHASKAR",
+    "name": "Golla Bhaskar",
     "designation": "PRT",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A., HPT",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "KAMMARI VENKATESWARLU",
+    "name": "Kammari Venkateswarlu",
     "designation": "PRT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.Sc. B.Ed",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "KONKULA KALPANA DEVI",
+    "name": "Konkula Kalpana Devi",
     "designation": "PRT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.TEC., B.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "P PAVAN",
+    "name": "P Pavan",
     "designation": "PRT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.A., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "SAYE KASI VISWANATH",
+    "name": "Saye Kasi Viswanath",
     "designation": "PRT",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "B.SC., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "ALIVI SUJATHA",
+    "name": "Alivi Sujatha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
   },
   {
-    "name": "AVULA RADIKA",
+    "name": "Avula Radika",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A, B.ED",
     "subject": "Telugu Primary",
     "photo": ""
   },
   {
-    "name": "AVVARU VIJAYA LAKSHMI",
+    "name": "Avvaru Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., HPT",
     "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "B AREEFA KHATOON",
+    "name": "B Areefa Khatoon",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.SC.B.ED",
     "subject": "English, Science, Social Primary",
     "photo": ""
   },
   {
-    "name": "GALI GIRIJA KALPANA",
+    "name": "Gali Girija Kalpana",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.SC, B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "GANDIKOTA APARNA",
+    "name": "Gandikota Aparna",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "GHOUSIA BEGUM",
+    "name": "Ghousia Begum",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "H KARUNA PRIYA",
+    "name": "H Karuna Priya",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "English, Maths Primary",
     "photo": ""
   },
   {
-    "name": "J SUNITHA",
+    "name": "J Sunitha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B. SC, B.ED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "JAKKI ANITHA",
+    "name": "Jakki Anitha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A., B,.ED",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "K SHIRISHA",
+    "name": "K Shirisha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "L MADHURI",
+    "name": "L Madhuri",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC, B.ED",
     "subject": "English, Science Primary",
     "photo": ""
   },
   {
-    "name": "M FAIYAZUNNISA",
+    "name": "M Faiyazunnisa",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "M VENKATA LAKSHUMAMMA",
+    "name": "M Venkata Lakshumamma",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.Sc. B.Ed",
     "subject": "Telugu Primary",
     "photo": ""
   },
   {
-    "name": "MADEM ARUNA",
+    "name": "Madem Aruna",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC, B.ED",
     "subject": "Telugu, Maths Primary",
     "photo": ""
   },
   {
-    "name": "MISKIN VIJAYA LAKSHMI",
+    "name": "Miskin Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "MODI LATHA",
+    "name": "Modi Latha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "English, Maths Primary",
     "photo": ""
   },
   {
-    "name": "N ANURADHA",
+    "name": "N Anuradha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "BA , B.ED",
     "subject": "Telugu Primary",
     "photo": ""
   },
   {
-    "name": "NAGALDINNI AAIZA ZUBEDA",
+    "name": "Nagaldinni Aaiza Zubeda",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "MA BED",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "RAFIA SULTANA",
+    "name": "Rafia Sultana",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B. A, B.ED",
     "subject": "Social Primary",
     "photo": ""
   },
   {
-    "name": "S ARSHIA",
+    "name": "S Arshia",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.SC, B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "SHAIK ABDUL BARI",
+    "name": "Shaik Abdul Bari",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "SHAIK FATHIMA",
+    "name": "Shaik Fathima",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A.., B.ED",
     "subject": "English, Hindi Primary",
     "photo": ""
   },
   {
-    "name": "SHAIK FOUZIA ANJUM",
+    "name": "Shaik Fouzia Anjum",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "SHAIK SAMEENA BEGUM",
+    "name": "Shaik Sameena Begum",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "English Primary",
     "photo": ""
   },
   {
-    "name": "SOUDAGAR VASIA SULTANA",
+    "name": "Soudagar Vasia Sultana",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.SC. B.ED",
     "subject": "Maths Primary",
     "photo": ""
   },
   {
-    "name": "SWETHA K M",
+    "name": "Swetha K M",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "Computer",
     "photo": ""
   },
   {
-    "name": "UPPARA INDIRA",
+    "name": "Uppara Indira",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
   },
   {
-    "name": "V JYOTHSNA DEVI",
+    "name": "V Jyothsna Devi",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.S.C., P.HD., B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "V SIREESHA",
+    "name": "V Sireesha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
   },
   {
-    "name": "VEMULA SARITHA",
+    "name": "Vemula Saritha",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "M. A., B.ED",
     "subject": "Science Primary",
     "photo": ""
   },
   {
-    "name": "VIJAYALAKSHMI ANANTAPUR",
+    "name": "Vijayalakshmi Anantapur",
     "designation": "PRT",
-    "block": "OXFORD",
+    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Hindi Primary",
     "photo": ""
   },
   {
-    "name": "GUNDRALA YELLA KRISHNA",
+    "name": "Gundrala Yella Krishna",
     "designation": "PRT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "GUNDRALLA VENU",
+    "name": "Gundralla Venu",
     "designation": "PRT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "SELLA SARASWATHI",
+    "name": "Sella Saraswathi",
     "designation": "PRT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "B.COM B.ED",
     "subject": "Computer",
     "photo": ""
   },
   {
-    "name": "SHAIK RAMEEZA BI",
+    "name": "Shaik Rameeza Bi",
     "designation": "PRT",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "BA HPT",
     "subject": "Hindi",
     "photo": ""
   },
   {
-    "name": "V VIJAYA LAKSHMI",
+    "name": "V Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
   },
   {
-    "name": "VARALAKSHMI",
+    "name": "Varalakshmi",
     "designation": "PRT",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "B.A., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "JANGAM CHAMUNDESWARI",
+    "name": "Jangam Chamundeswari",
     "designation": "PRT",
-    "block": "TINY TYKES",
+    "block": "Tiny Tykes",
     "qualification": "B.SC., B.ED",
     "subject": "Teacher PP",
     "photo": ""
   },
   {
-    "name": "KARANAM SIREESHA",
+    "name": "Karanam Sireesha",
     "designation": "PRT",
-    "block": "TINY TYKES",
+    "block": "Tiny Tykes",
     "qualification": "M.A., B.ED",
-    "subject": "TUTOR",
+    "subject": "Tutor",
     "photo": ""
   },
   {
-    "name": "SUJATHA L",
+    "name": "Sujatha L",
     "designation": "PRT",
-    "block": "TINY TYKES",
+    "block": "Tiny Tykes",
     "qualification": "B.SC, B.ED",
     "subject": "Teacher PP",
     "photo": ""
   },
   {
-    "name": "K RAGAVEENA",
+    "name": "K Ragaveena",
     "designation": "PET",
-    "block": "LAKSHYA JUNIORS",
+    "block": "Lakshya Juniors",
     "qualification": "B.A., UGD",
     "subject": "Maths",
     "photo": ""
   },
   {
-    "name": "BANDAMEEDI RANGAMUNI",
+    "name": "Bandameedi Rangamuni",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B.A. B.PED",
@@ -1310,7 +1312,7 @@
     "photo": ""
   },
   {
-    "name": "BATTIKERI RAGHAVENDRA",
+    "name": "Battikeri Raghavendra",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B.A., UGD",
@@ -1318,7 +1320,7 @@
     "photo": ""
   },
   {
-    "name": "BOYA RAGHAVENDRA NAIDU",
+    "name": "Boya Raghavendra Naidu",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B. PED",
@@ -1326,7 +1328,7 @@
     "photo": ""
   },
   {
-    "name": "KODIMUKKALA VENKATESULU",
+    "name": "Kodimukkala Venkatesulu",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "UGD",
@@ -1334,7 +1336,7 @@
     "photo": ""
   },
   {
-    "name": "MALIGELI SANTHA RAJU",
+    "name": "Maligeli Santha Raju",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "PET",
@@ -1342,7 +1344,7 @@
     "photo": ""
   },
   {
-    "name": "MUPPASANI SURESH",
+    "name": "Muppasani Suresh",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "M.A., M.PED",
@@ -1350,7 +1352,7 @@
     "photo": ""
   },
   {
-    "name": "MUSTAF ISMAIL",
+    "name": "Mustaf Ismail",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B.A., UGD",
@@ -1358,7 +1360,7 @@
     "photo": ""
   },
   {
-    "name": "SARAKONDA ESWARAIAH",
+    "name": "Sarakonda Eswaraiah",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B.Com., B.P.Ed",
@@ -1366,7 +1368,7 @@
     "photo": ""
   },
   {
-    "name": "T RAMESWARI",
+    "name": "T Rameswari",
     "designation": "PET",
     "block": "PET - M",
     "qualification": "B.Com., B.P.Ed",
@@ -1374,49 +1376,49 @@
     "photo": ""
   },
   {
-    "name": "SYED MOHAMMAD RAFI",
+    "name": "Syed Mohammad Rafi",
     "designation": "WELLNESS TEACHER",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "M.SC., M.ED",
     "subject": "English",
     "photo": ""
   },
   {
-    "name": "K RAMACHANDRA REDDY",
+    "name": "K Ramachandra Reddy",
     "designation": "OTHER",
-    "block": "LAKSHYA SENIORS",
+    "block": "Lakshya Seniors",
     "qualification": "M.A., B LIS",
     "subject": "Handwriting",
     "photo": ""
   },
   {
-    "name": "GOLLA NAGA RAJU",
+    "name": "Golla Naga Raju",
     "designation": "OTHER",
-    "block": "MEDHA",
+    "block": "Medha",
     "qualification": "MCOM MLISC",
     "subject": "Librarian",
     "photo": ""
   },
   {
-    "name": "GALAMURI RAVI KESAVULU",
+    "name": "Galamuri Ravi Kesavulu",
     "designation": "OTHER",
-    "block": "PRAGNYA JUNIORS",
+    "block": "Pragnya Juniors",
     "qualification": "B.SC., TTC",
     "subject": "Art & Craft",
     "photo": ""
   },
   {
-    "name": "VEERA SEKHAR REDDY V",
+    "name": "Veera Sekhar Reddy V",
     "designation": "OTHER",
-    "block": "PRAGNYA SENIORS",
+    "block": "Pragnya Seniors",
     "qualification": "B.SC., BLISC",
     "subject": "Librarian",
     "photo": ""
   },
   {
-    "name": "NAYAK BHAKTUR BABA",
+    "name": "Nayak Bhaktur Baba",
     "designation": "OTHER",
-    "block": "STATE",
+    "block": "State",
     "qualification": "BA HPT",
     "subject": "NCC",
     "photo": ""
