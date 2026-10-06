@@ -4,13 +4,11 @@
     "designation": "PRINCIPAL",
     "qualification": "M.A.,B.ED",
     "photo": "",
-    "block": "Pragnya Juniors",
     "subject": "Principal"
   },
   {
     "name": "Shaik Haseena",
     "designation": "PGT",
-    "block": "Pragnya Juniors",
     "qualification": "MA. B.ED",
     "subject": "Social High",
     "photo": ""
@@ -18,7 +16,6 @@
   {
     "name": "B Siddhartha",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.Sc. B.Ed",
     "subject": "Maths",
     "photo": ""
@@ -26,7 +23,6 @@
   {
     "name": "Duggani Sharada",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.SC. B.ED",
     "subject": "Maths",
     "photo": ""
@@ -34,7 +30,6 @@
   {
     "name": "G Swaroopa",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "B.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -42,7 +37,6 @@
   {
     "name": "Kallakuri Naga Prasuna",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
     "subject": "Telugu",
     "photo": ""
@@ -50,7 +44,6 @@
   {
     "name": "Katika Yusuf",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
@@ -58,7 +51,6 @@
   {
     "name": "Kolukula Padmavati",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.A. B.ED",
     "subject": "Telugu",
     "photo": ""
@@ -66,7 +58,6 @@
   {
     "name": "M Padma",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.SC, B.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -74,7 +65,6 @@
   {
     "name": "Pasupula Shilpa",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "MBA B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -82,7 +72,6 @@
   {
     "name": "Pinnaka Aparna",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Maths Primary",
     "photo": ""
@@ -90,7 +79,6 @@
   {
     "name": "Soganur Anitha",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
@@ -98,7 +86,6 @@
   {
     "name": "Supriya Javalakar",
     "designation": "TGT",
-    "block": "Pragnya Juniors",
     "qualification": "M Sc, B Ed",
     "subject": "Science Chemistry",
     "photo": ""
@@ -106,7 +93,6 @@
   {
     "name": "Gundrala Yella Krishna",
     "designation": "PRT",
-    "block": "Pragnya Juniors",
     "qualification": "M.A., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -114,7 +100,6 @@
   {
     "name": "Gundralla Venu",
     "designation": "PRT",
-    "block": "Pragnya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Handwriting",
     "photo": ""
@@ -122,7 +107,6 @@
   {
     "name": "Sella Saraswathi",
     "designation": "PRT",
-    "block": "Pragnya Juniors",
     "qualification": "B.COM B.ED",
     "subject": "Computer",
     "photo": ""
@@ -130,7 +114,6 @@
   {
     "name": "Shaik Rameeza Bi",
     "designation": "PRT",
-    "block": "Pragnya Juniors",
     "qualification": "BA HPT",
     "subject": "Hindi",
     "photo": ""
@@ -138,7 +121,6 @@
   {
     "name": "Galamuri Ravi Kesavulu",
     "designation": "OTHER",
-    "block": "Pragnya Juniors",
     "qualification": "B.SC., TTC",
     "subject": "Art & Craft",
     "photo": ""
@@ -146,7 +128,6 @@
   {
     "name": "Gona Dulcy Kalpana",
     "designation": "VICE PRINCIPAL",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Coordinator",
     "photo": ""
@@ -154,7 +135,6 @@
   {
     "name": "A G Suresh Babu",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -162,7 +142,6 @@
   {
     "name": "Abdul Hameed M",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.Sc., B.Ed.",
     "subject": "Science Biology",
     "photo": ""
@@ -170,7 +149,6 @@
   {
     "name": "Adavi Naga Gayatri",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -178,7 +156,6 @@
   {
     "name": "Anumula Rajya Lakshmi",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.Sc., B.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -186,7 +163,6 @@
   {
     "name": "Chakali Sangeetha Varalakshmi",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., HPT",
     "subject": "Hindi",
     "photo": ""
@@ -194,7 +170,6 @@
   {
     "name": "Chennamsetty Sai Santhosh",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., M.ED",
     "subject": "Social High",
     "photo": ""
@@ -202,7 +177,6 @@
   {
     "name": "G Raja Sekhar",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., TPT",
     "subject": "Maths",
     "photo": ""
@@ -210,7 +184,6 @@
   {
     "name": "Joshi Rathna Amrutha",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -218,7 +191,6 @@
   {
     "name": "Kodi Ramakrishna",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -226,7 +198,6 @@
   {
     "name": "Pathapadu Satya Prasad",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -234,7 +205,6 @@
   {
     "name": "S Shaheena",
     "designation": "PGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
@@ -242,7 +212,6 @@
   {
     "name": "C Naresh",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "B.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -250,7 +219,6 @@
   {
     "name": "Gadda Dorai Raj",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC., D.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -258,7 +226,6 @@
   {
     "name": "Jamedaru Brahmananda Rayudu",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Handwriting",
     "photo": ""
@@ -266,7 +233,6 @@
   {
     "name": "Mogathali Anjanaiah",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "MA",
     "subject": "Tutor",
     "photo": ""
@@ -274,7 +240,6 @@
   {
     "name": "Vakkati Chinna Sunkanna",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., M.ED",
     "subject": "English",
     "photo": ""
@@ -282,7 +247,6 @@
   {
     "name": "Yeddula Seshi Reddy",
     "designation": "TGT",
-    "block": "Pragnya Seniors",
     "qualification": "BSC B.ED",
     "subject": "Maths",
     "photo": ""
@@ -290,7 +254,6 @@
   {
     "name": "V Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "Pragnya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
@@ -298,7 +261,6 @@
   {
     "name": "Varalakshmi",
     "designation": "PRT",
-    "block": "Pragnya Seniors",
     "qualification": "B.A., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -306,7 +268,6 @@
   {
     "name": "Syed Mohammad Rafi",
     "designation": "WELLNESS TEACHER",
-    "block": "Pragnya Seniors",
     "qualification": "M.SC., M.ED",
     "subject": "English",
     "photo": ""
@@ -314,7 +275,6 @@
   {
     "name": "Veera Sekhar Reddy V",
     "designation": "OTHER",
-    "block": "Pragnya Seniors",
     "qualification": "B.SC., BLISC",
     "subject": "Librarian",
     "photo": ""
@@ -322,7 +282,6 @@
   {
     "name": "Dola Saha",
     "designation": "PGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.SC,. B.ED",
     "subject": "Coordinator",
     "photo": ""
@@ -330,7 +289,6 @@
   {
     "name": "Dharmavaram Shamshad Begum",
     "designation": "PGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.A., HPT",
     "subject": "Hindi",
     "photo": ""
@@ -338,7 +296,6 @@
   {
     "name": "Kurnool Peddeswari Kumari",
     "designation": "PGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -346,7 +303,6 @@
   {
     "name": "Mane Naga Jyothi",
     "designation": "PGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.A B.ED",
     "subject": "Telugu Sanskrit",
     "photo": ""
@@ -354,7 +310,6 @@
   {
     "name": "Nilofar Sayeeda",
     "designation": "PGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.COM, B.ED",
     "subject": "Social High",
     "photo": ""
@@ -362,7 +317,6 @@
   {
     "name": "C Navya",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.TEC PHD",
     "subject": "Science Physics",
     "photo": ""
@@ -370,7 +324,6 @@
   {
     "name": "Challa Nagarani",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -378,7 +331,6 @@
   {
     "name": "Golla Veeranjaneyulu",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.SC., B.ED",
     "subject": "Maths",
     "photo": ""
@@ -386,7 +338,6 @@
   {
     "name": "Palle Murali Mohan Reddy",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "B.SC, PGDCA, H.PT",
     "subject": "Science Physics",
     "photo": ""
@@ -394,7 +345,6 @@
   {
     "name": "S Arifa Sulthana",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "M.COM., B.ED",
     "subject": "English",
     "photo": ""
@@ -402,7 +352,6 @@
   {
     "name": "V Naga Sulochana",
     "designation": "TGT",
-    "block": "Lakshya Juniors",
     "qualification": "MA HPT",
     "subject": "Hindi Primary",
     "photo": ""
@@ -410,7 +359,6 @@
   {
     "name": "A Naresh Kumar",
     "designation": "PRT",
-    "block": "Lakshya Juniors",
     "qualification": "MBA., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -418,7 +366,6 @@
   {
     "name": "M P Chandrakanth",
     "designation": "PRT",
-    "block": "Lakshya Juniors",
     "qualification": "BSC PGDCA",
     "subject": "Computer",
     "photo": ""
@@ -426,7 +373,6 @@
   {
     "name": "K Ragaveena",
     "designation": "PET",
-    "block": "Lakshya Juniors",
     "qualification": "B.A., UGD",
     "subject": "Maths",
     "photo": ""
@@ -436,13 +382,11 @@
     "designation": "PGT",
     "qualification": "M.SC., B.ED",
     "photo": "",
-    "block": "Lakshya Seniors",
     "subject": "Coordinator"
   },
   {
     "name": "Deeba Vijayasekhar",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
@@ -450,7 +394,6 @@
   {
     "name": "K Lakshmi Kantha Reddy",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.A., TPT",
     "subject": "Telugu",
     "photo": ""
@@ -458,7 +401,6 @@
   {
     "name": "K Manoj Kumar",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -466,7 +408,6 @@
   {
     "name": "Padakandla Muralidhara Rao",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -474,7 +415,6 @@
   {
     "name": "Patnana Manmadharao",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "MSC D.EL.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -482,7 +422,6 @@
   {
     "name": "Sameera Ahmed",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.A, H.P.T",
     "subject": "English",
     "photo": ""
@@ -490,7 +429,6 @@
   {
     "name": "U Venkateswara Raju",
     "designation": "PGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
@@ -498,7 +436,6 @@
   {
     "name": "A Mallikarjuna",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "B.SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -506,7 +443,6 @@
   {
     "name": "Gadwal Stanton Ravi Kumar",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "B.ED",
     "subject": "Science Biology",
     "photo": ""
@@ -514,7 +450,6 @@
   {
     "name": "Jakka Hari Babu",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "MSC. D.EL.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -522,7 +457,6 @@
   {
     "name": "Marri Surendra Nath",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.COM",
     "subject": "Tutor",
     "photo": ""
@@ -530,7 +464,6 @@
   {
     "name": "Pagidala Vinay Teja",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "M.SC., B.ED",
     "subject": "Chemistry",
     "photo": ""
@@ -538,7 +471,6 @@
   {
     "name": "Tanagala Murali Mohan Rao",
     "designation": "TGT",
-    "block": "Lakshya Seniors",
     "qualification": "B.SC, PGDCA, H.PT",
     "subject": "Computer",
     "photo": ""
@@ -546,7 +478,6 @@
   {
     "name": "Golla Bhaskar",
     "designation": "PRT",
-    "block": "Lakshya Seniors",
     "qualification": "M.A., HPT",
     "subject": "Tutor",
     "photo": ""
@@ -554,7 +485,6 @@
   {
     "name": "K Ramachandra Reddy",
     "designation": "OTHER",
-    "block": "Lakshya Seniors",
     "qualification": "M.A., B LIS",
     "subject": "Handwriting",
     "photo": ""
@@ -562,7 +492,6 @@
   {
     "name": "Gangireddy Subba Reddy",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., M.ED",
     "subject": "Coordinator",
     "photo": ""
@@ -570,7 +499,6 @@
   {
     "name": "Adike Moulali",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Chemistry",
     "photo": ""
@@ -578,7 +506,6 @@
   {
     "name": "B Kezia",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "MSC MED",
     "subject": "Science Biology",
     "photo": ""
@@ -586,7 +513,6 @@
   {
     "name": "B Naveen Kumar",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Maths",
     "photo": ""
@@ -594,7 +520,6 @@
   {
     "name": "Darga Khadar Modin",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -602,7 +527,6 @@
   {
     "name": "K Kanaka Prasad",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A., B.ED",
     "subject": "Social High",
     "photo": ""
@@ -610,7 +534,6 @@
   {
     "name": "K S Nanda Kishore",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.TEC., B.ED",
     "subject": "Computer",
     "photo": ""
@@ -618,7 +541,6 @@
   {
     "name": "Kesanapalli Hema Sundari",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., PH.D",
     "subject": "Science Biology",
     "photo": ""
@@ -626,7 +548,6 @@
   {
     "name": "M A Heena Parveen",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A., B.ED",
     "subject": "English",
     "photo": ""
@@ -634,7 +555,6 @@
   {
     "name": "M B Sujatha Rao",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M. A. B.Ed",
     "subject": "Social High",
     "photo": ""
@@ -642,7 +562,6 @@
   {
     "name": "M Srinivasulu",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Science Chemistry",
     "photo": ""
@@ -650,7 +569,6 @@
   {
     "name": "Muthyala Niranjan Kumar",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A. B.ED",
     "subject": "Telugu",
     "photo": ""
@@ -658,7 +576,6 @@
   {
     "name": "P Navaz Khan",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A., BE.D",
     "subject": "Telugu",
     "photo": ""
@@ -666,7 +583,6 @@
   {
     "name": "Praveen Kumar Malige",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC, B.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -674,7 +590,6 @@
   {
     "name": "Sadiq Hussain K",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A., H.P.T",
     "subject": "Hindi",
     "photo": ""
@@ -682,7 +597,6 @@
   {
     "name": "Shabbeer Ahmed Shaik",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.A, H.P.T",
     "subject": "Hindi",
     "photo": ""
@@ -690,7 +604,6 @@
   {
     "name": "Thummala Ramesh",
     "designation": "PGT",
-    "block": "Medha",
     "qualification": "M.SC., M.PHI. B.ED",
     "subject": "Maths",
     "photo": ""
@@ -698,7 +611,6 @@
   {
     "name": "B Vengala Reddy",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.A., B.ED",
     "subject": "Maths",
     "photo": ""
@@ -706,7 +618,6 @@
   {
     "name": "Bengali Deepthi",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "Maths",
     "photo": ""
@@ -714,7 +625,6 @@
   {
     "name": "Bijjula Swapna",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "Social High",
     "photo": ""
@@ -722,7 +632,6 @@
   {
     "name": "G Kareemulla",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.TEC., B.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -730,7 +639,6 @@
   {
     "name": "G Prathap Reddy",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.A. TPT",
     "subject": "Telugu",
     "photo": ""
@@ -738,7 +646,6 @@
   {
     "name": "Gopireddy Gari Madhavi",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -746,7 +653,6 @@
   {
     "name": "Koppu Mohan Rao",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "MSC D.EL.ED",
     "subject": "Science Physics",
     "photo": ""
@@ -754,7 +660,6 @@
   {
     "name": "Lakshmi Prasad Yadav Ketham",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "M.SC., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -762,7 +667,6 @@
   {
     "name": "Noorunnisa Begum",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.Sc., B.Ed",
     "subject": "English",
     "photo": ""
@@ -770,7 +674,6 @@
   {
     "name": "Soganur Aruna Smitha",
     "designation": "TGT",
-    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
@@ -778,7 +681,6 @@
   {
     "name": "Kammari Venkateswarlu",
     "designation": "PRT",
-    "block": "Medha",
     "qualification": "B.Sc. B.Ed",
     "subject": "Handwriting",
     "photo": ""
@@ -786,7 +688,6 @@
   {
     "name": "Konkula Kalpana Devi",
     "designation": "PRT",
-    "block": "Medha",
     "qualification": "B.TEC., B.ED",
     "subject": "English",
     "photo": ""
@@ -794,7 +695,6 @@
   {
     "name": "P Pavan",
     "designation": "PRT",
-    "block": "Medha",
     "qualification": "B.A., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -802,7 +702,6 @@
   {
     "name": "Saye Kasi Viswanath",
     "designation": "PRT",
-    "block": "Medha",
     "qualification": "B.SC., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -810,7 +709,6 @@
   {
     "name": "Golla Naga Raju",
     "designation": "OTHER",
-    "block": "Medha",
     "qualification": "MCOM MLISC",
     "subject": "Librarian",
     "photo": ""
@@ -818,7 +716,6 @@
   {
     "name": "Y Srinivasulu",
     "designation": "PGT",
-    "block": "PET - M",
     "qualification": "M.SC., B.ED",
     "subject": "PET",
     "photo": ""
@@ -826,7 +723,6 @@
   {
     "name": "Bandameedi Rangamuni",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B.A. B.PED",
     "subject": "PET",
     "photo": ""
@@ -834,7 +730,6 @@
   {
     "name": "Battikeri Raghavendra",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B.A., UGD",
     "subject": "PET",
     "photo": ""
@@ -842,7 +737,6 @@
   {
     "name": "Boya Raghavendra Naidu",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B. PED",
     "subject": "PET",
     "photo": ""
@@ -850,7 +744,6 @@
   {
     "name": "Kodimukkala Venkatesulu",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "UGD",
     "subject": "PET",
     "photo": ""
@@ -858,7 +751,6 @@
   {
     "name": "Maligeli Santha Raju",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "PET",
     "subject": "PET",
     "photo": ""
@@ -866,7 +758,6 @@
   {
     "name": "Muppasani Suresh",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "M.A., M.PED",
     "subject": "PET",
     "photo": ""
@@ -874,7 +765,6 @@
   {
     "name": "Mustaf Ismail",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B.A., UGD",
     "subject": "PET",
     "photo": ""
@@ -882,7 +772,6 @@
   {
     "name": "Sarakonda Eswaraiah",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B.Com., B.P.Ed",
     "subject": "PET",
     "photo": ""
@@ -890,7 +779,6 @@
   {
     "name": "T Rameswari",
     "designation": "PET",
-    "block": "PET - M",
     "qualification": "B.Com., B.P.Ed",
     "subject": "PET",
     "photo": ""
@@ -898,7 +786,6 @@
   {
     "name": "Shaik Ayesha Jabeen",
     "designation": "PGT",
-    "block": "Tiny Tykes",
     "qualification": "M.A, H.P.T",
     "subject": "Teacher PP",
     "photo": ""
@@ -906,7 +793,6 @@
   {
     "name": "U Asfia Begum",
     "designation": "TGT",
-    "block": "Tiny Tykes",
     "qualification": "M.A., B.ED",
     "subject": "Teacher PP",
     "photo": ""
@@ -914,7 +800,6 @@
   {
     "name": "Jangam Chamundeswari",
     "designation": "PRT",
-    "block": "Tiny Tykes",
     "qualification": "B.SC., B.ED",
     "subject": "Teacher PP",
     "photo": ""
@@ -922,7 +807,6 @@
   {
     "name": "Karanam Sireesha",
     "designation": "PRT",
-    "block": "Tiny Tykes",
     "qualification": "M.A., B.ED",
     "subject": "Tutor",
     "photo": ""
@@ -930,7 +814,6 @@
   {
     "name": "Sujatha L",
     "designation": "PRT",
-    "block": "Tiny Tykes",
     "qualification": "B.SC, B.ED",
     "subject": "Teacher PP",
     "photo": ""
@@ -938,7 +821,6 @@
   {
     "name": "Kurupati Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A., B.ED",
     "subject": "Coordinator",
     "photo": ""
@@ -946,7 +828,6 @@
   {
     "name": "Aparna N",
     "designation": "TGT",
-    "block": "Chrysalis",
     "qualification": "MA. B.Ed",
     "subject": "Teacher Primary",
     "photo": ""
@@ -954,7 +835,6 @@
   {
     "name": "Husna Nasreen",
     "designation": "TGT",
-    "block": "Chrysalis",
     "qualification": "B.SC., B.ED",
     "subject": "English",
     "photo": ""
@@ -962,7 +842,6 @@
   {
     "name": "K Aparna",
     "designation": "TGT",
-    "block": "Chrysalis",
     "qualification": "MA. B.Ed",
     "subject": "Handwriting",
     "photo": ""
@@ -970,7 +849,6 @@
   {
     "name": "Badiger Shilpa",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A., D.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -978,7 +856,6 @@
   {
     "name": "Borusu Yerusha Priyadarshini",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.COM., D.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -986,7 +863,6 @@
   {
     "name": "Boya Varalakshmi",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A., B.ED",
     "subject": "Hindi",
     "photo": ""
@@ -994,7 +870,6 @@
   {
     "name": "Gandavarapu Vyjayanthi",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A. B.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -1002,7 +877,6 @@
   {
     "name": "Jampala Venkata Ramani",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M.Sc., B.Ed",
     "subject": "Science Primary",
     "photo": ""
@@ -1010,7 +884,6 @@
   {
     "name": "Kodandapuram Anuradha",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.SC.,B.ED",
     "subject": "English",
     "photo": ""
@@ -1018,7 +891,6 @@
   {
     "name": "Kuruva Maheswari",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M.SC. B.ED",
     "subject": "Telugu",
     "photo": ""
@@ -1026,7 +898,6 @@
   {
     "name": "Mancha Jayasree",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -1034,7 +905,6 @@
   {
     "name": "N Sahithi",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.SC., HPT",
     "subject": "Primary",
     "photo": ""
@@ -1042,7 +912,6 @@
   {
     "name": "Nazia Fatima",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A.., B.ED",
     "subject": "Hindi",
     "photo": ""
@@ -1050,7 +919,6 @@
   {
     "name": "Padmavathi Gurrala",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M.A.",
     "subject": "Telugu",
     "photo": ""
@@ -1058,7 +926,6 @@
   {
     "name": "R Miriam Cecilia",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M.A., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -1066,7 +933,6 @@
   {
     "name": "Shaik Fathima",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B.A.., B.ED",
     "subject": "Art & Craft",
     "photo": ""
@@ -1074,7 +940,6 @@
   {
     "name": "Sudha J",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "B. SC, B.ED",
     "subject": "Maths",
     "photo": ""
@@ -1082,7 +947,6 @@
   {
     "name": "V Madhuri",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M. A., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -1090,7 +954,6 @@
   {
     "name": "Yarasi Sravanthi",
     "designation": "PRT",
-    "block": "Chrysalis",
     "qualification": "M.SC., B.ED",
     "subject": "Teacher Primary",
     "photo": ""
@@ -1098,7 +961,6 @@
   {
     "name": "C Azra Begum",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Coordinator",
     "photo": ""
@@ -1106,7 +968,6 @@
   {
     "name": "Anuradha Mitti",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.SC.,B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1114,7 +975,6 @@
   {
     "name": "B Sireesha",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.SC. B.ED",
     "subject": "Maths Primary",
     "photo": ""
@@ -1122,7 +982,6 @@
   {
     "name": "Boggula Geetarani",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M. A TPT",
     "subject": "Telugu Primary",
     "photo": ""
@@ -1130,7 +989,6 @@
   {
     "name": "Galtu Shaik Nazia Banu",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1138,7 +996,6 @@
   {
     "name": "Kanike Anuradha",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.A., B.ED., HPT",
     "subject": "Hindi Primary",
     "photo": ""
@@ -1146,7 +1003,6 @@
   {
     "name": "M Haseenunnisa",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.A.B.ED",
     "subject": "Social Primary",
     "photo": ""
@@ -1154,7 +1010,6 @@
   {
     "name": "Nayani Anitha",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "B.SC., BED",
     "subject": "Maths Primary",
     "photo": ""
@@ -1162,7 +1017,6 @@
   {
     "name": "Rafia Anjum",
     "designation": "TGT",
-    "block": "Oxford",
     "qualification": "M.A. B.Ed",
     "subject": "English Primary",
     "photo": ""
@@ -1170,7 +1024,6 @@
   {
     "name": "Alivi Sujatha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
@@ -1178,7 +1031,6 @@
   {
     "name": "Avula Radika",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.A, B.ED",
     "subject": "Telugu Primary",
     "photo": ""
@@ -1186,7 +1038,6 @@
   {
     "name": "Avvaru Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.A., HPT",
     "subject": "Hindi Primary",
     "photo": ""
@@ -1194,7 +1045,6 @@
   {
     "name": "B Areefa Khatoon",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.SC.B.ED",
     "subject": "English, Science, Social Primary",
     "photo": ""
@@ -1202,7 +1052,6 @@
   {
     "name": "Gali Girija Kalpana",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.SC, B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1210,7 +1059,6 @@
   {
     "name": "Gandikota Aparna",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "English Primary",
     "photo": ""
@@ -1218,7 +1066,6 @@
   {
     "name": "Ghousia Begum",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Hindi Primary",
     "photo": ""
@@ -1226,7 +1073,6 @@
   {
     "name": "H Karuna Priya",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "English, Maths Primary",
     "photo": ""
@@ -1234,7 +1080,6 @@
   {
     "name": "J Sunitha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B. SC, B.ED",
     "subject": "Maths Primary",
     "photo": ""
@@ -1242,7 +1087,6 @@
   {
     "name": "Jakki Anitha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A., B,.ED",
     "subject": "English Primary",
     "photo": ""
@@ -1250,7 +1094,6 @@
   {
     "name": "K Shirisha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Maths Primary",
     "photo": ""
@@ -1258,7 +1101,6 @@
   {
     "name": "L Madhuri",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.SC, B.ED",
     "subject": "English, Science Primary",
     "photo": ""
@@ -1266,7 +1108,6 @@
   {
     "name": "M Faiyazunnisa",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "Maths Primary",
     "photo": ""
@@ -1274,7 +1115,6 @@
   {
     "name": "M Venkata Lakshumamma",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.Sc. B.Ed",
     "subject": "Telugu Primary",
     "photo": ""
@@ -1282,7 +1122,6 @@
   {
     "name": "Madem Aruna",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.SC, B.ED",
     "subject": "Telugu, Maths Primary",
     "photo": ""
@@ -1290,7 +1129,6 @@
   {
     "name": "Miskin Vijaya Lakshmi",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "English Primary",
     "photo": ""
@@ -1298,7 +1136,6 @@
   {
     "name": "Modi Latha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "English, Maths Primary",
     "photo": ""
@@ -1306,7 +1143,6 @@
   {
     "name": "N Anuradha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "BA , B.ED",
     "subject": "Telugu Primary",
     "photo": ""
@@ -1314,7 +1150,6 @@
   {
     "name": "Nagaldinni Aaiza Zubeda",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "MA BED",
     "subject": "English Primary",
     "photo": ""
@@ -1322,7 +1157,6 @@
   {
     "name": "Rafia Sultana",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B. A, B.ED",
     "subject": "Social Primary",
     "photo": ""
@@ -1330,7 +1164,6 @@
   {
     "name": "S Arshia",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.SC, B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1338,7 +1171,6 @@
   {
     "name": "Shaik Abdul Bari",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.A., B.ED",
     "subject": "Handwriting",
     "photo": ""
@@ -1346,7 +1178,6 @@
   {
     "name": "Shaik Fathima",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A.., B.ED",
     "subject": "English, Hindi Primary",
     "photo": ""
@@ -1354,7 +1185,6 @@
   {
     "name": "Shaik Fouzia Anjum",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "English Primary",
     "photo": ""
@@ -1362,7 +1192,6 @@
   {
     "name": "Shaik Sameena Begum",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.Sc., B.Ed",
     "subject": "English Primary",
     "photo": ""
@@ -1370,7 +1199,6 @@
   {
     "name": "Soudagar Vasia Sultana",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.SC. B.ED",
     "subject": "Maths Primary",
     "photo": ""
@@ -1378,7 +1206,6 @@
   {
     "name": "Swetha K M",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.SC., B.ED",
     "subject": "Computer",
     "photo": ""
@@ -1386,7 +1213,6 @@
   {
     "name": "Uppara Indira",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
@@ -1394,7 +1220,6 @@
   {
     "name": "V Jyothsna Devi",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.S.C., P.HD., B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1402,7 +1227,6 @@
   {
     "name": "V Sireesha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M.COM., B.ED",
     "subject": "Social Primary",
     "photo": ""
@@ -1410,7 +1234,6 @@
   {
     "name": "Vemula Saritha",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "M. A., B.ED",
     "subject": "Science Primary",
     "photo": ""
@@ -1418,7 +1241,6 @@
   {
     "name": "Vijayalakshmi Anantapur",
     "designation": "PRT",
-    "block": "Oxford",
     "qualification": "B.A., B.ED",
     "subject": "Hindi Primary",
     "photo": ""
@@ -1426,7 +1248,6 @@
   {
     "name": "Nayak Bhaktur Baba",
     "designation": "OTHER",
-    "block": "State",
     "qualification": "BA HPT",
     "subject": "NCC",
     "photo": ""

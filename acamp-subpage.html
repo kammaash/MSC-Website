@@ -126,20 +126,25 @@
        - dropdown links are bare "#hash" routes into this same file, and the
          entry matching the current route is tinted red via it.color, giving
          the menu a "you are here" state the branch page's copy does not have.
-     KNOWN QUIRK: this nav opens its panel on m.isOpen, whereas the branch page
-     uses m.showDropdown, which also requires the menu to have items. So here,
-     hovering one of the three item-less menus (Home, School Life, Transport)
-     pops an empty white panel. Guarding on m.hasItems as well, or exposing a
-     showDropdown flag as the branch page does, would fix it. -->
+     Menus open on hover for desktop AND on click/tap for mobile and touch
+     screens, via m.toggle on the top-level link: when a menu has dropdown
+     items, clicking/tapping it only opens or closes the panel and never
+     follows its own href, so touch users actually see the list of pages
+     instead of being sent straight to the branch page. Item-less menus
+     (Home) still navigate normally on click. m.isOpen already requires the
+     menu to have items, so hovering an item-less menu never pops an empty
+     white panel. Picking a dropdown item also closes the menu immediately
+     via closeMenu, instead of leaving a stale open panel floating over the
+     page that just loaded. -->
 <header style="position:sticky;top:0;z-index:60;background:#ffd9c4;box-shadow:0 2px 10px rgba(165,25,21,.12)">
   <nav class="wrap" style="padding-left:12px;padding-right:12px;display:flex;align-items:stretch;flex-wrap:wrap">
     <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
       <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-        <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:#a51915" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+        <a href="{{ m.href }}" onClick="{{ m.toggle }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:#a51915" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
         <sc-if value="{{ m.isOpen }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
             <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
-              <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:{{ it.color }}" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+              <a href="{{ it.href }}" onClick="{{ closeMenu }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:{{ it.color }}" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
             </sc-for>
           </div>
         </sc-if>
@@ -283,36 +288,31 @@
           <sc-for list="{{ b.facultyGroups }}" as="dg" hint-placeholder-count="1">
             <div style="margin:34px 0 0">
               <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:20px;color:#332c28;padding-bottom:6px;border-bottom:2px solid #f0e0dc">{{ dg.designation }}</div>
-              <sc-for list="{{ dg.blockGroups }}" as="grp" hint-placeholder-count="1">
-                <div style="margin:20px 0 0">
-                  <div style="font-family:'Quicksand',sans-serif;font-weight:700;font-size:16px;color:#a51915;margin-bottom:10px">{{ grp.block }}</div>
-                  <div style="overflow-x:auto;border:1px solid #f0e0dc;border-radius:12px">
-                    <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
-                      <tr style="background:#fbf3f2">
-                        <th style="padding:10px 12px;width:64px"></th>
-                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
-                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
-                        <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
-                      </tr>
-                      <sc-for list="{{ grp.members }}" as="f" hint-placeholder-count="3">
-                        <tr>
-                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc">
-                            <sc-if value="{{ f.hasPhoto }}" hint-placeholder-val="{{ false }}">
-                              <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc">
-                            </sc-if>
-                            <sc-if value="{{ !f.hasPhoto }}" hint-placeholder-val="{{ false }}">
-                              <div style="width:52px;height:52px;border-radius:50%;background:{{ f.avatarColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px">{{ f.initial }}</div>
-                            </sc-if>
-                          </td>
-                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
-                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
-                          <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
-                        </tr>
-                      </sc-for>
-                    </table>
-                  </div>
-                </div>
-              </sc-for>
+              <div style="margin:16px 0 0;overflow-x:auto;border:1px solid #f0e0dc;border-radius:12px">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
+                  <tr style="background:#fbf3f2">
+                    <th style="padding:10px 12px;width:64px"></th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Name</th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Qualification</th>
+                    <th style="padding:10px 12px;text-align:left;font-family:'Quicksand',sans-serif;color:#332c28">Subject</th>
+                  </tr>
+                  <sc-for list="{{ dg.members }}" as="f" hint-placeholder-count="3">
+                    <tr>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc">
+                        <sc-if value="{{ f.hasPhoto }}" hint-placeholder-val="{{ false }}">
+                          <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc">
+                        </sc-if>
+                        <sc-if value="{{ !f.hasPhoto }}" hint-placeholder-val="{{ false }}">
+                          <div style="width:52px;height:52px;border-radius:50%;background:{{ f.avatarColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px">{{ f.initial }}</div>
+                        </sc-if>
+                      </td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;font-weight:700;color:#332c28">{{ f.name }}</td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.qualification }}</td>
+                      <td style="padding:9px 12px;border-top:1px solid #f0e0dc;color:#6b615b">{{ f.subject }}</td>
+                    </tr>
+                  </sc-for>
+                </table>
+              </div>
             </div>
           </sc-for>
           <sc-if value="{{ !b.facultyGroups.length }}" hint-placeholder-val="{{ false }}">
@@ -601,8 +601,17 @@ class Component extends DCLogic {
     // done here rather than in the markup because {{ }} cannot compare values:
     // the entry matching the current route is tinted red as a "you are here".
     const menus = rawMenus.map((m, i) => ({
-      label: m.label, href: m.href, hasItems: m.items.length > 0, isOpen: open === i,
+      label: m.label, href: m.href, hasItems: m.items.length > 0, isOpen: open === i && m.items.length > 0,
       open: () => this.setState({ openMenu: i }),
+      // Click/tap support: a menu with dropdown items toggles its own panel
+      // instead of following href, so touch users (no hover) can actually see
+      // the item list rather than being sent straight to the branch page.
+      // Item-less menus fall through untouched and navigate normally.
+      toggle: (e) => {
+        if (!m.items.length) return;
+        if (e && e.preventDefault) e.preventDefault();
+        this.setState({ openMenu: open === i ? -1 : i });
+      },
       items: m.items.map(([label, key]) => ({ label, href: "#" + key, color: key === route ? "#a51915" : "#26201d" })),
     }));
 
@@ -1009,10 +1018,14 @@ class Component extends DCLogic {
 
     // Team Montessori's faculty roster is data-driven the same way, just
     // simpler: one flat list from data/faculty.json rather than one JSON
-    // file producing several page blocks. Grouped two levels deep —
-    // designation (PGT/TGT/PRT/etc, in a fixed seniority order) then
-    // block/wing within each — before handing it to the template, which
-    // expects { designation, blockGroups: [{ block, members }] }.
+    // file producing several page blocks. Grouped by designation only
+    // (PGT/TGT/PRT/etc, in a fixed seniority order matching how the school
+    // itself ranks its staff) before handing it to the template, which
+    // expects { designation, members }. There used to be a second grouping
+    // level by `block` (wing/building), but faculty.json no longer carries
+    // a block field, so that layer is gone too — it was only ever showing a
+    // redundant "Other" sub-heading above every single table once the field
+    // was removed.
     if (route === "team-monte") {
       const DESIG_ORDER = ["PRINCIPAL", "VICE PRINCIPAL", "PGT", "TGT", "PRT", "PET", "WELLNESS TEACHER", "SPECIAL EDUCATOR", "OTHER"];
       const AVATAR_COLORS = ["#a51915", "#c2410f", "#7f120f", "#b23b2f", "#8a4a1c", "#9a2f28"];
@@ -1031,14 +1044,14 @@ class Component extends DCLogic {
       const desigGroups = [];
       (this.state.facultyList || []).forEach((f0) => {
         const f = withAvatar(f0);
-        const desigName = f.designation || "OTHER";
+        const desigName = (f.designation || "OTHER").trim().toUpperCase();
         let dg = desigGroups.find((existing) => existing.designation === desigName);
-        if (!dg) { dg = { designation: desigName, blockGroups: [] }; desigGroups.push(dg); }
-        const blockName = f.block || "Other";
-        let bg = dg.blockGroups.find((existing) => existing.block === blockName);
-        if (!bg) { bg = { block: blockName, members: [] }; dg.blockGroups.push(bg); }
-        bg.members.push(f);
+        if (!dg) { dg = { designation: desigName, members: [] }; desigGroups.push(dg); }
+        dg.members.push(f);
       });
+      // Within each designation, list staff alphabetically by name so the
+      // table itself is easy to scan rather than in upload order.
+      desigGroups.forEach((dg) => dg.members.sort((a, b) => (a.name || "").localeCompare(b.name || "")));
       desigGroups.sort((a, b) => {
         const ai = DESIG_ORDER.indexOf(a.designation); const bi = DESIG_ORDER.indexOf(b.designation);
         return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);

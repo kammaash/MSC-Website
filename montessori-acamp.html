@@ -204,8 +204,13 @@
      The main navigation, built entirely from the `menus` array in renderVals()
      rather than hand-written markup: one entry per top-level item, each with
      its own list of dropdown links. Menus open on hover (onMouseEnter sets
-     openMenu to that index) and there is no click or keyboard affordance, so
-     the dropdowns are effectively desktop-only.
+     openMenu to that index) for desktop, AND on click/tap (m.toggle on the
+     top-level link) for mobile and touch screens: a menu with items opens
+     or closes its own panel instead of following its href, so touch users
+     actually see the list of pages rather than being sent straight into the
+     branch page's own section. Item-less menus (Home) still navigate
+     normally on click. Picking a dropdown item closes the menu immediately
+     via closeMenu.
      The bar sticks to the top of the viewport; its ref hands the
      element to the logic block, which measures it to decide when to show the
      floating pill below. -->
@@ -214,11 +219,11 @@
     <div style="{{ menuRowStyle }}">
       <sc-for list="{{ menus }}" as="m" hint-placeholder-count="11">
         <div onMouseEnter="{{ m.open }}" onMouseLeave="{{ closeMenu }}" style="position:relative">
-          <a href="{{ m.href }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
+          <a href="{{ m.href }}" onClick="{{ m.toggle }}" style="display:flex;align-items:center;gap:6px;height:52px;padding:0 15px;white-space:nowrap;font-family:'Quicksand',sans-serif;font-weight:600;font-size:14.5px;color:{{ m.color }};background:{{ m.bg }}" style-hover="background:rgba(165,25,21,.1)">{{ m.label }}<sc-if value="{{ m.hasItems }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;opacity:.7">▾</span></sc-if></a>
           <sc-if value="{{ m.showDropdown }}" hint-placeholder-val="{{ false }}">
             <div style="position:absolute;top:52px;left:0;min-width:230px;background:#fff;border:1px solid #f3e6e2;border-top:3px solid #e8541b;border-radius:0 0 10px 10px;box-shadow:0 18px 40px rgba(165,25,21,.18);padding:8px;z-index:70;animation:ddIn .16s ease both">
               <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="4">
-                <a href="{{ it.href }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#26201d" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
+                <a href="{{ it.href }}" onClick="{{ closeMenu }}" style="display:block;padding:10px 14px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:#26201d" style-hover="background:#fdeadf;color:#a51915">{{ it.label }}</a>
               </sc-for>
             </div>
           </sc-if>
@@ -812,6 +817,16 @@ class Component extends DCLogic {
       color: i === 0 ? "#fff" : (m.label === "Digital Library" ? "#1565a8" : "#a51915"),
       bg: i === 0 ? "#a51915" : "transparent",
       open: () => this.setState({ openMenu: i }),
+      // Click/tap support: a menu with dropdown items toggles its own panel
+      // instead of following href, so touch users (no hover) can actually see
+      // the item list rather than being sent straight into the page section.
+      // Item-less menus, and the external Digital Library link, fall through
+      // untouched and navigate normally.
+      toggle: (e) => {
+        if (!m.items.length) return;
+        if (e && e.preventDefault) e.preventDefault();
+        this.setState({ openMenu: open === i ? -1 : i });
+      },
     }));
 
     // header is always a static sticky gold bar
