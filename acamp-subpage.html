@@ -300,7 +300,7 @@
                     <tr>
                       <td style="padding:9px 12px;border-top:1px solid #f0e0dc">
                         <sc-if value="{{ f.hasPhoto }}" hint-placeholder-val="{{ false }}">
-                          <img src="{{ f.photo }}" alt="{{ f.name }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc">
+                          <img src="{{ f.photo }}" alt="{{ f.name }}" onClick="{{ f.open }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block;border:1px solid #f0e0dc;cursor:zoom-in">
                         </sc-if>
                         <sc-if value="{{ !f.hasPhoto }}" hint-placeholder-val="{{ false }}">
                           <div style="width:52px;height:52px;border-radius:50%;background:{{ f.avatarColor }};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand',sans-serif;font-weight:700;font-size:19px">{{ f.initial }}</div>
@@ -1052,12 +1052,30 @@ class Component extends DCLogic {
         for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
         return h;
       };
-      const withAvatar = (f) => ({
-        ...f,
-        hasPhoto: !!(f.photo && f.photo.trim()),
-        initial: (f.name || "?").trim().charAt(0).toUpperCase(),
-        avatarColor: AVATAR_COLORS[hashCode(f.name || "") % AVATAR_COLORS.length],
-      });
+      // Faculty photos reuse the exact same shared lightbox as every other
+      // photo grid on the page (see the "one shared overlay" note near the
+      // bottom of this file): clicking a thumbnail stashes a one-image array
+      // in state.lightbox, Prev/Next just won't show since there's only the
+      // one photo to step through. The caption carries name + subject (and
+      // qualification, if set) so the zoomed view identifies who it is, not
+      // just a bigger version of the same unlabeled photo.
+      const withAvatar = (f) => {
+        const hasPhoto = !!(f.photo && f.photo.trim());
+        return {
+          ...f,
+          hasPhoto,
+          initial: (f.name || "?").trim().charAt(0).toUpperCase(),
+          avatarColor: AVATAR_COLORS[hashCode(f.name || "") % AVATAR_COLORS.length],
+          // Caption is built at click time, not here, because the
+          // Coordinator-subject rewrite below (e.g. "Coordinator" ->
+          // "Coordinator (PGT)") happens on this same object right after
+          // withAvatar returns — reading f.subject lazily picks up that
+          // final value instead of the pre-rewrite one.
+          open: hasPhoto
+            ? () => this.setState({ lightbox: { images: [{ src: f.photo, caption: [f.name, f.subject, f.qualification].filter((x) => x && String(x).trim()).join(" — ") }], index: 0 } })
+            : null,
+        };
+      };
 
       const desigGroups = [];
       (this.state.facultyList || []).forEach((f0) => {

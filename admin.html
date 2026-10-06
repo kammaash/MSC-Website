@@ -304,12 +304,13 @@
         <datalist id="facultyDesignationOptions">
           <option value="PRINCIPAL"><option value="VICE PRINCIPAL"><option value="PGT"><option value="TGT"><option value="PRT"><option value="PET"><option value="WELLNESS TEACHER"><option value="SPECIAL EDUCATOR"><option value="OTHER">
         </datalist>
-        <div class="hint">Faculty are grouped on the live page by this first, then by block within it — use the same spelling every time (e.g. always "PGT", not sometimes "pgt").</div>
+        <div class="hint">Faculty are grouped on the live page by this — use the same spelling every time (e.g. always "PGT", not sometimes "pgt"). Setting Subject to exactly "Coordinator" puts this person in the Coordinators section instead, with their actual designation shown in the Subject column there (e.g. "Coordinator (PGT)").</div>
       </div>
       <div class="field">
         <label for="facultyBlock">Block / Wing</label>
         <input type="text" id="facultyBlock" placeholder="e.g. MEDHA" list="facultyBlockOptions">
         <datalist id="facultyBlockOptions"></datalist>
+        <div class="hint">Not currently shown on the live page — kept here only in case it's needed again later.</div>
       </div>
       <div class="field">
         <label for="facultyQualification">Qualification</label>
@@ -317,7 +318,9 @@
       </div>
       <div class="field" style="margin-bottom:0">
         <label for="facultySubject">Subject</label>
-        <input type="text" id="facultySubject" placeholder="e.g. Mathematics">
+        <input type="text" id="facultySubject" placeholder="e.g. Mathematics, or Science Biology" list="facultySubjectOptions">
+        <datalist id="facultySubjectOptions"></datalist>
+        <div class="hint">Shown in the Subject column on the live page. Suggestions below are every subject already in use, so you can reuse the exact existing spelling instead of creating a near-duplicate (e.g. "Science Biology" vs "Biology").</div>
       </div>
     </div>
 
@@ -843,7 +846,7 @@ function loadFacultyFile() {
       facultyExisting = Array.isArray(data) ? data : [];
       facultyFetchOk = true;
       $("facultyFetchWarning").innerHTML = '<div class="banner ok">Loaded ' + facultyExisting.length + ' existing faculty member' + (facultyExisting.length === 1 ? "" : "s") + ' from data/faculty.json.</div>';
-      populateFacultyPicker(); populateFacultyBlockOptions();
+      populateFacultyPicker(); populateFacultyBlockOptions(); populateFacultySubjectOptions();
       setFacultyMode("add");
     })
     .catch(() => {
@@ -900,6 +903,13 @@ function resetFacultyForm() {
 function populateFacultyBlockOptions() {
   const blocks = [...new Set(facultyExisting.map((f) => f.block).filter(Boolean))];
   $("facultyBlockOptions").innerHTML = blocks.map((b) => '<option value="' + String(b).replace(/</g, "&lt;") + '">').join("");
+}
+function populateFacultySubjectOptions() {
+  const subjects = [...new Set(facultyExisting.map((f) => f.subject).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const opts = subjects.map((s) => '<option value="' + String(s).replace(/</g, "&lt;") + '">').join("");
+  $("facultySubjectOptions").innerHTML = opts;
+  // Bulk-table subject inputs are plain text inputs rendered later, but they
+  // can point at this same datalist by id — no need for a second copy.
 }
 
 // ---------- faculty photo ----------
@@ -969,7 +979,7 @@ $("facultyPublishBtn").addEventListener("click", async () => {
     await ghPutFile("data/faculty.json", jsonBase64, (facultyMode === "edit" ? "Edit faculty: " : "Add faculty: ") + name, token);
 
     facultyExisting = merged;
-    populateFacultyPicker(); populateFacultyBlockOptions();
+    populateFacultyPicker(); populateFacultyBlockOptions(); populateFacultySubjectOptions();
     $("facultyPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check About → Team Montessori on the live site.</div>';
   } catch (e) {
     $("facultyPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed partway through:</strong> ' + e.message + '. Check what actually landed in the repo before retrying.</div>';
@@ -1059,7 +1069,7 @@ async function publishImport() {
     const jsonBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(merged, null, 2))));
     await ghPutFile("data/faculty.json", jsonBase64, "Import " + newEntries.length + " faculty member(s) from spreadsheet", token);
     facultyExisting = merged;
-    populateFacultyPicker(); populateFacultyBlockOptions();
+    populateFacultyPicker(); populateFacultyBlockOptions(); populateFacultySubjectOptions();
     $("importPublishStatus").innerHTML = '<div class="banner ok"><strong>Published.</strong> Give GitHub Pages a minute or two, then check the live site. Remember to upload any referenced photo files to assets/gallery separately if you haven\'t already.</div>';
   } catch (e) {
     $("importPublishStatus").innerHTML = '<div class="banner err"><strong>Something failed:</strong> ' + e.message + '</div>';
@@ -1095,7 +1105,8 @@ function renderBulkTable() {
   bulkRows.forEach((r, i) => {
     html += "<tr>";
     cols.forEach(([key], ci) => {
-      html += '<td' + (ci === 0 ? ' class="sticky-col"' : "") + '><input type="text" data-bulk="' + key + '" data-i="' + i + '" value="' + escapeHtml(r[key] || "").replace(/"/g, "&quot;") + '" style="width:100%;min-width:120px;border:1px solid #e2d3ce;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px"></td>';
+      const listAttr = key === "subject" ? ' list="facultySubjectOptions"' : key === "designation" ? ' list="facultyDesignationOptions"' : key === "block" ? ' list="facultyBlockOptions"' : "";
+      html += '<td' + (ci === 0 ? ' class="sticky-col"' : "") + '><input type="text" data-bulk="' + key + '" data-i="' + i + '"' + listAttr + ' value="' + escapeHtml(r[key] || "").replace(/"/g, "&quot;") + '" style="width:100%;min-width:120px;border:1px solid #e2d3ce;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px"></td>';
     });
     const previewSrc = r._previewUrl || r.photo || "";
     html += '<td class="bulk-photo-cell">';
@@ -1215,7 +1226,7 @@ async function publishBulkFaculty() {
 
     facultyExisting = cleaned;
     bulkRows = cleaned.map((f) => ({ ...f }));
-    populateFacultyPicker(); populateFacultyBlockOptions();
+    populateFacultyPicker(); populateFacultyBlockOptions(); populateFacultySubjectOptions();
     const extras = [];
     if (photoRows.length) extras.push(photoRows.length + " updated photo" + (photoRows.length > 1 ? "s" : ""));
     if (removedCount) extras.push(removedCount + " removed photo" + (removedCount > 1 ? "s" : "") + " cleaned up");
